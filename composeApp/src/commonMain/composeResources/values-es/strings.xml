@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">Weather App</string>
+
+    <string name="required_field">Este campo es obligatorio</string>
+    <string name="storage_permission_dialog_message">Es necesario el acceso al almacenamiento para guardar las localizaciones del usuario</string>
+    <string name="storage_permission_dialog_title">Permisos requeridos</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancelar</string>
+
+    <string name="no_weather_data">No se pudo obtnener datos del clima</string>
+
+    <string name="title_activity_main">Clima</string>
+    <string name="title_weather">Clima</string>
+    <string name="title_location">Ubicaciones</string>
+    <string name="title_settings">Ajustes</string>
+    <string name="title_about">Acerca de</string>
+
+    <string name="temp_celsius">%s°C</string>
+    <string name="temp_celsius_widget">%s°</string>
+    <string name="temp_fahrenheit">%s°F</string>
+    <string name="feels_like_temp_celsius">Sensación térmica %s°C</string>
+    <string name="feels_like_temp_fahrenheit">Sensación térmica %s°F</string>
+    <string name="speed_km">%s KM/H</string>
+    <string name="speed_miles">%s M/H</string>
+    <string name="wind">Viento</string>
+    <string name="wind_direction">Dirección del viento</string>
+    <string name="humidity">Humedad</string>
+    <string name="uv_index">Índice UV</string>
+    <string name="rain">Luvia</string>
+    <string name="snow">Nieve</string>
+    <string name="sun">Sol</string>
+    <string name="sunrise_sunset">Sale %s\nPone %s</string>
+    <string name="visibility">Visibilidad</string>
+    <string name="visibility_km">%s KM</string>
+    <string name="title_add_location">Añadir ubicación</string>
+    <string name="city_name">Ciudad</string>
+    <string name="add_location">Añadir</string>
+    <string name="cant_delete_current_location">No puedes eliminar esta ubicación</string>
+
+    <string name="notification_title">%s° | %s</string>
+    <string name="notification_short_details">%s. Sensación térmica %s°C</string>
+    <string name="notification_long_details">%s\nSensación térmica %s°C\nTemp min %s°C - max %s°C\nPosibilidad de lluvia %s%%</string>
+    <string name="location_name">%1$s/%2$s</string>
+    <string name="today">Hoy</string>
+    <string name="tomorrow">Mañana</string>
+    <string name="gps">GPS</string>
+
+    <string name="add_location_button_content_description">Añadir ubicación</string>
+
+    <string name="denied_notification_permission_message">Puedes activar notificaciones después en Configuración</string>
+    <string name="denied_location_permission_message">Puedes activar ubicación después en Configuración</string>
+
+</resources>

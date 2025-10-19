@@ -1,0 +1,40 @@
+package com.kronos.multiplatform.weatherapp.domain.model
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Hour(
+    val timeEpoch: Int,
+    val time: String,
+    val tempC: Double,
+    val tempF: Double,
+    val isDay: Boolean,
+    val condition: Condition,
+    val windMph: Double,
+    val windKph: Double,
+    val windDegree: Double,
+    val windDir: String,
+    val pressureMb: Double,
+    val pressureIn: Double,
+    val precipMm: Double,
+    val precipIn: Double,
+    val humidity: Int,
+    val cloud: Int,
+    val feelslikeC: Double,
+    val feelslikeF: Double,
+    val windchillC: Double,
+    val windchillF: Double,
+    val heatindexC: Double,
+    val heatindexF: Double,
+    val dewpoC: Double,
+    val dewpoF: Double,
+    val willItRain: Boolean,
+    val chanceOfRain: Double,
+    val willItSnow: Boolean,
+    val chanceOfSnow: Double,
+    val visKm: Double,
+    val visMiles: Double,
+    val gustMph: Double,
+    val gustKph: Double,
+    val uv: Double,
+)

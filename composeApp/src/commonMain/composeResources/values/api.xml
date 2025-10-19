@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_key" translatable="false">7e068f83abce49b58b2142037230910</string>
+    <string name="default_language_value" translatable="false">en</string>
+    <string name="default_days_values" translatable="false">3</string>
+    <string name="default_city_value" translatable="false">Panama</string>
+    <string name="default_image_quality_value" translatable="false">low</string>
+</resources>

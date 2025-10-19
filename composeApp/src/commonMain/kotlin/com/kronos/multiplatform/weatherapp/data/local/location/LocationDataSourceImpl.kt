@@ -1,0 +1,3 @@
+package com.kronos.multiplatform.weatherapp.data.local.location
+
+expect class LocationDataSourceImpl:LocationDataSource

@@ -1,0 +1,166 @@
+package com.kronos.multiplatform.weatherapp.features.setting
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import com.kronos.multiplatform.weatherapp.components.SettingRadioOptions
+import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
+import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.default_lang_key
+import weather_app.composeapp.generated.resources.lang_preference_default_value
+import weather_app.composeapp.generated.resources.preference_app_theme_entries
+import weather_app.composeapp.generated.resources.preference_app_theme_values
+import weather_app.composeapp.generated.resources.preference_lang_entries
+import weather_app.composeapp.generated.resources.preference_lang_values
+import weather_app.composeapp.generated.resources.preference_theme_subtitle
+import weather_app.composeapp.generated.resources.preference_theme_title
+import weather_app.composeapp.generated.resources.theme_preference_default_value
+import weather_app.composeapp.generated.resources.theme_preference_key
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+    navHost: NavHostController,
+    isDarkTheme: Boolean,
+    deviceScreenConfiguration: DeviceScreenConfiguration,
+) {
+    val viewModel = koinViewModel<PreferenceViewModel>()
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Claves y valores predeterminados desde recursos
+    val langPreferenceKey = stringResource(Res.string.default_lang_key)
+    val langPreferenceDefault = stringResource(Res.string.lang_preference_default_value)
+    val themePreferenceKey = stringResource(Res.string.theme_preference_key)
+    val themePreferenceDefault = stringResource(Res.string.theme_preference_default_value)
+
+    // Obtener preferencias al iniciar
+    LaunchedEffect(Unit) {
+        viewModel.getPreferenceLang(langPreferenceKey, langPreferenceDefault)
+        viewModel.getPreferenceTheme(themePreferenceKey, themePreferenceDefault)
+    }
+
+    // Estados locales para las opciones seleccionadas
+    var selectedLang by remember { mutableStateOf("") }
+    var selectedTheme by remember { mutableStateOf("") }
+
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
+
+    // Observar cambios en los StateFlows
+    LaunchedEffect(viewModel.preferenceLangFlow) {
+        viewModel.preferenceLangFlow.collect { lang ->
+            selectedLang = lang
+        }
+    }
+
+    LaunchedEffect(viewModel.preferenceThemeFlow) {
+        viewModel.preferenceThemeFlow.collect { theme ->
+            selectedTheme = theme
+        }
+    }
+
+    // Listas de opciones desde recursos
+    val langOptions = stringResource(Res.string.preference_lang_entries)
+        .split(",")
+        .mapIndexed { index, entry ->
+            Pair(entry.trim(), stringResource(Res.string.preference_lang_values).split(",")[index].trim())
+        }
+
+    val themeOptions = stringResource(Res.string.preference_app_theme_entries)
+        .split(",")
+        .mapIndexed { index, entry ->
+            Pair(entry.trim(), stringResource(Res.string.preference_app_theme_values).split(",")[index].trim())
+        }
+
+    LaunchedEffect(viewModel.message) {
+        if (viewModel.message.orEmpty().containsKey("error")) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = viewModel.message.orEmpty()["error"].orEmpty(),
+                    duration = SnackbarDuration.Short
+                )
+                viewModel.message?.clear()
+            }
+        }
+    }
+
+    // UI
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ){
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(snackbarHostState) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = MaterialTheme.colorScheme.error, // Fondo del Snackbar
+                        contentColor = MaterialTheme.colorScheme.onError // Color del texto
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxSize().statusBarsPadding()
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                /*SettingRadioOptions(
+                    title = stringResource(Res.string.lang_title),
+                    subtitle = stringResource(Res.string.lang_subtitle),
+                    icon = Res.drawable.ic_language,
+                    iconDesc = stringResource(Res.string.lang_subtitle),
+                    options = langOptions,
+                    selectedOption = selectedLang,
+                    onOptionSelected = {
+                        viewModel.savePreference(langPreferenceKey, it)
+                        viewModel.setPreferenceLang(it)
+                    }
+                )*/
+
+                SettingRadioOptions(
+                    title = stringResource(Res.string.preference_theme_title),
+                    subtitle = stringResource(Res.string.preference_theme_subtitle),
+                    //icon = Res.drawable.ic_theme,
+                    iconDesc = stringResource(Res.string.preference_theme_subtitle),
+                    options = themeOptions,
+                    selectedOption = selectedTheme,
+                    onOptionSelected = {
+                        scope.launch {
+                            viewModel.preferenceRepository.setPreference(themePreferenceKey, it)
+                        }
+                        viewModel.setPreferenceTheme(it)
+                    }
+                )
+
+            }
+        }
+    }
+}
