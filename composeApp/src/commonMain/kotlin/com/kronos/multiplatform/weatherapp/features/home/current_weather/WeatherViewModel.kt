@@ -98,7 +98,7 @@ class WeatherViewModel(
         }
     }
 
-    private suspend fun handleGpsDisabled(
+    private fun handleGpsDisabled(
         userLocation: UserCustomLocation?,
         lang: String,
         apiKey: String,
@@ -118,7 +118,7 @@ class WeatherViewModel(
         }
     }
 
-    private suspend fun handleLocationFallback(
+    private fun handleLocationFallback(
         userLocation: UserCustomLocation?,
         lang: String,
         apiKey: String,
