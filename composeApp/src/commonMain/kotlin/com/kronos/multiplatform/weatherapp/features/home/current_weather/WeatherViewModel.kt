@@ -35,7 +35,7 @@ class WeatherViewModel(
     val error = _error.asStateFlow()
 
     // Inicialización
-    fun initLocations(lang: String, apiKey: String, days: Int) {
+    fun initLocations(lang: String, apiKey: String, days: Int,defaultCity: String = "") {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 // 1. Buscar ubicación guardada del usuario
@@ -59,8 +59,12 @@ class WeatherViewModel(
                     }
 
                     else -> {
-                        // Intentar usar GPS o fallback
-                        getGpsLocation(null, lang, apiKey, days)
+                        if (locationRepository.isLocationEnabled()){
+                            // Intentar usar GPS o fallback
+                            getGpsLocation(null, lang, apiKey, days)
+                        }else{
+                            getWeather(defaultCity, lang, apiKey, days)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -231,4 +235,11 @@ class WeatherViewModel(
         loading = false
         log("General error: ${e.message}", isError = true)
     }
+}
+
+sealed class WeatherScreenState {
+    object Idle : WeatherScreenState()
+    object Loading : WeatherScreenState()
+    object NoWeather : WeatherScreenState()
+    object WeatherObtained : WeatherScreenState()
 }

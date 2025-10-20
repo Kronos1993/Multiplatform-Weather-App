@@ -2,7 +2,6 @@ package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -34,7 +33,7 @@ fun WeatherScreen(
     apiKey: String,
     imageQuality: String,
     amountOfDays: Int,
-    defaultCity:String,
+    defaultCity: String,
     isDarkTheme: Boolean,
 ) {
     val viewModel = koinViewModel<WeatherViewModel>()
@@ -43,10 +42,9 @@ fun WeatherScreen(
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val listState = rememberLazyGridState()
 
     LaunchedEffect(Unit) {
-        viewModel.initLocations(currentLang, apiKey, amountOfDays)
+        viewModel.initLocations(currentLang, apiKey, amountOfDays,defaultCity)
     }
 
     // Manejo de errores
@@ -99,7 +97,7 @@ fun WeatherScreen(
                             isDarkTheme = isDarkTheme,
                             urlProvider = viewModel.urlProvider,
                             imageQuality = imageQuality,
-                            listState = listState
+                            paddingValues = paddingValues
                         )
                     }
                 }

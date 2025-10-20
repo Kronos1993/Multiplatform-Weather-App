@@ -4,7 +4,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -35,6 +43,9 @@ import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.denied_location_permission_message
 import weather_app.composeapp.generated.resources.denied_notification_permission_message
+import weather_app.composeapp.generated.resources.title_about
+import weather_app.composeapp.generated.resources.title_location
+import weather_app.composeapp.generated.resources.title_settings
 import weather_app.composeapp.generated.resources.title_weather
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -181,8 +192,8 @@ fun HomeScreen(
     val tabs = listOf(
         TabItem(
             stringResource(Res.string.title_weather),
-            Icons.Filled.CalendarMonth,
-            Icons.Outlined.CalendarMonth,
+            Icons.Filled.Cloud,
+            Icons.Outlined.Cloud,
             1
         ) {
             WeatherScreen(
@@ -194,6 +205,33 @@ fun HomeScreen(
                 defaultCity,
                 isDarkTheme
             )
+        },
+
+        TabItem(
+            stringResource(Res.string.title_location),
+            Icons.Filled.MyLocation,
+            Icons.Outlined.MyLocation,
+            1
+        ) {
+
+        },
+
+        TabItem(
+            stringResource(Res.string.title_settings),
+            Icons.Filled.Settings,
+            Icons.Outlined.Settings,
+            1
+        ) {
+
+        },
+
+        TabItem(
+            stringResource(Res.string.title_about),
+            Icons.Filled.Info,
+            Icons.Outlined.Info,
+            1
+        ) {
+
         },
     )
 

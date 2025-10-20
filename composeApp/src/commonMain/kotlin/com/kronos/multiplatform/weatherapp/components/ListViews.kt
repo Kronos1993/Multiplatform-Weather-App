@@ -12,8 +12,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.NoWeatherIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SunSunriseIndicator
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.no_weather_data
@@ -43,10 +47,10 @@ fun NoWeather(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector = Icons.Outlined.CloudOff,
+            imageVector = WeatherAppIcons.NoWeatherIndicator,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = Color.Unspecified
         )
         HeaderText(
             text = stringResource(Res.string.no_weather_data),

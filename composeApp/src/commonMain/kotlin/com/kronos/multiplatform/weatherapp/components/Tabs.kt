@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -89,9 +90,11 @@ fun ScrollableTabView(
                             }
                         },
                         text = {
-                            TitleText(
+                            BodyText(
                                 text = tab.name,
-                                textColor = MaterialTheme.colorScheme.primary
+                                textColor = MaterialTheme.colorScheme.primary,
+                                textOverflow = TextOverflow.Ellipsis,
+                                maxLines = 1
                             )
                         },
                         icon = {
