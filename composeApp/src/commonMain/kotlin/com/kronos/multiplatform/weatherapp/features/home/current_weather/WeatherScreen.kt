@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -36,8 +34,8 @@ import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
-import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContent
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentLandscape
+import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentPortrait
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.loading_dialog_text
@@ -171,7 +169,7 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
-                                            WeatherContent(
+                                            WeatherContentPortrait(
                                                 weather = weather!!,
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
                                                 isDarkTheme = isDarkTheme,
@@ -217,7 +215,8 @@ fun WeatherScreen(
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
                                             imageQuality = imageQuality,
-                                            modifier = rootModifier
+                                            modifier = rootModifier,
+                                            deviceScreenConfiguration = deviceScreenConfiguration
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -229,12 +228,54 @@ fun WeatherScreen(
                             }
                         }
 
-                        DeviceScreenConfiguration.TABLET_PORTRAIT,
+                        DeviceScreenConfiguration.TABLET_PORTRAIT->{
+                            Column(
+                                modifier = rootModifier,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                when (screenState) {
+                                    WeatherScreenState.Idle -> {
+                                        WeatherIdleState(
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    }
+
+                                    WeatherScreenState.Loading -> {
+                                        WeatherLoadingState(
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+
+                                    WeatherScreenState.NoWeather -> {
+                                        NoWeatherItem(
+                                            modifier = Modifier.fillMaxSize(),
+                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                        )
+                                    }
+
+                                    WeatherScreenState.WeatherObtained -> {
+                                        if (weather != null) {
+                                            WeatherContentPortrait(
+                                                weather = weather!!,
+                                                deviceScreenConfiguration = deviceScreenConfiguration,
+                                                isDarkTheme = isDarkTheme,
+                                                urlProvider = viewModel.urlProvider,
+                                                imageQuality = imageQuality,
+                                            )
+                                        } else {
+                                            NoWeatherItem(
+                                                modifier = Modifier.fillMaxSize(),
+                                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         DeviceScreenConfiguration.TABLET_LANDSCAPE,
                         DeviceScreenConfiguration.DESKTOP -> {
                             Column(
                                 modifier = rootModifier
-                                    .verticalScroll(rememberScrollState())
                                     .padding(top = 48.dp),
                                 verticalArrangement = Arrangement.spacedBy(32.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -261,12 +302,12 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
-                                            WeatherContent(
+                                            WeatherContentLandscape(
                                                 weather = weather!!,
-                                                deviceScreenConfiguration = deviceScreenConfiguration,
                                                 isDarkTheme = isDarkTheme,
                                                 urlProvider = viewModel.urlProvider,
                                                 imageQuality = imageQuality,
+                                                deviceScreenConfiguration = deviceScreenConfiguration,
                                             )
                                         } else {
                                             NoWeatherItem(

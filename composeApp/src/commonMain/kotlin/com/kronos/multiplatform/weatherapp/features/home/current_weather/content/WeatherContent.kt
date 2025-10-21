@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,8 +38,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import com.kronos.multiplatform.weatherapp.components.CurrentWeatherBigScreenCompactItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherCompactItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherItem
+import com.kronos.multiplatform.weatherapp.components.CurrentWeatherLandscapeCompactItem
 import com.kronos.multiplatform.weatherapp.components.DailyWeatherList
 import com.kronos.multiplatform.weatherapp.components.HourlyItemIndicator
 import com.kronos.multiplatform.weatherapp.components.WeatherIndicatorList
@@ -76,7 +77,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 @Composable
-fun WeatherContent(
+fun WeatherContentPortrait(
     weather: Forecast,
     deviceScreenConfiguration: DeviceScreenConfiguration,
     isDarkTheme: Boolean,
@@ -351,34 +352,59 @@ fun WeatherContentLandscape(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    deviceScreenConfiguration: DeviceScreenConfiguration,
 ) {
     Row(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column(
             modifier = Modifier
-                .weight(0.4f)
-                .fillMaxHeight(),
+                .weight(0.4f),
             verticalArrangement = Arrangement.Center
         ) {
-            CurrentWeatherCompactItem(
-                currentWeather = weather,
-                darkTheme = isDarkTheme,
-                urlProvider = urlProvider,
-                imageQuality = imageQuality,
-                modifier = Modifier.fillMaxWidth()
-            )
+
+            when (deviceScreenConfiguration) {
+                DeviceScreenConfiguration.MOBILE_PORTRAIT,
+                DeviceScreenConfiguration.TABLET_PORTRAIT-> {
+                    WeatherContentPortrait(
+                        weather = weather!!,
+                        deviceScreenConfiguration = deviceScreenConfiguration,
+                        isDarkTheme = isDarkTheme,
+                        urlProvider = urlProvider,
+                        imageQuality = imageQuality,
+                    )
+                }
+
+                DeviceScreenConfiguration.MOBILE_LANDSCAPE->{
+                    CurrentWeatherLandscapeCompactItem(
+                        currentWeather = weather,
+                        darkTheme = isDarkTheme,
+                        urlProvider = urlProvider,
+                        imageQuality = imageQuality,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                DeviceScreenConfiguration.TABLET_LANDSCAPE,
+                DeviceScreenConfiguration.DESKTOP -> {
+                    CurrentWeatherBigScreenCompactItem(
+                        currentWeather = weather,
+                        darkTheme = isDarkTheme,
+                        urlProvider = urlProvider,
+                        imageQuality = imageQuality,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
 
         Column(
             modifier = Modifier
-                .weight(0.6f)
-                .fillMaxHeight(),
+                .weight(0.6f),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             WeatherContentSectionLandscape(

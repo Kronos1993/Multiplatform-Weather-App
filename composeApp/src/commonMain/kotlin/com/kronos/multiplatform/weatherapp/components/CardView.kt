@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Card
@@ -92,7 +95,7 @@ fun HourlyItemIndicator(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
 
-            val date = Instant.of(item.time,true)
+            val date = Instant.of(item.time, true)
 
             val hour = date?.getHour() ?: ""
 
@@ -419,6 +422,234 @@ fun CurrentWeatherCompactItem(
     }
 }
 
+@Composable
+fun CurrentWeatherLandscapeCompactItem(
+    currentWeather: Forecast,
+    darkTheme: Boolean,
+    urlProvider: UrlProvider,
+    imageQuality: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+            .data(urlProvider.getImageUrl(currentWeather.current.condition.icon, imageQuality))
+            .memoryCachePolicy(CachePolicy.DISABLED)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .build()
+
+        AsyncImage(
+            model = imageRequest,
+            contentDescription = "weather",
+            modifier = Modifier
+                .background(Color.Transparent)
+                .size(96.dp),
+            contentScale = ContentScale.Crop
+        )
+
+        HeaderText(
+            currentWeather.current.condition.description,
+            textColor = Color.White,
+            textAlign = TextAlign.Center,
+            size = ComponentSize.SMALL,
+            fontWeight = FontWeight.Companion.Bold
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                BodyText(
+                    currentWeather.location.name,
+                    textColor = Color.White.copy(alpha = 0.8f),
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.Start
+                )
+
+                BodyText(
+                    currentWeather.location.localtime,
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.End
+                )
+
+                BodyText(
+                    stringResource(Res.string.location_name).format(
+                        currentWeather.location.country,
+                        currentWeather.location.name
+                    ),
+                    textColor = Color.White.copy(alpha = 0.8f),
+                    size = ComponentSize.SMALL,
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    textOverflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight(),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                HeaderText(
+                    stringResource(Res.string.temp_celsius).format(
+                        currentWeather.current.tempC,
+                    ),
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.End
+                )
+
+                BodyText(
+                    stringResource(Res.string.feels_like_temp_celsius).format(
+                        currentWeather.current.feelslikeC,
+                    ),
+                    textColor = Color.White.copy(alpha = 0.8f),
+                    size = ComponentSize.SMALL,
+                    textAlign = TextAlign.End
+                )
+
+            }
+        }
+    }
+}
+
+@Composable
+fun CurrentWeatherBigScreenCompactItem(
+    currentWeather: Forecast,
+    darkTheme: Boolean,
+    urlProvider: UrlProvider,
+    imageQuality: String,
+    modifier: Modifier = Modifier,
+) {
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+            .data(urlProvider.getImageUrl(currentWeather.current.condition.icon, imageQuality))
+            .memoryCachePolicy(CachePolicy.DISABLED)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .build()
+
+        AsyncImage(
+            model = imageRequest,
+            contentDescription = "weather",
+            modifier = Modifier
+                .background(Color.Transparent)
+                .size(256.dp),
+            contentScale = ContentScale.Crop
+        )
+
+        HeaderText(
+            currentWeather.current.condition.description,
+            textColor = Color.White,
+            textAlign = TextAlign.Center,
+            size = ComponentSize.MEDIUM,
+            fontWeight = FontWeight.Companion.Bold
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                TitleText(
+                    currentWeather.location.name,
+                    textColor = Color.White.copy(alpha = 0.8f),
+                    size = ComponentSize.LARGE,
+                    textAlign = TextAlign.Start
+                )
+
+                TitleText(
+                    currentWeather.location.localtime,
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.End
+                )
+
+                TitleText(
+                    stringResource(Res.string.location_name).format(
+                        currentWeather.location.country,
+                        currentWeather.location.name
+                    ),
+                    vector = Icons.Filled.MyLocation,
+                    iconTint = Color.White,
+                    iconPosition = IconPosition.START,
+                    textColor = Color.White.copy(alpha = 0.8f),
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    textOverflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight(),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                DisplayText(
+                    stringResource(Res.string.temp_celsius).format(
+                        currentWeather.current.tempC,
+                    ),
+                    textColor = Color.White,
+                    size = ComponentSize.SMALL,
+                    textAlign = TextAlign.End
+                )
+
+                TitleText(
+                    stringResource(Res.string.feels_like_temp_celsius).format(
+                        currentWeather.current.feelslikeC,
+                    ),
+                    textColor = Color.White.copy(alpha = 0.8f),
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.End
+                )
+
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalTime::class)
 @Composable
@@ -448,15 +679,15 @@ fun DailyWeatherItemIndicator(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val date = Instant.of(item.date,false)
+            val date = Instant.of(item.date, false)
 
-            val dayOfWeek = if (date!=null){
+            val dayOfWeek = if (date != null) {
                 if (date.isToday()) {
                     stringResource(Res.string.today)
-                }else if(date.isTomorrow()){
+                } else if (date.isTomorrow()) {
                     stringResource(Res.string.tomorrow)
-                }else{
-                    when(date.toDayOfWeekText()) {
+                } else {
+                    when (date.toDayOfWeekText()) {
                         DayOfWeek.MONDAY -> stringResource(Res.string.monday)
                         DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday)
                         DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday)
@@ -466,7 +697,7 @@ fun DailyWeatherItemIndicator(
                         DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
                     }
                 }
-            }else{
+            } else {
                 ""
             }
 
