@@ -1,5 +1,8 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
@@ -14,10 +17,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
-import com.kronos.multiplatform.weatherapp.components.NoWeather
+import com.kronos.multiplatform.weatherapp.components.NoWeatherItem
 import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContent
@@ -39,20 +43,35 @@ fun WeatherScreen(
     val viewModel = koinViewModel<WeatherViewModel>()
     val weather by viewModel.weather.collectAsStateWithLifecycle()
     val selectedUserLocation by viewModel.selectedUserLocation.collectAsStateWithLifecycle()
+    val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        viewModel.initLocations(currentLang, apiKey, amountOfDays,defaultCity)
+        viewModel.initLocations(currentLang, apiKey, amountOfDays, defaultCity)
     }
 
     // Manejo de errores
-    LaunchedEffect(viewModel.message) {
-        viewModel.message?.get("error")?.let { errorMessage ->
+    LaunchedEffect(error) {
+        error?.let { errorMessage ->
             if (errorMessage.isNotBlank()) {
                 snackbarHostState.showSnackbar(
                     message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+                viewModel.clean()
+            }
+        }
+    }
+
+    // Manejo de mensajes de advertencia
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.get("warning")?.let { warningMessage ->
+            if (warningMessage.isNotBlank()) {
+                snackbarHostState.showSnackbar(
+                    message = warningMessage,
                     duration = SnackbarDuration.Short
                 )
                 viewModel.clean()
@@ -72,43 +91,100 @@ fun WeatherScreen(
                 SnackbarHost(snackbarHostState) { data ->
                     Snackbar(
                         snackbarData = data,
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                        containerColor = when {
+                            data.visuals.message.contains("error", ignoreCase = true) ->
+                                MaterialTheme.colorScheme.error
+                            else -> MaterialTheme.colorScheme.primary
+                        },
+                        contentColor = when {
+                            data.visuals.message.contains("error", ignoreCase = true) ->
+                                MaterialTheme.colorScheme.onError
+                            else -> MaterialTheme.colorScheme.onPrimary
+                        }
                     )
                 }
             },
         ) { paddingValues ->
             PullToRefreshContainer(
                 innerPadding = paddingValues,
-                isRefreshing = viewModel.loading,
+                isRefreshing = screenState == WeatherScreenState.Loading,
                 onRefresh = {
-                    viewModel.refreshWeather(currentLang, apiKey, 3)
+                    viewModel.refreshWeather(currentLang, apiKey, amountOfDays)
                 }
             ) {
-                when {
-                    weather == null -> {
-                        NoWeather(modifier = Modifier.fillMaxSize())
+                when (screenState) {
+                    WeatherScreenState.Idle -> {
+                        WeatherIdleState(
+                            modifier = Modifier.fillMaxSize(),
+                        )
                     }
 
-                    weather != null -> {
-                        WeatherContent(
-                            weather = weather!!,
-                            deviceScreenConfiguration = deviceScreenConfiguration,
-                            isDarkTheme = isDarkTheme,
-                            urlProvider = viewModel.urlProvider,
-                            imageQuality = imageQuality,
-                            paddingValues = paddingValues
+                    WeatherScreenState.Loading -> {
+                        WeatherLoadingState(
+                            modifier = Modifier.fillMaxSize()
                         )
+                    }
+
+                    WeatherScreenState.NoWeather -> {
+                        NoWeatherItem(
+                            modifier = Modifier.fillMaxSize(),
+                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                        )
+                    }
+
+                    WeatherScreenState.WeatherObtained -> {
+                        if (weather != null) {
+                            WeatherContent(
+                                weather = weather!!,
+                                deviceScreenConfiguration = deviceScreenConfiguration,
+                                isDarkTheme = isDarkTheme,
+                                urlProvider = viewModel.urlProvider,
+                                imageQuality = imageQuality,
+                                paddingValues = paddingValues,
+                            )
+                        } else {
+                            NoWeatherItem(
+                                modifier = Modifier.fillMaxSize(),
+                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                            )
+                        }
                     }
                 }
             }
 
-            // Diálogo de carga
+            // Diálogo de carga - solo se muestra durante Loading state
             LoadingDialog(
                 title = Res.string.loading_dialog_title,
                 message = Res.string.loading_dialog_text,
-                showDialog = viewModel.loading
+                showDialog = screenState == WeatherScreenState.Loading
             )
         }
+    }
+}
+
+@Composable
+private fun WeatherIdleState(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+        }
+    }
+}
+
+@Composable
+private fun WeatherLoadingState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
     }
 }

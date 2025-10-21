@@ -31,13 +31,19 @@ class WeatherViewModel(
     private val _selectedUserLocation = MutableStateFlow<UserCustomLocation?>(null)
     val selectedUserLocation = _selectedUserLocation.asStateFlow()
 
+    private val _screenState = MutableStateFlow<WeatherScreenState>(WeatherScreenState.Idle)
+    val screenState = _screenState.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
     // Inicialización
-    fun initLocations(lang: String, apiKey: String, days: Int,defaultCity: String = "") {
+    fun initLocations(lang: String, apiKey: String, days: Int, defaultCity: String = "") {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                _screenState.value = WeatherScreenState.Loading
+                _error.value = null
+
                 // 1. Buscar ubicación guardada del usuario
                 var userLocation = userCustomLocationLocalRepository.getSelectedLocation()
                 if (userLocation == null) {
@@ -50,7 +56,7 @@ class WeatherViewModel(
                 when {
                     userLocation != null && userLocation.isCurrent && userLocation.isSelected -> {
                         // Usar GPS para ubicación actual
-                        getGpsLocation(userLocation, lang, apiKey, days)
+                        getGpsLocation(userLocation, lang, apiKey, days, defaultCity)
                     }
 
                     userLocation != null -> {
@@ -59,10 +65,10 @@ class WeatherViewModel(
                     }
 
                     else -> {
-                        if (locationRepository.isLocationEnabled()){
+                        if (locationRepository.isLocationEnabled()) {
                             // Intentar usar GPS o fallback
-                            getGpsLocation(null, lang, apiKey, days)
-                        }else{
+                            getGpsLocation(null, lang, apiKey, days, defaultCity)
+                        } else {
                             getWeather(defaultCity, lang, apiKey, days)
                         }
                     }
@@ -77,12 +83,13 @@ class WeatherViewModel(
         userLocation: UserCustomLocation?,
         lang: String,
         apiKey: String,
-        days: Int
+        days: Int,
+        defaultCity: String = ""
     ) {
         try {
             // Verificar si el GPS está activado
             if (!locationRepository.isLocationEnabled()) {
-                handleGpsDisabled(userLocation, lang, apiKey, days)
+                handleGpsDisabled(userLocation, lang, apiKey, days, defaultCity)
                 return
             }
 
@@ -95,10 +102,10 @@ class WeatherViewModel(
                 saveCurrentLocation(currentLocation)
             } else {
                 // Fallback si no se pudo obtener ubicación GPS
-                handleLocationFallback(userLocation, lang, apiKey, days)
+                handleLocationFallback(userLocation, lang, apiKey, days, defaultCity)
             }
         } catch (e: Exception) {
-            handleLocationFallback(userLocation, lang, apiKey, days)
+            handleLocationFallback(userLocation, lang, apiKey, days, defaultCity)
         }
     }
 
@@ -106,7 +113,8 @@ class WeatherViewModel(
         userLocation: UserCustomLocation?,
         lang: String,
         apiKey: String,
-        days: Int
+        days: Int,
+        defaultCity: String = ""
     ) {
         message = hashMapOf("warning" to "GPS desactivado, usando ubicación guardada")
 
@@ -118,7 +126,7 @@ class WeatherViewModel(
             }
         } else {
             // Ciudad por defecto
-            getWeather("London", lang, apiKey, days)
+            getWeather(defaultCity, lang, apiKey, days)
         }
     }
 
@@ -126,7 +134,8 @@ class WeatherViewModel(
         userLocation: UserCustomLocation?,
         lang: String,
         apiKey: String,
-        days: Int
+        days: Int,
+        defaultCity: String = ""
     ) {
         message = hashMapOf("warning" to "No se pudo obtener ubicación GPS")
 
@@ -137,24 +146,24 @@ class WeatherViewModel(
                 getWeather(userLocation.cityName, lang, apiKey, days)
             }
         } else {
-            // Ciudad por defecto
-            getWeather("London", lang, apiKey, days)
+            getWeather(defaultCity, lang, apiKey, days)
         }
     }
 
     private fun getWeather(lat: Double, lon: Double, lang: String, apiKey: String, days: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            loading = true
+            _screenState.value = WeatherScreenState.Loading
 
             weatherRemoteRepository.getWeatherDataForecast(lat, lon, lang, apiKey, days)
                 .onSuccess { forecast ->
                     _weather.value = forecast
+                    _screenState.value = WeatherScreenState.WeatherObtained
+                    _error.value = null
                     log("Weather from coordinates acquired: ${forecast.location.name}", false)
-                    loading = false
                 }
                 .onError { error ->
                     _error.value = "Error getting weather: $error"
-                    loading = false
+                    _screenState.value = WeatherScreenState.NoWeather
                     _weather.value = null
                     log("Weather error: $error", isError = true)
                 }
@@ -163,19 +172,20 @@ class WeatherViewModel(
 
     private fun getWeather(city: String, lang: String, apiKey: String, days: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            loading = true
+            _screenState.value = WeatherScreenState.Loading
 
             weatherRemoteRepository.getWeatherDataForecast(city, lang, apiKey, days)
                 .onSuccess { forecast ->
                     _weather.value = forecast
-                    loading = false
-                    log("Weather from city acquired: ${forecast.location.name}",false)
+                    _screenState.value = WeatherScreenState.WeatherObtained
+                    _error.value = null
+                    log("Weather from city acquired: ${forecast.location.name}", false)
                 }
                 .onError { error ->
-                    _error.value = "Error getting weather: ${error}"
-                    loading = false
+                    _error.value = "Error getting weather: $error"
+                    _screenState.value = WeatherScreenState.NoWeather
                     _weather.value = null
-                    log("Weather error: ${error}", isError = true)
+                    log("Weather error: $error", isError = true)
                 }
         }
     }
@@ -191,13 +201,12 @@ class WeatherViewModel(
                     lon = location.longitude
                 )
 
-                // Preservar ID si existe
                 _selectedUserLocation.value?.id?.let { userLocation.id = it }
 
                 userCustomLocationLocalRepository.saveLocation(userLocation)
                 _selectedUserLocation.value = userLocation
 
-                log("Current location saved: ${userLocation.cityName}",false)
+                log("Current location saved: ${userLocation.cityName}", false)
             } catch (e: Exception) {
                 log("Error saving location: ${e.message}", isError = true)
             }
@@ -206,7 +215,6 @@ class WeatherViewModel(
 
     private fun log(item: String, isError: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
-            // Aquí puedes integrar con tu sistema de logging
             if (isError) {
                 println("ERROR: $item")
             } else {
@@ -215,24 +223,29 @@ class WeatherViewModel(
         }
     }
 
-    // Funciones públicas
     fun refreshWeather(lang: String, apiKey: String, days: Int) {
         initLocations(lang, apiKey, days)
     }
 
     fun clean() {
         _error.value = null
+        _screenState.value = WeatherScreenState.Idle
         message = null
     }
 
     fun clearWeather() {
         _weather.value = null
+        _screenState.value = WeatherScreenState.NoWeather
+    }
+
+    fun retryLastOperation(lang: String, apiKey: String, days: Int) {
+        refreshWeather(lang, apiKey, days)
     }
 
     private fun handleError(e: Exception) {
         _weather.value = null
         _error.value = "Error: ${e.message}"
-        loading = false
+        _screenState.value = WeatherScreenState.NoWeather
         log("General error: ${e.message}", isError = true)
     }
 }
