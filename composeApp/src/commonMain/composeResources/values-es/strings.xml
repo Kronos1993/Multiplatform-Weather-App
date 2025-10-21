@@ -43,6 +43,13 @@
     <string name="location_name">%1$s/%2$s</string>
     <string name="today">Hoy</string>
     <string name="tomorrow">Mañana</string>
+    <string name="monday">Lunes</string>
+    <string name="tuesday">Martes</string>
+    <string name="wednesday">Miércoles</string>
+    <string name="thursday">Jueves</string>
+    <string name="friday">Viernes</string>
+    <string name="saturday">Sábado</string>
+    <string name="sunday">Domingo</string>
     <string name="gps">GPS</string>
 
     <string name="add_location_button_content_description">Añadir ubicación</string>
@@ -50,4 +57,8 @@
     <string name="denied_notification_permission_message">Puedes activar notificaciones después en Configuración</string>
     <string name="denied_location_permission_message">Puedes activar ubicación después en Configuración</string>
 
+    <string name="exit_dialog_title">Salir</string>
+    <string name="exit_dialog_body">Estas seguro que quieres salir?</string>
+    <string name="exit_dialog_yes">Yes</string>
+    <string name="exit_dialog_no">No</string>
 </resources>

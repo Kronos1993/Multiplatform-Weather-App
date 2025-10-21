@@ -11,24 +11,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BatterySaver
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.room.util.TableInfo
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.CachePolicy
@@ -40,17 +36,35 @@ import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorD
 import com.kronos.multiplatform.weatherapp.components.theme.backgroundCardColorDark
 import com.kronos.multiplatform.weatherapp.components.theme.backgroundCardColorLight
 import com.kronos.multiplatform.weatherapp.core.util.format
+import com.kronos.multiplatform.weatherapp.core.util.getHour
+import com.kronos.multiplatform.weatherapp.core.util.isToday
+import com.kronos.multiplatform.weatherapp.core.util.isTomorrow
+import com.kronos.multiplatform.weatherapp.core.util.of
+import com.kronos.multiplatform.weatherapp.core.util.toDayOfWeekText
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Indicator
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
+import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.feels_like_temp_celsius
+import weather_app.composeapp.generated.resources.friday
 import weather_app.composeapp.generated.resources.location_name
+import weather_app.composeapp.generated.resources.monday
+import weather_app.composeapp.generated.resources.saturday
+import weather_app.composeapp.generated.resources.sunday
 import weather_app.composeapp.generated.resources.temp_celsius
+import weather_app.composeapp.generated.resources.thursday
+import weather_app.composeapp.generated.resources.today
+import weather_app.composeapp.generated.resources.tomorrow
+import weather_app.composeapp.generated.resources.tuesday
+import weather_app.composeapp.generated.resources.wednesday
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun HourlyItemIndicator(
     item: Hour,
@@ -73,13 +87,17 @@ fun HourlyItemIndicator(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
+                .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
+
+            val date = Instant.of(item.time,true)
+
+            val hour = date?.getHour() ?: ""
+
             LabelText(
-                text = item.time,
+                text = hour,
                 modifier = Modifier.wrapContentSize(),
                 textColor = Color.White,
                 size = ComponentSize.MEDIUM
@@ -95,13 +113,12 @@ fun HourlyItemIndicator(
                 model = imageRequest,
                 contentDescription = "weather",
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(32.dp)
                     .background(Color.Transparent),
                 contentScale = ContentScale.Fit
             )
 
-            // Temperatura - abajo
-            TitleText(
+            LabelText(
                 text = item.tempC.toString(),
                 modifier = Modifier.wrapContentSize(),
                 textColor = Color.White,
@@ -238,9 +255,10 @@ fun CurrentWeatherItem(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .padding(4.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp,Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -293,6 +311,9 @@ fun CurrentWeatherItem(
                 currentWeather.location.country,
                 currentWeather.location.name
             ),
+            vector = Icons.Filled.MyLocation,
+            iconTint = Color.White,
+            iconPosition = IconPosition.START,
             textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
@@ -310,7 +331,7 @@ fun CurrentWeatherCompactItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -385,6 +406,9 @@ fun CurrentWeatherCompactItem(
                     currentWeather.location.country,
                     currentWeather.location.name
                 ),
+                vector = Icons.Filled.MyLocation,
+                iconTint = Color.White,
+                iconPosition = IconPosition.START,
                 textColor = Color.White.copy(alpha = 0.8f),
                 size = ComponentSize.SMALL,
                 textAlign = TextAlign.End,
@@ -396,6 +420,7 @@ fun CurrentWeatherCompactItem(
 }
 
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun DailyWeatherItemIndicator(
     item: DailyForecast,
@@ -419,12 +444,34 @@ fun DailyWeatherItemIndicator(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically, // Alineación vertical centrada
-            horizontalArrangement = Arrangement.SpaceBetween // Distribuye el espacio entre elementos
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val date = Instant.of(item.date,false)
+
+            val dayOfWeek = if (date!=null){
+                if (date.isToday()) {
+                    stringResource(Res.string.today)
+                }else if(date.isTomorrow()){
+                    stringResource(Res.string.tomorrow)
+                }else{
+                    when(date.toDayOfWeekText()) {
+                        DayOfWeek.MONDAY -> stringResource(Res.string.monday)
+                        DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday)
+                        DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday)
+                        DayOfWeek.THURSDAY -> stringResource(Res.string.thursday)
+                        DayOfWeek.FRIDAY -> stringResource(Res.string.friday)
+                        DayOfWeek.SATURDAY -> stringResource(Res.string.saturday)
+                        DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
+                    }
+                }
+            }else{
+                ""
+            }
+
             BodyText(
-                "Show day",
+                dayOfWeek,
                 modifier = Modifier.weight(1f),
                 textColor = Color.White,
                 size = ComponentSize.MEDIUM,
@@ -451,7 +498,7 @@ fun DailyWeatherItemIndicator(
                 model = imageRequest,
                 contentDescription = "weather",
                 modifier = Modifier
-                    .size(40.dp) // Tamaño fijo para la imagen
+                    .size(40.dp)
                     .background(Color.Transparent),
                 contentScale = ContentScale.Crop
             )
@@ -491,5 +538,32 @@ fun DailyWeatherList(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Composable
+fun WeatherIdleState(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+        }
+    }
+}
+
+@Composable
+fun WeatherLoadingState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
     }
 }

@@ -1,10 +1,18 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -19,12 +27,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.components.NoWeatherItem
 import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
+import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
+import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContent
+import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentLandscape
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.loading_dialog_text
@@ -112,79 +125,168 @@ fun WeatherScreen(
                     viewModel.refreshWeather(currentLang, apiKey, amountOfDays)
                 }
             ) {
-                when (screenState) {
-                    WeatherScreenState.Idle -> {
-                        WeatherIdleState(
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
 
-                    WeatherScreenState.Loading -> {
-                        WeatherLoadingState(
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    WeatherScreenState.NoWeather -> {
-                        NoWeatherItem(
-                            modifier = Modifier.fillMaxSize(),
-                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
-                        )
-                    }
-
-                    WeatherScreenState.WeatherObtained -> {
-                        if (weather != null) {
-                            WeatherContent(
-                                weather = weather!!,
-                                deviceScreenConfiguration = deviceScreenConfiguration,
-                                isDarkTheme = isDarkTheme,
-                                urlProvider = viewModel.urlProvider,
-                                imageQuality = imageQuality,
-                                paddingValues = paddingValues,
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val rootModifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 15.dp,
+                                topEnd = 15.dp
                             )
-                        } else {
-                            NoWeatherItem(
-                                modifier = Modifier.fillMaxSize(),
-                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
-                            )
+                        )
+                        .background(
+                            MaterialTheme.colorScheme.surface
+                        )
+                        .consumeWindowInsets(WindowInsets.navigationBars)
+
+                    when (deviceScreenConfiguration) {
+                        DeviceScreenConfiguration.MOBILE_PORTRAIT -> {
+                            Column(
+                                modifier = rootModifier,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                when (screenState) {
+                                    WeatherScreenState.Idle -> {
+                                        WeatherIdleState(
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    }
+
+                                    WeatherScreenState.Loading -> {
+                                        WeatherLoadingState(
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+
+                                    WeatherScreenState.NoWeather -> {
+                                        NoWeatherItem(
+                                            modifier = Modifier.fillMaxSize(),
+                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                        )
+                                    }
+
+                                    WeatherScreenState.WeatherObtained -> {
+                                        if (weather != null) {
+                                            WeatherContent(
+                                                weather = weather!!,
+                                                deviceScreenConfiguration = deviceScreenConfiguration,
+                                                isDarkTheme = isDarkTheme,
+                                                urlProvider = viewModel.urlProvider,
+                                                imageQuality = imageQuality,
+                                            )
+                                        } else {
+                                            NoWeatherItem(
+                                                modifier = Modifier.fillMaxSize(),
+                                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        DeviceScreenConfiguration.MOBILE_LANDSCAPE -> {
+                            when (screenState) {
+                                WeatherScreenState.Idle -> {
+                                    WeatherIdleState(
+                                        modifier = rootModifier,
+                                    )
+                                }
+
+                                WeatherScreenState.Loading -> {
+                                    WeatherLoadingState(
+                                        modifier = rootModifier
+                                    )
+                                }
+
+                                WeatherScreenState.NoWeather -> {
+                                    NoWeatherItem(
+                                        modifier = rootModifier,
+                                        onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                    )
+                                }
+
+                                WeatherScreenState.WeatherObtained -> {
+                                    if (weather != null) {
+                                        WeatherContentLandscape(
+                                            weather = weather!!,
+                                            isDarkTheme = isDarkTheme,
+                                            urlProvider = viewModel.urlProvider,
+                                            imageQuality = imageQuality,
+                                            modifier = rootModifier
+                                        )
+                                    } else {
+                                        NoWeatherItem(
+                                            modifier = rootModifier,
+                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        DeviceScreenConfiguration.TABLET_PORTRAIT,
+                        DeviceScreenConfiguration.TABLET_LANDSCAPE,
+                        DeviceScreenConfiguration.DESKTOP -> {
+                            Column(
+                                modifier = rootModifier
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(top = 48.dp),
+                                verticalArrangement = Arrangement.spacedBy(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                when (screenState) {
+                                    WeatherScreenState.Idle -> {
+                                        WeatherIdleState(
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    }
+
+                                    WeatherScreenState.Loading -> {
+                                        WeatherLoadingState(
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+
+                                    WeatherScreenState.NoWeather -> {
+                                        NoWeatherItem(
+                                            modifier = Modifier.fillMaxSize(),
+                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                        )
+                                    }
+
+                                    WeatherScreenState.WeatherObtained -> {
+                                        if (weather != null) {
+                                            WeatherContent(
+                                                weather = weather!!,
+                                                deviceScreenConfiguration = deviceScreenConfiguration,
+                                                isDarkTheme = isDarkTheme,
+                                                urlProvider = viewModel.urlProvider,
+                                                imageQuality = imageQuality,
+                                            )
+                                        } else {
+                                            NoWeatherItem(
+                                                modifier = Modifier.fillMaxSize(),
+                                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Diálogo de carga - solo se muestra durante Loading state
             LoadingDialog(
                 title = Res.string.loading_dialog_title,
                 message = Res.string.loading_dialog_text,
                 showDialog = screenState == WeatherScreenState.Loading
             )
         }
-    }
-}
-
-@Composable
-private fun WeatherIdleState(
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-        }
-    }
-}
-
-@Composable
-private fun WeatherLoadingState(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
     }
 }

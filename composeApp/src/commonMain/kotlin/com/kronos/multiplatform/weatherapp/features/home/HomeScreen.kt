@@ -3,12 +3,10 @@ package com.kronos.multiplatform.weatherapp.features.home
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MyLocation
@@ -30,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.Destinations
+import com.kronos.multiplatform.weatherapp.components.ConfirmDialog
 import com.kronos.multiplatform.weatherapp.components.ScrollableTabView
 import com.kronos.multiplatform.weatherapp.components.TabItem
 import com.kronos.multiplatform.weatherapp.core.util.BackPressHandlerEffect
@@ -43,6 +42,10 @@ import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.denied_location_permission_message
 import weather_app.composeapp.generated.resources.denied_notification_permission_message
+import weather_app.composeapp.generated.resources.exit_dialog_body
+import weather_app.composeapp.generated.resources.exit_dialog_no
+import weather_app.composeapp.generated.resources.exit_dialog_title
+import weather_app.composeapp.generated.resources.exit_dialog_yes
 import weather_app.composeapp.generated.resources.title_about
 import weather_app.composeapp.generated.resources.title_location
 import weather_app.composeapp.generated.resources.title_settings
@@ -183,11 +186,14 @@ fun HomeScreen(
         }
     }
 
+    var showExitDialog by remember { mutableStateOf(false) }
+
     BackPressHandlerEffect(
         enabled = navHost.currentBackStackEntry?.destination?.route == Destinations.HOME.name
     ) {
-        // todo show exit dialog
+        showExitDialog = true
     }
+
 
     val tabs = listOf(
         TabItem(
@@ -256,6 +262,18 @@ fun HomeScreen(
                 paddingValues = paddingValues
             )
         }
+
+        ConfirmDialog(
+            title = stringResource(Res.string.exit_dialog_title),
+            body = stringResource(Res.string.exit_dialog_body),
+            confirmText = stringResource(Res.string.exit_dialog_yes),
+            onConfirm = {
+                showExitDialog = false
+            },
+            cancelText = stringResource(Res.string.exit_dialog_no),
+            onCancel = { showExitDialog = false },
+            showDialog = showExitDialog
+        )
     }
 }
 

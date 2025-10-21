@@ -17,9 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlin.time.Clock
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @Composable
@@ -47,12 +47,12 @@ fun LoadingDialog(title: StringResource, message: StringResource, showDialog: Bo
 
 @Composable
 fun ConfirmDialog(
-    title: StringResource,
-    body: StringResource,
+    title: String,
+    body: String,
     showDialog: Boolean,
-    confirmText: StringResource,
+    confirmText: String,
     onConfirm: () -> Unit,
-    cancelText: StringResource,
+    cancelText: String,
     onCancel: () -> Unit,
     onClose: (() -> Unit)? = null
 ) {
@@ -66,14 +66,14 @@ fun ConfirmDialog(
             },
             title = {
                 Text(
-                    text = stringResource(title),
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
             text = {
                 Text(
-                    text = stringResource(body),
+                    text = body,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -81,7 +81,7 @@ fun ConfirmDialog(
             confirmButton = {
                 TextButton(onClick = { onConfirm() }) {
                     Text(
-                        text = stringResource(confirmText),
+                        text = confirmText,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -89,7 +89,7 @@ fun ConfirmDialog(
             dismissButton = {
                 TextButton(onClick = { onCancel() }) {
                     Text(
-                        text = stringResource(cancelText),
+                        text = cancelText,
                         color = MaterialTheme.colorScheme.error
                     )
                 }

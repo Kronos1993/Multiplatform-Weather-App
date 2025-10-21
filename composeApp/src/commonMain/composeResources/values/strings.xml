@@ -43,6 +43,13 @@
     <string name="location_name">%1$s/%2$s</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="today">Today</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
     <string name="gps">GPS</string>
 
     <string name="add_location_button_content_description">Add location</string>
@@ -73,5 +80,10 @@
 
     <string name="denied_notification_permission_message">You can\'t use notifications without permission. You can enable it in Settings</string>
     <string name="denied_location_permission_message">You can\'t use location without permission. You can enable it in Settings</string>
+
+    <string name="exit_dialog_title">Exit</string>
+    <string name="exit_dialog_body">Are you sure you want to exit?</string>
+    <string name="exit_dialog_yes">Yes</string>
+    <string name="exit_dialog_no">No</string>
 
 </resources>

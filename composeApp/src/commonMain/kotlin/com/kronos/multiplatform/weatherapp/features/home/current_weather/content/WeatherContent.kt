@@ -1,24 +1,26 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather.content
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -31,9 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -82,15 +82,18 @@ fun WeatherContent(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
-    paddingValues: PaddingValues
 ) {
     var isCompact by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
 
-    // Nested scroll connection corregido
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Solo aplicar comportamiento compact en portrait móvil
+                if (deviceScreenConfiguration != DeviceScreenConfiguration.MOBILE_PORTRAIT) {
+                    return Offset.Zero
+                }
+
                 // Scroll hacia ABAJO (valor positivo) -> expandir
                 if (available.y > 30 && isCompact) {
                     isCompact = false
@@ -113,12 +116,7 @@ fun WeatherContent(
         .nestedScroll(nestedScrollConnection)
         .consumeWindowInsets(WindowInsets.navigationBars)
 
-    val shouldUseCompactBehavior = when (deviceScreenConfiguration) {
-        DeviceScreenConfiguration.MOBILE_PORTRAIT,
-        DeviceScreenConfiguration.TABLET_PORTRAIT -> true
-        else -> false
-    }
-
+    val shouldUseCompactBehavior = deviceScreenConfiguration == DeviceScreenConfiguration.MOBILE_PORTRAIT
     val actualCompactMode = isCompact && shouldUseCompactBehavior
 
     Column(
@@ -147,6 +145,7 @@ fun WeatherContent(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WeatherHeaderSection(
     currentWeather: Forecast,
@@ -156,48 +155,31 @@ fun WeatherHeaderSection(
     modifier: Modifier = Modifier,
     isCompactMode: Boolean = false
 ) {
-    val transition = updateTransition(targetState = isCompactMode, label = "headerTransition")
-
-    val alpha by transition.animateFloat(
+    AnimatedContent(
+        targetState = isCompactMode,
+        modifier = modifier,
         transitionSpec = {
-            tween(durationMillis = 300, easing = FastOutSlowInEasing)
-        }, label = "alpha"
-    ) { compact -> if (compact) 1f else 1f }
-
-    val verticalPadding by transition.animateDp(
-        transitionSpec = {
-            tween(durationMillis = 300, easing = FastOutSlowInEasing)
-        }, label = "verticalPadding"
-    ) { compact -> if (compact) 8.dp else 16.dp }
-
-    Box(
-        modifier = modifier
-            .alpha(alpha)
-            .padding(vertical = verticalPadding),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Crossfade(
-            targetState = isCompactMode,
-            modifier = Modifier.fillMaxWidth(),
-            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-            label = "headerCrossfade"
-        ) { compact ->
-            if (compact) {
-                CurrentWeatherCompactItem(
-                    currentWeather = currentWeather,
-                    darkTheme = isDarkTheme,
-                    urlProvider = urlProvider,
-                    imageQuality = imageQuality,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                CurrentWeatherItem(
-                    currentWeather = currentWeather,
-                    darkTheme = isDarkTheme,
-                    urlProvider = urlProvider,
-                    imageQuality = imageQuality
-                )
-            }
+            fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing)) with
+                    fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing))
+        },
+        label = "headerTransition"
+    ) { compact ->
+        if (compact) {
+            CurrentWeatherCompactItem(
+                currentWeather = currentWeather,
+                darkTheme = isDarkTheme,
+                urlProvider = urlProvider,
+                imageQuality = imageQuality,
+                modifier = Modifier.wrapContentHeight()
+            )
+        } else {
+            CurrentWeatherItem(
+                currentWeather = currentWeather,
+                darkTheme = isDarkTheme,
+                urlProvider = urlProvider,
+                imageQuality = imageQuality,
+                modifier = Modifier.wrapContentHeight()
+            )
         }
     }
 }
@@ -309,21 +291,16 @@ fun WeatherContentSection(
         // Sección de horas
         if (hours.isNotEmpty()) {
             item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        items(hours, key = { it.time }) { hour ->
-                            HourlyItemIndicator(
-                                item = hour,
-                                urlProvider = urlProvider,
-                                imageQuality = imageQuality,
-                                darkTheme = isDarkTheme,
-                            )
-                        }
+                    items(hours, key = { it.time }) { hour ->
+                        HourlyItemIndicator(
+                            item = hour,
+                            urlProvider = urlProvider,
+                            imageQuality = imageQuality,
+                            darkTheme = isDarkTheme,
+                        )
                     }
                 }
             }
@@ -364,6 +341,199 @@ fun WeatherContentSection(
         // Espacio al final
         item {
             Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+fun WeatherContentLandscape(
+    weather: Forecast,
+    isDarkTheme: Boolean,
+    urlProvider: UrlProvider,
+    imageQuality: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(0.4f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            CurrentWeatherCompactItem(
+                currentWeather = weather,
+                darkTheme = isDarkTheme,
+                urlProvider = urlProvider,
+                imageQuality = imageQuality,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(0.6f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            WeatherContentSectionLandscape(
+                currentWeather = weather,
+                isDarkTheme = isDarkTheme,
+                urlProvider = urlProvider,
+                imageQuality = imageQuality,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalTime::class)
+@Composable
+fun WeatherContentSectionLandscape(
+    currentWeather: Forecast,
+    isDarkTheme: Boolean,
+    urlProvider: UrlProvider,
+    imageQuality: String,
+    modifier: Modifier = Modifier
+) {
+    val currentDayForecast = remember(currentWeather) {
+        currentWeather.forecast.forecastDay.find { forecastDay ->
+            val date =
+                Instant.of(forecastDay.date, false, TimeZone.of(currentWeather.location.tzId))
+            date != null && date.isToday(TimeZone.of(currentWeather.location.tzId))
+        } ?: currentWeather.forecast.forecastDay.firstOrNull()
+    }
+
+    val hours = remember(currentDayForecast) {
+        val currentTime = Clock.System.now()
+        currentDayForecast?.hours?.filter { hour ->
+            val date = Instant.of(hour.time, true, TimeZone.of(currentWeather.location.tzId))
+            date != null && date > currentTime
+        }?.take(12) ?: emptyList()
+    }
+
+    val futureDays = remember(currentWeather) {
+        currentWeather.forecast.forecastDay.filter {
+            val date = Instant.of(it.date, false)
+            date != null && !date.isToday()
+        }.take(5)
+    }
+
+    // Obtener strings
+    val windText = stringResource(Res.string.wind)
+    val humidityText = stringResource(Res.string.humidity)
+    val uvIndexText = stringResource(Res.string.uv_index)
+    val snowText = stringResource(Res.string.snow)
+    val rainText = stringResource(Res.string.rain)
+    val sunText = stringResource(Res.string.sun)
+    val visibilityText = stringResource(Res.string.visibility)
+    val speedKmText = stringResource(Res.string.speed_km)
+    val visibilityKmText = stringResource(Res.string.visibility_km)
+
+    val indicators = remember(currentWeather, currentDayForecast) {
+        listOf(
+            Indicator(
+                1,
+                windText,
+                speedKmText.format(currentWeather.current.windSpeedKph),
+                WeatherAppIcons.WindIndicator
+            ),
+            Indicator(
+                2,
+                humidityText,
+                "${currentWeather.current.humidity}%",
+                WeatherAppIcons.WaterDropsIndicator
+            ),
+            Indicator(
+                3,
+                uvIndexText,
+                currentWeather.current.uv.toString(),
+                WeatherAppIcons.SunIndicator
+            ),
+            if (currentDayForecast?.day?.dailyWillItSnow == true) {
+                Indicator(
+                    4,
+                    snowText,
+                    "${currentDayForecast.day.totalsnowCm} cm",
+                    WeatherAppIcons.SnowflakeIndicator
+                )
+            } else {
+                Indicator(
+                    5,
+                    rainText,
+                    "${currentWeather.current.precipitationMm} mm",
+                    WeatherAppIcons.RainyIndicator
+                )
+            },
+            Indicator(
+                6,
+                sunText,
+                "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
+                WeatherAppIcons.SunSunriseIndicator
+            ),
+            Indicator(
+                7,
+                visibilityText,
+                visibilityKmText.format(currentDayForecast?.day?.avgvisKm ?: 0),
+                WeatherAppIcons.VisibilityIndicator
+            )
+        ).filter { it.description.isNotBlank() }
+    }
+
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        // Sección de horas
+        if (hours.isNotEmpty()) {
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items(hours, key = { it.time }) { hour ->
+                        HourlyItemIndicator(
+                            item = hour,
+                            urlProvider = urlProvider,
+                            imageQuality = imageQuality,
+                            darkTheme = isDarkTheme,
+                        )
+                    }
+                }
+            }
+        }
+
+        // Sección de indicadores
+        if (indicators.isNotEmpty()) {
+            item {
+                WeatherIndicatorList(
+                    indicators = indicators,
+                    darkTheme = isDarkTheme,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        // Sección de días futuros
+        if (futureDays.isNotEmpty()) {
+            item {
+                DailyWeatherList(
+                    days = futureDays,
+                    darkTheme = isDarkTheme,
+                    urlProvider = urlProvider,
+                    imageQuality = imageQuality,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        // Espacio al final
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
