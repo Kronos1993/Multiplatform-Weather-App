@@ -24,7 +24,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            export(libs.kmpnotifier)
+            //export(libs.kmpnotifier)
             baseName = "ComposeApp"
             linkerOpts.add("-lsqlite3")
             isStatic = true
