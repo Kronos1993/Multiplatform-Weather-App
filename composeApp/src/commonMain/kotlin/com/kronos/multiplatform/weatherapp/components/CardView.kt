@@ -108,8 +108,8 @@ fun HourlyItemIndicator(
 
             val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
                 .data(urlProvider.getImageUrl(item.condition.icon, imageQuality))
-                .memoryCachePolicy(CachePolicy.DISABLED)
-                .diskCachePolicy(CachePolicy.DISABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
                 .build()
 
             AsyncImage(
@@ -274,8 +274,8 @@ fun CurrentWeatherItem(
 
         val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
             .data(urlProvider.getImageUrl(currentWeather.current.condition.icon, imageQuality))
-            .memoryCachePolicy(CachePolicy.DISABLED)
-            .diskCachePolicy(CachePolicy.DISABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
             .build()
 
         AsyncImage(
@@ -345,8 +345,8 @@ fun CurrentWeatherCompactItem(
         ) {
             val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
                 .data(urlProvider.getImageUrl(currentWeather.current.condition.icon, imageQuality))
-                .memoryCachePolicy(CachePolicy.DISABLED)
-                .diskCachePolicy(CachePolicy.DISABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
                 .build()
 
             AsyncImage(
@@ -440,8 +440,8 @@ fun CurrentWeatherLandscapeCompactItem(
     ) {
         val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
             .data(urlProvider.getImageUrl(currentWeather.current.condition.icon, imageQuality))
-            .memoryCachePolicy(CachePolicy.DISABLED)
-            .diskCachePolicy(CachePolicy.DISABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
             .build()
 
         AsyncImage(
@@ -553,8 +553,8 @@ fun CurrentWeatherBigScreenCompactItem(
     ) {
         val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
             .data(urlProvider.getImageUrl(currentWeather.current.condition.icon, imageQuality))
-            .memoryCachePolicy(CachePolicy.DISABLED)
-            .diskCachePolicy(CachePolicy.DISABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
             .build()
 
         AsyncImage(
@@ -721,8 +721,8 @@ fun DailyWeatherItemIndicator(
 
             val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
                 .data(urlProvider.getImageUrl(item.day.condition.icon, imageQuality))
-                .memoryCachePolicy(CachePolicy.DISABLED)
-                .diskCachePolicy(CachePolicy.DISABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
                 .build()
 
             AsyncImage(
