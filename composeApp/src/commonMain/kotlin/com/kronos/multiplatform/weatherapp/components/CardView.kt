@@ -35,6 +35,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.TempIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WaterDropsIndicator
 import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorDashboardAcceptedDark
 import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorDashboardAcceptedLight
@@ -130,7 +131,8 @@ fun HourlyItemIndicator(
                 text = item.tempC.toString(),
                 modifier = Modifier.wrapContentSize(),
                 textColor = Color.White,
-                size = ComponentSize.MEDIUM
+                size = ComponentSize.MEDIUM,
+                fontWeight = FontWeight.Companion.Bold
             )
         }
     }
@@ -169,6 +171,7 @@ fun WeatherIndicatorItem(
             textColor = Color.White,
             textAlign = TextAlign.Center,
             size = ComponentSize.SMALL,
+            fontWeight = FontWeight.Companion.Bold,
             modifier = Modifier.wrapContentWidth()
         )
     }
@@ -349,7 +352,7 @@ fun CurrentWeatherCompactItem(
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
                 .data(urlProvider.getImageUrl(currentWeather.current.condition.icon, imageQuality))
@@ -362,7 +365,7 @@ fun CurrentWeatherCompactItem(
                 contentDescription = "weather",
                 modifier = Modifier
                     .background(Color.Transparent)
-                    .size(48.dp),
+                    .size(96.dp),
                 contentScale = ContentScale.Crop
             )
 
@@ -378,7 +381,7 @@ fun CurrentWeatherCompactItem(
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             val date = Instant.of(currentWeather.location.localtime, true)
 
@@ -516,7 +519,7 @@ fun CurrentWeatherLandscapeCompactItem(
                         currentWeather.current.tempC,
                     ),
                     textColor = Color.White,
-                    size = ComponentSize.MEDIUM,
+                    size = ComponentSize.SMALL,
                     textAlign = TextAlign.End
                 )
 
@@ -528,7 +531,6 @@ fun CurrentWeatherLandscapeCompactItem(
                     size = ComponentSize.SMALL,
                     textAlign = TextAlign.End
                 )
-
             }
         }
     }
@@ -670,72 +672,97 @@ fun DailyWeatherItemIndicator(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val date = Instant.of(item.date, false)
-
-            val dayOfWeek = if (date != null) {
-                if (date.isToday()) {
-                    stringResource(Res.string.today)
-                } else if (date.isTomorrow()) {
-                    stringResource(Res.string.tomorrow)
-                } else {
-                    when (date.toDayOfWeekText()) {
-                        DayOfWeek.MONDAY -> stringResource(Res.string.monday)
-                        DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday)
-                        DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday)
-                        DayOfWeek.THURSDAY -> stringResource(Res.string.thursday)
-                        DayOfWeek.FRIDAY -> stringResource(Res.string.friday)
-                        DayOfWeek.SATURDAY -> stringResource(Res.string.saturday)
-                        DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                val date = Instant.of(item.date, false)
+                val dayOfWeek = if (date != null) {
+                    if (date.isToday()) {
+                        stringResource(Res.string.today)
+                    } else if (date.isTomorrow()) {
+                        stringResource(Res.string.tomorrow)
+                    } else {
+                        when (date.toDayOfWeekText()) {
+                            DayOfWeek.MONDAY -> stringResource(Res.string.monday)
+                            DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday)
+                            DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday)
+                            DayOfWeek.THURSDAY -> stringResource(Res.string.thursday)
+                            DayOfWeek.FRIDAY -> stringResource(Res.string.friday)
+                            DayOfWeek.SATURDAY -> stringResource(Res.string.saturday)
+                            DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
+                        }
                     }
+                } else {
+                    ""
                 }
-            } else {
-                ""
+
+                BodyText(
+                    text = dayOfWeek,
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
+                    textOverflow = TextOverflow.Ellipsis
+                )
             }
 
-            BodyText(
-                dayOfWeek,
+            Box(
                 modifier = Modifier.weight(1f),
-                textColor = Color.White,
-                size = ComponentSize.MEDIUM,
-                textAlign = TextAlign.Start
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                LabelText(
+                    text = "${item.day.avghumidity}%",
+                    vector = WeatherAppIcons.WaterDropsIndicator,
+                    iconPosition = IconPosition.START,
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+            }
 
-            LabelText(
-                "${item.day.avghumidity}%",
-                vector = WeatherAppIcons.WaterDropsIndicator,
-                iconPosition = IconPosition.START,
+            Box(
                 modifier = Modifier.weight(1f),
-                textColor = Color.White,
-                size = ComponentSize.MEDIUM,
-                textAlign = TextAlign.Center
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+                    .data(urlProvider.getImageUrl(item.day.condition.icon, imageQuality))
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build()
 
-            val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
-                .data(urlProvider.getImageUrl(item.day.condition.icon, imageQuality))
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .build()
+                AsyncImage(
+                    model = imageRequest,
+                    contentDescription = "weather",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(Color.Transparent),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
-            AsyncImage(
-                model = imageRequest,
-                contentDescription = "weather",
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(Color.Transparent),
-                contentScale = ContentScale.Crop
-            )
-
-            LabelText(
-                item.day.avgtempC.toString(),
+            Box(
                 modifier = Modifier.weight(1f),
-                textColor = Color.White,
-                size = ComponentSize.MEDIUM,
-                textAlign = TextAlign.End
-            )
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                LabelText(
+                    text = stringResource(Res.string.temp_celsius).format(item.day.mintempC.toString()) +
+                            "\n" +
+                            stringResource(Res.string.temp_celsius).format(item.day.maxtempC.toString()),
+                    modifier = Modifier,
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    vector = WeatherAppIcons.TempIndicator,
+                    iconPosition = IconPosition.START,
+                    textAlign = TextAlign.End,
+                    maxLines = 2
+                )
+            }
         }
     }
 }
@@ -885,16 +912,16 @@ fun UserCustomLocationItem(
                         model = imageRequest,
                         contentDescription = "weather",
                         modifier = Modifier
-                            .size(96.dp)
+                            .size(48.dp)
                             .background(Color.Transparent),
                         contentScale = ContentScale.Crop
                     )
 
-                    DisplayText(
+                    HeaderText(
                         text = stringResource(Res.string.temp_celsius).format(item.tempC.toString()),
                         modifier = Modifier.weight(1f),
                         textColor = Color.White,
-                        size = ComponentSize.SMALL,
+                        size = ComponentSize.MEDIUM,
                         textAlign = TextAlign.End
                     )
                 }
@@ -905,13 +932,14 @@ fun UserCustomLocationItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    HeaderText(
+                    TitleText(
                         text = item.cityName,
                         modifier = Modifier.weight(1f),
                         textColor = Color.White,
-                        size = ComponentSize.SMALL,
+                        size = ComponentSize.MEDIUM,
                         textAlign = TextAlign.Start,
                         maxLines = 1,
+                        fontWeight = FontWeight.Companion.Bold,
                         textOverflow = TextOverflow.Ellipsis
                     )
 

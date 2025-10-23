@@ -36,6 +36,10 @@ class UserCustomLocationViewModel(
     private var _resetSwipe = MutableStateFlow(false)
     var resetSwipe: StateFlow<Boolean> = _resetSwipe.asStateFlow()
 
+    fun postResetSwipe(resetSwipe: Boolean) {
+        _resetSwipe.value = resetSwipe
+    }
+
     fun initLocations(lang: String, apiKey: String, days: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -197,6 +201,10 @@ class UserCustomLocationViewModel(
         _error.value = "Error: ${e.message}"
         _screenState.value = UserCustomLocationScreenState.NoLocations
         log("General error: ${e.message}", isError = true)
+    }
+
+    fun handleRemoveCurrentLocation(message: String){
+        _error.value = message
     }
 }
 

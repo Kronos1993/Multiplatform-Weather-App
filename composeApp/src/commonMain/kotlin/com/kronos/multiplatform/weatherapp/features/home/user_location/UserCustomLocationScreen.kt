@@ -49,8 +49,10 @@ import com.kronos.multiplatform.weatherapp.components.button.FabDialActions
 import com.kronos.multiplatform.weatherapp.components.button.FabDialButton
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.features.home.user_location.content.GridList
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.cant_delete_current_location
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 
@@ -98,7 +100,6 @@ fun UserCustomLocationScreen(
                     message = errorMessage,
                     duration = SnackbarDuration.Short
                 )
-                viewModel.clean()
             }
         }
     }
@@ -111,7 +112,6 @@ fun UserCustomLocationScreen(
                     message = warningMessage,
                     duration = SnackbarDuration.Short
                 )
-                viewModel.clean()
             }
         }
     }
@@ -250,6 +250,8 @@ fun UserCustomLocationScreen(
                                         }
                                 }*/
 
+                                val cantDeleteLocation =
+                                    stringResource(Res.string.cant_delete_current_location)
                                 GridList(
                                     gridColumns = when (deviceScreenConfiguration) {
                                         DeviceScreenConfiguration.MOBILE_PORTRAIT -> {
@@ -271,19 +273,25 @@ fun UserCustomLocationScreen(
                                     urlProvider = viewModel.urlProvider,
                                     imageQuality = imageQuality,
                                     darkTheme = isDarkTheme,
-                                    enableStartToEnd = true,
+                                    enableStartToEnd = false,
                                     startToEndIcon = Icons.Filled.Delete,
-                                    onSwipeStartToEnd = {
-                                        viewModel.removeLocation(
-                                            it,
-                                            currentLang,
-                                            apiKey,
-                                            amountOfDays
-                                        )
-                                    },
-                                    enableEndToStart = false,
+                                    onSwipeStartToEnd = {},
+                                    enableEndToStart = true,
                                     endToStartIcon = Icons.Filled.Delete,
-                                    onSwipeEndToStart = {},
+                                    onSwipeEndToStart = {
+                                        if (it.isCurrent) {
+                                            viewModel.handleRemoveCurrentLocation(cantDeleteLocation)
+                                            viewModel.postResetSwipe(true)
+                                        } else {
+                                            viewModel.removeLocation(
+                                                it,
+                                                currentLang,
+                                                apiKey,
+                                                amountOfDays
+                                            )
+                                            viewModel.postResetSwipe(false)
+                                        }
+                                    },
                                     onItemClick = {},
                                     onItemLongClick = {},
                                     resetSwipe = resetSwipe,
