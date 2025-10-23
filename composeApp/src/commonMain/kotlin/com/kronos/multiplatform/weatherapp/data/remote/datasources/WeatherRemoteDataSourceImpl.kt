@@ -70,6 +70,15 @@ class WeatherRemoteDataSourceImpl(
                         0
                     )
                 )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return Result.Error(
+                    FullNetworkError(
+                        NetworkError.NO_INTERNET,
+                        "No internet connection",
+                        0
+                    )
+                )
             }
 
         return when (response.status.value) {
@@ -241,6 +250,15 @@ class WeatherRemoteDataSourceImpl(
                     )
                 )
             } catch (e: SocketTimeoutException) {
+                e.printStackTrace()
+                return Result.Error(
+                    FullNetworkError(
+                        NetworkError.NO_INTERNET,
+                        "No internet connection",
+                        0
+                    )
+                )
+            } catch (e: Exception) {
                 e.printStackTrace()
                 return Result.Error(
                     FullNetworkError(
@@ -438,7 +456,7 @@ class WeatherRemoteDataSourceImpl(
                         0
                     )
                 )
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
                 return Result.Error(
                     FullNetworkError(
