@@ -1,12 +1,16 @@
 package com.kronos.multiplatform.weatherapp.components.button
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,6 +44,11 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import com.kronos.multiplatform.weatherapp.components.BodyText
 import com.kronos.multiplatform.weatherapp.components.IconPosition
 import com.kronos.multiplatform.weatherapp.components.ComponentSize
+import kotlinx.coroutines.delay
 
 @Composable
 fun Button(
@@ -702,6 +712,7 @@ fun FabButton(
     BuildFab(icon, text, size, modifier, buttonColors, onClick)
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FabDialButton(
     icon: ImageVector,
@@ -717,19 +728,35 @@ fun FabDialButton(
     val buttonColors = getButtonColors(style, type)
 
     Column(horizontalAlignment = Alignment.End) {
-        if (expanded) {
-            dialActions.forEachIndexed { index, action ->
-                AnimatedVisibility(
-                    visible = expanded,
-                    enter = fadeIn() + slideInVertically(
-                        animationSpec = tween(delayMillis = index * 50),
-                        initialOffsetY = { it / 2 }
-                    ),
-                    exit = fadeOut() + slideOutVertically(
-                        animationSpec = tween(delayMillis = index * 50),
-                        targetOffsetY = { it / 2 }
+        dialActions.forEachIndexed { index, action ->
+            AnimatedVisibility(
+                visible = expanded,
+                enter = fadeIn(
+                    animationSpec = tween(
+                        delayMillis = index * 60,
+                        durationMillis = 250
                     )
-                ) {
+                ) + slideInVertically(
+                    animationSpec = tween(
+                        delayMillis = index * 60,
+                        durationMillis = 300
+                    ),
+                    initialOffsetY = { it * 2 }
+                ),
+                exit = fadeOut(
+                    animationSpec = tween(
+                        delayMillis = (dialActions.size - index - 1) * 40,
+                        durationMillis = 200
+                    )
+                ) + slideOutVertically(
+                    animationSpec = tween(
+                        delayMillis = (dialActions.size - index - 1) * 40,
+                        durationMillis = 250
+                    ),
+                    targetOffsetY = { it * 2 }
+                )
+            ) {
+                Column {
                     BuildFab(
                         icon = action.icon,
                         text = action.text,
@@ -738,14 +765,22 @@ fun FabDialButton(
                         buttonColors = buttonColors,
                         onClick = action.onClick
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                Spacer(modifier = Modifier.height(5.dp))
             }
-            Spacer(modifier = Modifier.height(5.dp))
         }
+
         BuildFab(
             icon = {
-                Crossfade(targetState = expanded, label = "fab-icon") { isExpanded ->
+                AnimatedContent(
+                    targetState = expanded,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(150, 150)) with
+                                fadeOut(animationSpec = tween(150)) using
+                                SizeTransform(clip = false)
+                    },
+                    label = "fab-icon"
+                ) { isExpanded ->
                     Icon(
                         imageVector = if (isExpanded) Icons.Filled.Close else icon,
                         contentDescription = "FAB icon",
