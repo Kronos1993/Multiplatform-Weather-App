@@ -9,13 +9,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,6 +41,7 @@ import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorD
 import com.kronos.multiplatform.weatherapp.components.theme.backgroundCardColorDark
 import com.kronos.multiplatform.weatherapp.components.theme.backgroundCardColorLight
 import com.kronos.multiplatform.weatherapp.core.util.format
+import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
 import com.kronos.multiplatform.weatherapp.core.util.getHour
 import com.kronos.multiplatform.weatherapp.core.util.isToday
 import com.kronos.multiplatform.weatherapp.core.util.isTomorrow
@@ -48,12 +51,14 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Indicator
+import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.feels_like_temp_celsius
 import weather_app.composeapp.generated.resources.friday
+import weather_app.composeapp.generated.resources.gps
 import weather_app.composeapp.generated.resources.location_name
 import weather_app.composeapp.generated.resources.monday
 import weather_app.composeapp.generated.resources.saturday
@@ -249,6 +254,7 @@ fun WeatherIndicatorList(
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun CurrentWeatherItem(
     currentWeather: Forecast,
@@ -287,8 +293,12 @@ fun CurrentWeatherItem(
             contentScale = ContentScale.Crop
         )
 
+        val date = Instant.of(currentWeather.location.localtime, true)
+
+        val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
+
         BodyText(
-            currentWeather.location.localtime,
+            stringDate,
             textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
@@ -314,15 +324,13 @@ fun CurrentWeatherItem(
                 currentWeather.location.country,
                 currentWeather.location.name
             ),
-            vector = Icons.Filled.MyLocation,
-            iconTint = Color.White,
-            iconPosition = IconPosition.START,
             textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun CurrentWeatherCompactItem(
     currentWeather: Forecast,
@@ -365,13 +373,6 @@ fun CurrentWeatherCompactItem(
                 size = ComponentSize.MEDIUM,
                 fontWeight = FontWeight.Bold
             )
-
-            BodyText(
-                currentWeather.location.name,
-                textColor = Color.White.copy(alpha = 0.8f),
-                size = ComponentSize.SMALL,
-                textAlign = TextAlign.Start
-            )
         }
 
         Column(
@@ -379,8 +380,12 @@ fun CurrentWeatherCompactItem(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Center
         ) {
+            val date = Instant.of(currentWeather.location.localtime, true)
+
+            val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
+
             BodyText(
-                currentWeather.location.localtime,
+                stringDate,
                 textColor = Color.White,
                 size = ComponentSize.SMALL,
                 textAlign = TextAlign.End
@@ -399,7 +404,7 @@ fun CurrentWeatherCompactItem(
                 stringResource(Res.string.feels_like_temp_celsius).format(
                     currentWeather.current.feelslikeC,
                 ),
-                textColor = Color.White.copy(alpha = 0.8f),
+                textColor = Color.White,
                 size = ComponentSize.SMALL,
                 textAlign = TextAlign.End
             )
@@ -409,10 +414,7 @@ fun CurrentWeatherCompactItem(
                     currentWeather.location.country,
                     currentWeather.location.name
                 ),
-                vector = Icons.Filled.MyLocation,
-                iconTint = Color.White,
-                iconPosition = IconPosition.START,
-                textColor = Color.White.copy(alpha = 0.8f),
+                textColor = Color.White,
                 size = ComponentSize.SMALL,
                 textAlign = TextAlign.End,
                 maxLines = 1,
@@ -422,6 +424,7 @@ fun CurrentWeatherCompactItem(
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun CurrentWeatherLandscapeCompactItem(
     currentWeather: Forecast,
@@ -476,18 +479,15 @@ fun CurrentWeatherLandscapeCompactItem(
                 verticalArrangement = Arrangement.Center
             ) {
 
-                BodyText(
-                    currentWeather.location.name,
-                    textColor = Color.White.copy(alpha = 0.8f),
-                    size = ComponentSize.MEDIUM,
-                    textAlign = TextAlign.Start
-                )
+                val date = Instant.of(currentWeather.location.localtime, true)
+
+                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
 
                 BodyText(
-                    currentWeather.location.localtime,
+                    stringDate,
                     textColor = Color.White,
-                    size = ComponentSize.MEDIUM,
-                    textAlign = TextAlign.End
+                    size = ComponentSize.SMALL,
+                    textAlign = TextAlign.Start
                 )
 
                 BodyText(
@@ -495,9 +495,9 @@ fun CurrentWeatherLandscapeCompactItem(
                         currentWeather.location.country,
                         currentWeather.location.name
                     ),
-                    textColor = Color.White.copy(alpha = 0.8f),
+                    textColor = Color.White,
                     size = ComponentSize.SMALL,
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Start,
                     maxLines = 1,
                     textOverflow = TextOverflow.Ellipsis
                 )
@@ -524,7 +524,7 @@ fun CurrentWeatherLandscapeCompactItem(
                     stringResource(Res.string.feels_like_temp_celsius).format(
                         currentWeather.current.feelslikeC,
                     ),
-                    textColor = Color.White.copy(alpha = 0.8f),
+                    textColor = Color.White,
                     size = ComponentSize.SMALL,
                     textAlign = TextAlign.End
                 )
@@ -534,6 +534,7 @@ fun CurrentWeatherLandscapeCompactItem(
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun CurrentWeatherBigScreenCompactItem(
     currentWeather: Forecast,
@@ -589,18 +590,15 @@ fun CurrentWeatherBigScreenCompactItem(
                 verticalArrangement = Arrangement.Center
             ) {
 
-                TitleText(
-                    currentWeather.location.name,
-                    textColor = Color.White.copy(alpha = 0.8f),
-                    size = ComponentSize.LARGE,
-                    textAlign = TextAlign.Start
-                )
+                val date = Instant.of(currentWeather.location.localtime, true)
+
+                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
 
                 TitleText(
-                    currentWeather.location.localtime,
+                    stringDate,
                     textColor = Color.White,
                     size = ComponentSize.MEDIUM,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.Start
                 )
 
                 TitleText(
@@ -608,12 +606,9 @@ fun CurrentWeatherBigScreenCompactItem(
                         currentWeather.location.country,
                         currentWeather.location.name
                     ),
-                    vector = Icons.Filled.MyLocation,
-                    iconTint = Color.White,
-                    iconPosition = IconPosition.START,
-                    textColor = Color.White.copy(alpha = 0.8f),
+                    textColor = Color.White,
                     size = ComponentSize.MEDIUM,
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Start,
                     maxLines = 1,
                     textOverflow = TextOverflow.Ellipsis
                 )
@@ -640,7 +635,7 @@ fun CurrentWeatherBigScreenCompactItem(
                     stringResource(Res.string.feels_like_temp_celsius).format(
                         currentWeather.current.feelslikeC,
                     ),
-                    textColor = Color.White.copy(alpha = 0.8f),
+                    textColor = Color.White,
                     size = ComponentSize.MEDIUM,
                     textAlign = TextAlign.End
                 )
@@ -796,5 +791,155 @@ fun WeatherLoadingState(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
+    }
+}
+
+@Composable
+fun UserCustomLocationIdleState(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+        }
+    }
+}
+
+@Composable
+fun UserCustomLocationLoadingState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+    }
+}
+
+@Composable
+fun UserCustomLocationItem(
+    item: UserCustomLocation,
+    urlProvider: UrlProvider,
+    imageQuality: String,
+    darkTheme: Boolean,
+    enableStartToEnd: Boolean = true,
+    startToEndIcon: ImageVector,
+    onSwipeStartToEnd: (UserCustomLocation) -> Unit,
+    enableEndToStart: Boolean = true,
+    endToStartIcon: ImageVector,
+    onSwipeEndToStart: (UserCustomLocation) -> Unit,
+    onItemClick: (UserCustomLocation) -> Unit,
+    onItemLongClick: (UserCustomLocation) -> Unit,
+    resetSwipe: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+
+    val cardBackgroundColor = if (darkTheme) {
+        BackgroundCardColorDashboardAcceptedDark
+    } else {
+        BackgroundCardColorDashboardAcceptedLight
+    }
+
+    SwipeActionContainer(
+        item = item,
+        modifier = Modifier.padding(5.dp),
+        enableStartToEnd = enableStartToEnd,
+        startToEndIcon = startToEndIcon,
+        onSwipeStartToEnd = {
+            onSwipeStartToEnd(item)
+        },
+        enableEndToStart = enableEndToStart,
+        endToStartIcon = endToStartIcon,
+        onSwipeEndToStart = {
+            onSwipeEndToStart(item)
+        },
+        resetSwipe = resetSwipe
+    ) {
+        Card(
+            modifier = modifier
+                .padding(4.dp),
+            colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+                        .data(urlProvider.getImageUrl(item.icon, imageQuality))
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .build()
+
+                    AsyncImage(
+                        model = imageRequest,
+                        contentDescription = "weather",
+                        modifier = Modifier
+                            .size(96.dp)
+                            .background(Color.Transparent),
+                        contentScale = ContentScale.Crop
+                    )
+
+                    DisplayText(
+                        text = stringResource(Res.string.temp_celsius).format(item.tempC.toString()),
+                        modifier = Modifier.weight(1f),
+                        textColor = Color.White,
+                        size = ComponentSize.SMALL,
+                        textAlign = TextAlign.End
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    HeaderText(
+                        text = item.cityName,
+                        modifier = Modifier.weight(1f),
+                        textColor = Color.White,
+                        size = ComponentSize.SMALL,
+                        textAlign = TextAlign.Start,
+                        maxLines = 1,
+                        textOverflow = TextOverflow.Ellipsis
+                    )
+
+                    if (item.isCurrent) {
+                        LabelText(
+                            text = stringResource(Res.string.gps),
+                            iconPosition = IconPosition.START,
+                            textColor = Color.White,
+                            size = ComponentSize.LARGE,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    if (item.isSelected) {
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = "selected",
+                            modifier = Modifier.size(24.dp),
+                            tint = Color.White
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.size(24.dp))
+                    }
+                }
+            }
+        }
     }
 }

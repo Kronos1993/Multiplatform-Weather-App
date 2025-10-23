@@ -8,6 +8,7 @@
     <string name="cancel">Cancel</string>
 
     <string name="no_weather_data">No weather data</string>
+    <string name="retry">Retry</string>
 
     <string name="title_activity_main">Weather</string>
     <string name="title_weather">Weather</string>

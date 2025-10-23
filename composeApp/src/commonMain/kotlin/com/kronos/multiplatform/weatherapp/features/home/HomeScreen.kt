@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +35,7 @@ import com.kronos.multiplatform.weatherapp.core.util.BackPressHandlerEffect
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.WeatherScreen
+import com.kronos.multiplatform.weatherapp.features.home.user_location.UserCustomLocationScreen
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
@@ -215,11 +216,18 @@ fun HomeScreen(
 
         TabItem(
             stringResource(Res.string.title_location),
-            Icons.Filled.MyLocation,
-            Icons.Outlined.MyLocation,
+            Icons.Filled.LocationOn,
+            Icons.Outlined.LocationOn,
             1
         ) {
-
+            UserCustomLocationScreen(
+                deviceScreenConfiguration,
+                currentLang,
+                apiKey,
+                imageQuality,
+                amountOfDays,
+                isDarkTheme
+            )
         },
 
         TabItem(

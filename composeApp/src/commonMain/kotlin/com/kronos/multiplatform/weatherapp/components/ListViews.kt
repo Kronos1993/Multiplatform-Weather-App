@@ -22,7 +22,14 @@ import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.NoWeatherIndicator
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.add_location
 import weather_app.composeapp.generated.resources.no_weather_data
+import weather_app.composeapp.generated.resources.retry
+import weather_app.composeapp.generated.resources.title_add_location
+
+enum class Sort {
+    ASC,DESC
+}
 
 @Composable
 fun NoItemsToShow(
@@ -70,7 +77,44 @@ fun NoWeatherItem(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                text = "Retry",
+                text = stringResource(Res.string.retry),
+                type = ButtonType.FILLED,
+                style = ButtonStyle.INFO,
+                onClick = onRetry)
+        }
+    }
+}
+
+@Composable
+fun NoUserCustomLocationItem(
+    modifier: Modifier = Modifier,
+    onRetry: () -> Unit
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = WeatherAppIcons.NoWeatherIndicator,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = Color.Unspecified
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            HeaderText(
+                text = stringResource(Res.string.title_add_location),
+                modifier = Modifier.padding(top = 16.dp),
+                size = ComponentSize.SMALL,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                text = stringResource(Res.string.add_location),
                 type = ButtonType.FILLED,
                 style = ButtonStyle.INFO,
                 onClick = onRetry)

@@ -27,20 +27,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun <T> SwipeActionContainer(
     item: T,
     modifier: Modifier,
     enableStartToEnd: Boolean,
-    startToEndIcon: DrawableResource? = null,
+    startToEndIcon: ImageVector? = null,
     onSwipeStartToEnd: (T) -> Unit,
     enableEndToStart: Boolean,
-    endToStartIcon: DrawableResource? = null,
+    endToStartIcon: ImageVector? = null,
     onSwipeEndToStart: (T) -> Unit,
     animationDuration: Int = 500,
     resetSwipe: Boolean = false,
@@ -109,8 +108,8 @@ fun <T> SwipeActionContainer(
 @Composable
 fun SwipeBackground(
     swipeDismissState: SwipeToDismissBoxState,
-    startToEndIcon: DrawableResource? = null,
-    endToStartIcon: DrawableResource? = null,
+    startToEndIcon: ImageVector? = null,
+    endToStartIcon: ImageVector? = null,
 ) {
     val progress = swipeDismissState.dismissDirection
 
@@ -127,15 +126,11 @@ fun SwipeBackground(
     // Mostrar el ícono dependiendo de la dirección del swipe
     val icon = when (progress) {
         SwipeToDismissBoxValue.StartToEnd -> {
-            if (startToEndIcon != null)
-                painterResource(startToEndIcon)
-            else null // Icono de eliminar si el swipe es hacia la derecha
+            startToEndIcon
         }
 
         SwipeToDismissBoxValue.EndToStart -> {
-            if (endToStartIcon != null)
-                painterResource(endToStartIcon)
-            else null // Icono de eliminar si el swipe es hacia la izquierda
+            endToStartIcon
 
         }
 
@@ -153,7 +148,7 @@ fun SwipeBackground(
     ) {
         if (icon != null) {
             Icon(
-                painter = icon,
+                imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp)
             )

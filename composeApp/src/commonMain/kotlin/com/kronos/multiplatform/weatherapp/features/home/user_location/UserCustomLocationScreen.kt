@@ -1,0 +1,316 @@
+package com.kronos.multiplatform.weatherapp.features.home.user_location
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kronos.multiplatform.weatherapp.components.LoadingDialog
+import com.kronos.multiplatform.weatherapp.components.NoUserCustomLocationItem
+import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
+import com.kronos.multiplatform.weatherapp.components.UserCustomLocationIdleState
+import com.kronos.multiplatform.weatherapp.components.UserCustomLocationLoadingState
+import com.kronos.multiplatform.weatherapp.components.button.FabDialActions
+import com.kronos.multiplatform.weatherapp.components.button.FabDialButton
+import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.features.home.user_location.content.GridList
+import org.koin.compose.viewmodel.koinViewModel
+import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.loading_dialog_text
+import weather_app.composeapp.generated.resources.loading_dialog_title
+
+@Composable
+fun UserCustomLocationScreen(
+    deviceScreenConfiguration: DeviceScreenConfiguration,
+    currentLang: String,
+    apiKey: String,
+    imageQuality: String,
+    amountOfDays: Int,
+    isDarkTheme: Boolean,
+) {
+    val viewModel = koinViewModel<UserCustomLocationViewModel>()
+    val locations by viewModel.locations.collectAsStateWithLifecycle()
+    val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val resetSwipe by viewModel.resetSwipe.collectAsStateWithLifecycle()
+    val listState = rememberLazyGridState()
+
+    var showFab by remember { mutableStateOf(true) }
+    var fabExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(listState) {
+        var lastScrollIndex = 0
+        listState.scrollToItem(0) // Inicializar en la posición 0
+
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { index ->
+                showFab = index == 0 || index < lastScrollIndex
+                lastScrollIndex = index
+            }
+    }
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.initLocations(currentLang, apiKey, amountOfDays)
+    }
+
+    // Manejo de errores
+    LaunchedEffect(error) {
+        error?.let { errorMessage ->
+            if (errorMessage.isNotBlank()) {
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+                viewModel.clean()
+            }
+        }
+    }
+
+    // Manejo de mensajes de advertencia
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.get("warning")?.let { warningMessage ->
+            if (warningMessage.isNotBlank()) {
+                snackbarHostState.showSnackbar(
+                    message = warningMessage,
+                    duration = SnackbarDuration.Short
+                )
+                viewModel.clean()
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
+            snackbarHost = {
+                SnackbarHost(snackbarHostState) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = when {
+                            data.visuals.message.contains("error", ignoreCase = true) ->
+                                MaterialTheme.colorScheme.error
+
+                            else -> MaterialTheme.colorScheme.primary
+                        },
+                        contentColor = when {
+                            data.visuals.message.contains("error", ignoreCase = true) ->
+                                MaterialTheme.colorScheme.onError
+
+                            else -> MaterialTheme.colorScheme.onPrimary
+                        }
+                    )
+                }
+            },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = showFab,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
+                ) {
+                    FabDialButton(
+                        icon = Icons.Filled.MoreVert,
+                        dialActions = listOf(
+                            FabDialActions(
+                                text = "Action 1",
+                                icon = Icons.Filled.CalendarMonth,
+                                onClick = {
+                                    fabExpanded = !fabExpanded
+                                }
+                            ),
+                            FabDialActions(
+                                text = "Action 2",
+                                icon = Icons.AutoMirrored.Filled.Sort,
+                                onClick = {
+                                    fabExpanded = !fabExpanded
+                                }
+                            ),
+                            FabDialActions(
+                                text = "Action 3",
+                                icon = Icons.Filled.Restore,
+                                onClick = {
+                                    fabExpanded = !fabExpanded
+                                }
+                            )
+                        ),
+                        expanded = fabExpanded,
+                        onClick = {
+                            fabExpanded = !fabExpanded
+                        }
+                    )
+                }
+            },
+        ) { paddingValues ->
+            PullToRefreshContainer(
+                innerPadding = paddingValues,
+                isRefreshing = screenState == UserCustomLocationScreenState.Loading,
+                onRefresh = {
+                    viewModel.refreshLocations(currentLang, apiKey, amountOfDays)
+                }
+            ) {
+                val rootModifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 15.dp,
+                            topEnd = 15.dp
+                        )
+                    )
+                    .background(
+                        MaterialTheme.colorScheme.surface
+                    )
+                    .consumeWindowInsets(WindowInsets.navigationBars)
+
+                Column(
+                    modifier = rootModifier
+                ) {
+                    when (screenState) {
+                        UserCustomLocationScreenState.Idle -> {
+                            UserCustomLocationIdleState(
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+
+                        UserCustomLocationScreenState.Loading -> {
+                            UserCustomLocationLoadingState(
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                        UserCustomLocationScreenState.NoLocations -> {
+                            NoUserCustomLocationItem(
+                                modifier = Modifier.fillMaxSize(),
+                                onRetry = {
+                                    viewModel.retryLastOperation(
+                                        currentLang,
+                                        apiKey,
+                                        amountOfDays
+                                    )
+                                }
+                            )
+                        }
+
+                        UserCustomLocationScreenState.LocationsObtained -> {
+                            if (locations.isNotEmpty()) {
+                                /*LaunchedEffect(listState) {
+                                    snapshotFlow { listState.layoutInfo }
+                                        .collect { layoutInfo ->
+                                            val visibleItemCount = layoutInfo.visibleItemsInfo.size
+                                            val totalItemCount = layoutInfo.totalItemsCount
+                                            val firstVisibleItemIndex =
+                                                layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
+
+                                            if (viewModel.loading == false && visibleItemCount + firstVisibleItemIndex >= totalItemCount) {
+                                                if (viewModel.offset.value <= viewModel.total.value) {
+                                                    viewModel.refreshLocations(lang = currentLang, apiKey = apiKey, days = amountOfDays)
+                                                }
+                                            }
+                                        }
+                                }*/
+
+                                GridList(
+                                    gridColumns = when (deviceScreenConfiguration) {
+                                        DeviceScreenConfiguration.MOBILE_PORTRAIT -> {
+                                            1
+                                        }
+
+                                        DeviceScreenConfiguration.MOBILE_LANDSCAPE,
+                                        DeviceScreenConfiguration.TABLET_PORTRAIT -> {
+                                            2
+                                        }
+
+                                        DeviceScreenConfiguration.TABLET_LANDSCAPE,
+                                        DeviceScreenConfiguration.DESKTOP -> {
+                                            3
+                                        }
+                                    },
+                                    listState = listState,
+                                    items = locations,
+                                    urlProvider = viewModel.urlProvider,
+                                    imageQuality = imageQuality,
+                                    darkTheme = isDarkTheme,
+                                    enableStartToEnd = true,
+                                    startToEndIcon = Icons.Filled.Delete,
+                                    onSwipeStartToEnd = {
+                                        viewModel.removeLocation(
+                                            it,
+                                            currentLang,
+                                            apiKey,
+                                            amountOfDays
+                                        )
+                                    },
+                                    enableEndToStart = false,
+                                    endToStartIcon = Icons.Filled.Delete,
+                                    onSwipeEndToStart = {},
+                                    onItemClick = {},
+                                    onItemLongClick = {},
+                                    resetSwipe = resetSwipe,
+                                    modifier = rootModifier
+                                )
+                            } else {
+                                NoUserCustomLocationItem(
+                                    modifier = Modifier.fillMaxSize(),
+                                    onRetry = {
+                                        viewModel.retryLastOperation(
+                                            currentLang,
+                                            apiKey,
+                                            amountOfDays
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            LoadingDialog(
+                title = Res.string.loading_dialog_title,
+                message = Res.string.loading_dialog_text,
+                showDialog = screenState == UserCustomLocationScreenState.Loading
+            )
+        }
+    }
+}

@@ -11,6 +11,88 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
+fun formatDateTime(
+    instant: Instant,
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val localDateTime = instant.toLocalDateTime(timeZone)
+
+    val day = localDateTime.dayOfMonth.toString().padStart(2, '0')
+    val month = localDateTime.monthNumber.toString().padStart(2, '0')
+    val year = localDateTime.year.toString()
+
+    val hour24 = localDateTime.hour
+    val hour12 = if (hour24 % 12 == 0) 12 else hour24 % 12
+    val minute = localDateTime.minute.toString().padStart(2, '0')
+    val second = localDateTime.second.toString().padStart(2, '0')
+
+    val amPm = if (hour24 < 12) "AM" else "PM"
+
+    return "$day/$month/$year $hour12:$minute:$second $amPm"
+}
+
+@OptIn(ExperimentalTime::class)
+fun formatDateTime(
+    instant: Instant,
+    format: String,
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val localDateTime = instant.toLocalDateTime(timeZone)
+
+    return when (format) {
+        "dd/MM/yyyy hh:mm:ss a" -> {
+            val day = localDateTime.dayOfMonth.toString().padStart(2, '0')
+            val month = localDateTime.monthNumber.toString().padStart(2, '0')
+            val year = localDateTime.year.toString()
+
+            val hour24 = localDateTime.hour
+            val hour12 = if (hour24 % 12 == 0) 12 else hour24 % 12
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            val second = localDateTime.second.toString().padStart(2, '0')
+
+            val amPm = if (hour24 < 12) "AM" else "PM"
+
+            "$day/$month/$year $hour12:$minute:$second $amPm"
+        }
+
+        "yyyy-MM-dd HH:mm:ss" -> {
+            val day = localDateTime.dayOfMonth.toString().padStart(2, '0')
+            val month = localDateTime.monthNumber.toString().padStart(2, '0')
+            val year = localDateTime.year.toString()
+
+            val hour = localDateTime.hour.toString().padStart(2, '0')
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            val second = localDateTime.second.toString().padStart(2, '0')
+
+            "$year-$month-$day $hour:$minute:$second"
+        }
+
+        "MMM dd, yyyy" -> {
+            val month = localDateTime.month.name.take(3)
+            val day = localDateTime.dayOfMonth.toString().padStart(2, '0')
+            val year = localDateTime.year.toString()
+
+            "$month $day, $year"
+        }
+
+        "EEE MMM d | h:mm aa" -> {
+            val dayOfWeek = localDateTime.dayOfWeek.name.take(3)
+            val month = localDateTime.month.name
+            val day = localDateTime.dayOfMonth
+            val hour = localDateTime.hour % 12.let { if (it == 0) 12 else it }
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            val amPm = if (localDateTime.hour < 12) "AM" else "PM"
+
+            "$dayOfWeek $month $day | $hour:$minute $amPm"
+        }
+
+        else -> {
+            localDateTime.toString()
+        }
+    }
+}
+
 // Extensión para verificar si es hoy
 @OptIn(ExperimentalTime::class)
 fun Instant.isToday(timeZone: TimeZone = TimeZone.currentSystemDefault()): Boolean {
