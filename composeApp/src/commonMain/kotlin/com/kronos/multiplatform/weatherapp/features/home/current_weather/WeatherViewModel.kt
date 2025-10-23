@@ -162,10 +162,10 @@ class WeatherViewModel(
                     log("Weather from coordinates acquired: ${forecast.location.name}", false)
                 }
                 .onError { error ->
-                    _error.value = "Error getting weather: $error"
+                    _error.value = "Error getting weather: ${error.errorMessage}"
                     _screenState.value = WeatherScreenState.NoWeather
                     _weather.value = null
-                    log("Weather error: $error", isError = true)
+                    log("Weather error: ${error.errorMessage}", isError = true)
                 }
         }
     }
@@ -182,10 +182,10 @@ class WeatherViewModel(
                     log("Weather from city acquired: ${forecast.location.name}", false)
                 }
                 .onError { error ->
-                    _error.value = "Error getting weather: $error"
+                    _error.value = "Error getting weather: ${error.errorMessage}"
                     _screenState.value = WeatherScreenState.NoWeather
                     _weather.value = null
-                    log("Weather error: $error", isError = true)
+                    log("Weather error: ${error.errorMessage}", isError = true)
                 }
         }
     }
@@ -229,7 +229,6 @@ class WeatherViewModel(
 
     fun clean() {
         _error.value = null
-        _screenState.value = WeatherScreenState.Idle
         message = null
     }
 

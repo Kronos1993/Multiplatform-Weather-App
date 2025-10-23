@@ -18,6 +18,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import io.ktor.client.call.body
 import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.util.network.UnresolvedAddressException
@@ -403,6 +404,12 @@ class WeatherRemoteDataSourceImpl(
                         parameter("lang", lang)
                         parameter("key", apiKey)
                         parameter("days", days)
+
+                        timeout {
+                            requestTimeoutMillis = 30_000
+                            connectTimeoutMillis = 10_000
+                            socketTimeoutMillis = 15_000
+                        }
                     }
             } catch (e: UnresolvedAddressException) {
                 e.printStackTrace()
@@ -423,6 +430,15 @@ class WeatherRemoteDataSourceImpl(
                     )
                 )
             } catch (e: SocketTimeoutException) {
+                e.printStackTrace()
+                return Result.Error(
+                    FullNetworkError(
+                        NetworkError.NO_INTERNET,
+                        "No internet connection",
+                        0
+                    )
+                )
+            }catch (e: Exception){
                 e.printStackTrace()
                 return Result.Error(
                     FullNetworkError(

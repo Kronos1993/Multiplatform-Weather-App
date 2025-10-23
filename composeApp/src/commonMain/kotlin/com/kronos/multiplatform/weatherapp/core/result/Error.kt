@@ -1,3 +1,6 @@
 package com.kronos.multiplatform.weatherapp.core.result
 
-interface Error
+interface Error {
+    val errorMessage: String
+    val errorCode: Int
+}

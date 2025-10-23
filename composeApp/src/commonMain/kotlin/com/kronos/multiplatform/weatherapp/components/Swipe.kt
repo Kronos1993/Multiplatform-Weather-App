@@ -42,44 +42,56 @@ fun <T> SwipeActionContainer(
     resetSwipe: Boolean = false,
     content: @Composable (T) -> Unit
 ) {
-    var isRemoved by remember {
-        mutableStateOf(false)
+    var isVisible by remember(resetSwipe) {
+        mutableStateOf(true)
     }
+
+    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart && enableEndToStart) {
-                isRemoved = true
-                true
-            } else if (value == SwipeToDismissBoxValue.StartToEnd && enableStartToEnd) {
-                isRemoved = true
-                true
-            } else {
-                isRemoved = false
-                false
+            if (!isVisible) return@rememberSwipeToDismissBoxState false
+
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    if (enableEndToStart) {
+                        isVisible = false
+                        pendingAction = { onSwipeEndToStart(item) }
+                        true
+                    } else false
+                }
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    if (enableStartToEnd) {
+                        isVisible = false
+                        pendingAction = { onSwipeStartToEnd(item) }
+                        true
+                    } else false
+                }
+                else -> false
             }
         },
         positionalThreshold = { it * .85f }
     )
 
-    if (state.currentValue != SwipeToDismissBoxValue.Settled && resetSwipe) {
-        LaunchedEffect(Unit) {
+    // Ejecutar la acción después de la animación
+    LaunchedEffect(isVisible) {
+        if (!isVisible) {
+            delay(animationDuration.toLong())
+            pendingAction?.invoke()
+            pendingAction = null
+        }
+    }
+
+    // Reset cuando resetSwipe cambia a true
+    LaunchedEffect(resetSwipe) {
+        if (resetSwipe) {
+            isVisible = true
             state.reset()
         }
     }
 
-    LaunchedEffect(key1 = isRemoved) {
-        if (isRemoved && state.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-            delay(animationDuration.toLong())
-            onSwipeEndToStart(item)
-        } else if (isRemoved && state.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
-            delay(animationDuration.toLong())
-            onSwipeStartToEnd(item)
-        }
-    }
-
     AnimatedVisibility(
-        visible = !isRemoved,
+        visible = isVisible,
         exit = shrinkVertically(
             animationSpec = tween(durationMillis = animationDuration),
             shrinkTowards = Alignment.Top

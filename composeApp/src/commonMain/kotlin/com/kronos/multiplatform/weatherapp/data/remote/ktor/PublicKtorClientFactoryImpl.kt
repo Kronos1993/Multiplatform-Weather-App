@@ -1,6 +1,7 @@
 package com.kronos.multiplatform.weatherapp.data.remote.ktor
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -23,6 +24,11 @@ class PublicKtorClientFactoryImpl: KtorClientFactory {
                         allowSpecialFloatingPointValues = true // Allow NaN and Infinity
                     }
                 )
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 30_000 // Tiempo de espera de solicitud en milisegundos(30 seg)
+                connectTimeoutMillis = 10_000 // Tiempo de espera de conexión en milisegundos(10 seg)
+                socketTimeoutMillis = 15_000 // Tiempo de espera de socket en milisegundos(15 seg)
             }
         }
     }
