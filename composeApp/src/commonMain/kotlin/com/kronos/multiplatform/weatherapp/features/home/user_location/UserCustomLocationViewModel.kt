@@ -75,7 +75,7 @@ class UserCustomLocationViewModel(
     ): List<UserCustomLocation> {
         return locations.map { location ->
             try {
-                val weatherResult = if (location.isCurrent && location.lat != null && location.lon != null) {
+                val weatherResult = if (location.lat != null && location.lon != null) {
                     weatherRemoteRepository.getWeatherDataForecast(
                         location.lat!!,
                         location.lon!!,
