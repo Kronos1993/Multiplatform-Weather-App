@@ -16,6 +16,7 @@ import com.kronos.multiplatform.weatherapp.components.theme.AppTheme
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.features.home.HomeScreen
+import com.kronos.multiplatform.weatherapp.features.home.add_city.AddCityScreen
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -100,7 +101,10 @@ fun App() {
         AppTheme (
             darkTheme = isDarkTheme == stringResource(Res.string.theme_preference_default_value)
         ) {
-            NavHost(navController = navController, startDestination = Destinations.HOME.name) {
+            NavHost(
+                navController = navController,
+                startDestination = Destinations.HOME.name
+            ) {
                 composable(route = Destinations.HOME.name) {
                     HomeScreen(
                         navController,
@@ -111,6 +115,14 @@ fun App() {
                         amountDays,
                         defaultCity,
                         deviceScreenConfiguration = deviceScreenConfiguration,
+                    )
+                }
+                composable(route = Destinations.ADD_CITY.name) {
+                    AddCityScreen(
+                        navController,
+                        currentLang,
+                        apiKeyRemember,
+                        isDarkTheme == stringResource(Res.string.theme_preference_default_value),
                     )
                 }
             }

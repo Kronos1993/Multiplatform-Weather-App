@@ -17,6 +17,7 @@ import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
 import kotlin.time.Duration.Companion.seconds
 
@@ -43,6 +44,8 @@ fun FixMapView(
             )
         )
 
+    val styleState = rememberStyleState()
+
     LaunchedEffect(Unit) {
         camera.animateTo(
             finalPosition =
@@ -59,6 +62,7 @@ fun FixMapView(
     ) {
         MaplibreMap(
             baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
+            styleState = styleState,
             modifier = modifier,
             cameraState = camera,
             options = MapOptions(
@@ -84,5 +88,54 @@ fun FixMapView(
         ) {
 
         }
+    }
+}
+
+@Composable
+fun MapView(
+    darkTheme: Boolean,
+    onMapClick: (Position) -> Unit,
+    onMapLongClick: (Position) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    val camera = rememberCameraState()
+
+    val styleState = rememberStyleState()
+
+    LaunchedEffect(Unit) {
+        camera.animateTo(
+            finalPosition =
+                camera.position.copy(),
+            duration = 3.seconds,
+        )
+    }
+
+    MaplibreMap(
+        baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
+        styleState = styleState,
+        modifier = modifier,
+        cameraState = camera,
+        options = MapOptions(
+            gestureOptions = GestureOptions.Standard,
+            ornamentOptions = OrnamentOptions.AllDisabled,
+        ),
+        onMapClick = { pos, offset ->
+            val features = camera.projection?.queryRenderedFeatures(offset)
+            if (!features.isNullOrEmpty()) {
+                println("Clicked on ${features[0].json()} at $pos")
+                onMapClick(pos)
+                ClickResult.Consume
+            } else {
+                ClickResult.Pass
+            }
+        },
+        onMapLongClick = { pos, offset ->
+            println("Long click at $pos")
+            onMapLongClick(pos)
+            ClickResult.Pass
+        },
+    ) {
+
     }
 }

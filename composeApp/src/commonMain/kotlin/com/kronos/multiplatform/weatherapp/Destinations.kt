@@ -1,5 +1,5 @@
 package com.kronos.multiplatform.weatherapp
 
 enum class Destinations {
-    HOME,
+    HOME,ADD_CITY
 }

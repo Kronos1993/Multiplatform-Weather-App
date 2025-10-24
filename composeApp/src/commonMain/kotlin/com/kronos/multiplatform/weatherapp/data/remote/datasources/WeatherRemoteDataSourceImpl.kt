@@ -18,7 +18,6 @@ import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import io.ktor.client.call.body
 import io.ktor.client.network.sockets.SocketTimeoutException
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.util.network.UnresolvedAddressException
@@ -41,7 +40,7 @@ class WeatherRemoteDataSourceImpl(
                     .get(urlProvider.getPrivateApiUrl() + WeatherApi.GET_CURRENT_WEATHER) {
                         parameter("q", q)
                         parameter("lang", lang)
-                        parameter("apiKey", apiKey)
+                        parameter("key", apiKey)
                     }
             } catch (e: UnresolvedAddressException) {
                 e.printStackTrace()
@@ -92,20 +91,8 @@ class WeatherRemoteDataSourceImpl(
                             allowSpecialFloatingPointValues = true
                         }
                         val list =
-                            json.decodeFromString<Response<CurrentForecastResponseDto, ResponseError>>(
-                                result
-                            )
-                        if (list.response != null) {
-                            Result.Success(list.response!!.toCurrentForecast())
-                        } else {
-                            Result.Error(
-                                FullNetworkError(
-                                    NetworkError.SERIALIZATION,
-                                    if (list.error.isNotEmpty()) list.error.first().message else NetworkError.SERIALIZATION.name,
-                                    if (list.error.isNotEmpty()) list.error.first().code else 409
-                                )
-                            )
-                        }
+                            json.decodeFromString<CurrentForecastResponseDto>(result)
+                        Result.Success(list.toCurrentForecast())
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Result.Error(
@@ -228,7 +215,7 @@ class WeatherRemoteDataSourceImpl(
                     .get(urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST) {
                         parameter("q", q)
                         parameter("lang", lang)
-                        parameter("apiKey", apiKey)
+                        parameter("key", apiKey)
                         parameter("days", days)
                     }
             } catch (e: UnresolvedAddressException) {
@@ -280,20 +267,8 @@ class WeatherRemoteDataSourceImpl(
                             allowSpecialFloatingPointValues = true
                         }
                         val list =
-                            json.decodeFromString<Response<ForecastResponseDto, ResponseError>>(
-                                result
-                            )
-                        if (list.response != null) {
-                            Result.Success(list.response!!.toForecast())
-                        } else {
-                            Result.Error(
-                                FullNetworkError(
-                                    NetworkError.SERIALIZATION,
-                                    if (list.error.isNotEmpty()) list.error.first().message else NetworkError.SERIALIZATION.name,
-                                    if (list.error.isNotEmpty()) list.error.first().code else 409
-                                )
-                            )
-                        }
+                            json.decodeFromString<ForecastResponseDto>(result)
+                        Result.Success(list.toForecast())
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Result.Error(
@@ -422,12 +397,6 @@ class WeatherRemoteDataSourceImpl(
                         parameter("lang", lang)
                         parameter("key", apiKey)
                         parameter("days", days)
-
-                        timeout {
-                            requestTimeoutMillis = 30_000
-                            connectTimeoutMillis = 10_000
-                            socketTimeoutMillis = 15_000
-                        }
                     }
             } catch (e: UnresolvedAddressException) {
                 e.printStackTrace()

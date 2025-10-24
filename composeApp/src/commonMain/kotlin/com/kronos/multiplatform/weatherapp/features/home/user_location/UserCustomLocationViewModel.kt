@@ -6,7 +6,6 @@ import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
-import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +18,6 @@ import kotlinx.coroutines.launch
 class UserCustomLocationViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
-    private val locationRepository: LocationRepository,
     val urlProvider: UrlProvider,
 ) : ParentViewModel() {
 
@@ -111,49 +109,36 @@ class UserCustomLocationViewModel(
         }
     }
 
-    fun addLocation(cityName: String,lat:Double,lon:Double, lang: String, apiKey: String, days: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _screenState.value = UserCustomLocationScreenState.Loading
-            try {
-                val currentLocations = userCustomLocationLocalRepository.listAll()
-                currentLocations.forEach { loc ->
-                    loc.isSelected = false
-                    userCustomLocationLocalRepository.saveLocation(loc)
-                }
-
-                val location = UserCustomLocation(cityName = cityName, lat = lat, lon = lon, isSelected = true)
-                userCustomLocationLocalRepository.saveLocation(location)
-                log("Custom location: $cityName added.", false)
-
-                refreshLocations(lang, apiKey, days)
-            } catch (e: Exception) {
-                _error.value = "Error adding location: ${e.message}"
-                _screenState.value = UserCustomLocationScreenState.LocationsObtained
-                log("Location error: ${e.message}", isError = true)
-            }
-        }
-    }
-
     fun setLocationSelected(
         userLocation: UserCustomLocation,
-        lang: String,
-        apiKey: String,
-        days: Int
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = UserCustomLocationScreenState.Loading
             try {
                 val allLocations = userCustomLocationLocalRepository.listAll()
                 allLocations.forEach { location ->
+                    val wasSelected = location.isSelected
                     location.isSelected = false
-                    userCustomLocationLocalRepository.saveLocation(location)
+                    if (wasSelected) {
+                        userCustomLocationLocalRepository.saveLocation(location)
+                    }
                 }
 
                 userLocation.isSelected = true
                 userCustomLocationLocalRepository.saveLocation(userLocation)
-                log("Custom location: ${userLocation.cityName} selected.", false)
 
-                refreshLocations(lang, apiKey, days)
+                val updatedLocations = _locations.value.map { location ->
+                    when {
+                        location.id == userLocation.id -> location.copy(isSelected = true)
+                        location.isSelected -> location.copy(isSelected = false)
+                        else -> location
+                    }
+                }
+
+                _locations.value = updatedLocations
+                _screenState.value = UserCustomLocationScreenState.LocationsObtained
+
+                log("Custom location: ${userLocation.cityName} selected.", false)
             } catch (e: Exception) {
                 _error.value = "Error selecting location: ${e.message}"
                 log("Location selection error: ${e.message}", isError = true)
@@ -167,10 +152,45 @@ class UserCustomLocationViewModel(
             try {
                 userCustomLocationLocalRepository.delete(location)
                 log("Custom location: ${location.cityName} removed.", false)
-                refreshLocations(lang, apiKey, days)
+
+                val updatedLocations = _locations.value.filter { it.id != location.id }
+                _locations.value = updatedLocations
+
+                _screenState.value = if (updatedLocations.isNotEmpty()) {
+                    UserCustomLocationScreenState.LocationsObtained
+                } else {
+                    UserCustomLocationScreenState.NoLocations
+                }
+
             } catch (e: Exception) {
                 _error.value = "Error removing location: ${e.message}"
                 log("Location removal error: ${e.message}", isError = true)
+            }
+        }
+    }
+
+    fun refreshLocations(lang: String, apiKey: String, days: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _screenState.value = UserCustomLocationScreenState.Loading
+
+                val locationsFromDb = userCustomLocationLocalRepository.listAll()
+                val updatedLocations = updateWeatherDataForLocations(
+                    locationsFromDb,
+                    lang,
+                    apiKey,
+                    days
+                )
+
+                _locations.value = updatedLocations
+                _screenState.value = if (updatedLocations.isNotEmpty()) {
+                    UserCustomLocationScreenState.LocationsObtained
+                } else {
+                    UserCustomLocationScreenState.NoLocations
+                }
+
+            } catch (e: Exception) {
+                handleError(e)
             }
         }
     }
@@ -181,10 +201,6 @@ class UserCustomLocationViewModel(
         } else {
             println("INFO: $item")
         }
-    }
-
-    fun refreshLocations(lang: String, apiKey: String, days: Int) {
-        initLocations(lang, apiKey, days)
     }
 
     fun clean() {
@@ -202,7 +218,7 @@ class UserCustomLocationViewModel(
         log("General error: ${e.message}", isError = true)
     }
 
-    fun handleRemoveCurrentLocation(message: String){
+    fun handleRemoveCurrentLocation(message: String) {
         _error.value = message
     }
 }

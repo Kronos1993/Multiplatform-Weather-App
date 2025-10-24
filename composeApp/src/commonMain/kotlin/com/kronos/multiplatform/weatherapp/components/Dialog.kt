@@ -141,3 +141,56 @@ fun SelectDateDialog(
     }
 }
 
+@Composable
+fun ShowCityInfoDialog(
+    cityName: String,
+    temp: String,
+    showDialog: Boolean,
+    confirmText: String,
+    onConfirm: () -> Unit,
+    cancelText: String,
+    onCancel: () -> Unit,
+    onClose: (() -> Unit)? = null
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                if (onClose != null)
+                    onClose()
+                else
+                    onCancel()
+            },
+            title = {},
+            text = {
+                Column {
+                    HeaderText(
+                        temp,
+                        size = ComponentSize.SMALL
+                    )
+
+                    TitleText(
+                        cityName,
+                        size = ComponentSize.MEDIUM
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onConfirm() }) {
+                    Text(
+                        text = confirmText,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onCancel() }) {
+                    Text(
+                        text = cancelText,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            shape = MaterialTheme.shapes.medium
+        )
+    }
+}

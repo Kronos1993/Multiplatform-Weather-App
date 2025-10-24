@@ -221,6 +221,7 @@ fun HomeScreen(
             1
         ) {
             UserCustomLocationScreen(
+                navHost,
                 deviceScreenConfiguration,
                 currentLang,
                 apiKey,

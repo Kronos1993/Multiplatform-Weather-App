@@ -16,11 +16,9 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -40,6 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import com.kronos.multiplatform.weatherapp.Destinations
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.components.NoUserCustomLocationItem
 import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
@@ -52,12 +52,14 @@ import com.kronos.multiplatform.weatherapp.features.home.user_location.content.G
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.add_location
 import weather_app.composeapp.generated.resources.cant_delete_current_location
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 
 @Composable
 fun UserCustomLocationScreen(
+    navHost: NavHostController,
     deviceScreenConfiguration: DeviceScreenConfiguration,
     currentLang: String,
     apiKey: String,
@@ -153,26 +155,13 @@ fun UserCustomLocationScreen(
                         icon = Icons.Filled.MoreVert,
                         dialActions = listOf(
                             FabDialActions(
-                                text = "Action 1",
-                                icon = Icons.Filled.CalendarMonth,
+                                text = stringResource(Res.string.add_location),
+                                icon = Icons.Filled.AddLocationAlt,
                                 onClick = {
+                                    navHost.navigate(Destinations.ADD_CITY.name)
                                     fabExpanded = !fabExpanded
                                 }
                             ),
-                            FabDialActions(
-                                text = "Action 2",
-                                icon = Icons.AutoMirrored.Filled.Sort,
-                                onClick = {
-                                    fabExpanded = !fabExpanded
-                                }
-                            ),
-                            FabDialActions(
-                                text = "Action 3",
-                                icon = Icons.Filled.Restore,
-                                onClick = {
-                                    fabExpanded = !fabExpanded
-                                }
-                            )
                         ),
                         expanded = fabExpanded,
                         onClick = {
@@ -279,7 +268,7 @@ fun UserCustomLocationScreen(
                                     enableEndToStart = true,
                                     endToStartIcon = Icons.Filled.Delete,
                                     onSwipeEndToStart = {
-                                        if (it.isCurrent) {
+                                        if (it.isCurrent || it.isSelected) {
                                             viewModel.handleRemoveCurrentLocation(cantDeleteLocation)
                                             viewModel.postResetSwipe(true)
                                         } else {
@@ -292,7 +281,9 @@ fun UserCustomLocationScreen(
                                             viewModel.postResetSwipe(false)
                                         }
                                     },
-                                    onItemClick = {},
+                                    onItemClick = {
+                                        viewModel.setLocationSelected(it)
+                                    },
                                     onItemLongClick = {},
                                     resetSwipe = resetSwipe,
                                     modifier = rootModifier

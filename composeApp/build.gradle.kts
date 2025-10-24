@@ -108,8 +108,8 @@ kotlin {
 
             api(libs.kmpnotifier)
 
-            // Remover maplibre.compose de commonMain si es específico de Android
             implementation(libs.maplibre.compose)
+            implementation(libs.maplibre.composeMaterial3)
         }
 
         iosMain.dependencies {

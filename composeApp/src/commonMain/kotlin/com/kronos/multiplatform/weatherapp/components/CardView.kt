@@ -891,7 +891,10 @@ fun UserCustomLocationItem(
             modifier = modifier
                 .padding(4.dp),
             colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-            elevation = CardDefaults.cardElevation(4.dp)
+            elevation = CardDefaults.cardElevation(4.dp),
+            onClick = {
+                onItemClick(item)
+            },
         ) {
             Column(
                 modifier = Modifier.padding(8.dp)
@@ -952,8 +955,6 @@ fun UserCustomLocationItem(
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
                     }
 
                     if (item.isSelected) {
@@ -963,8 +964,6 @@ fun UserCustomLocationItem(
                             modifier = Modifier.size(24.dp),
                             tint = Color.White
                         )
-                    } else {
-                        Spacer(modifier = Modifier.size(24.dp))
                     }
                 }
             }
