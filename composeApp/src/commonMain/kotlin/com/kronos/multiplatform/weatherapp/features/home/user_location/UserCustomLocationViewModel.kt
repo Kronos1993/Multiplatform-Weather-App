@@ -111,7 +111,7 @@ class UserCustomLocationViewModel(
         }
     }
 
-    fun addLocation(cityName: String, lang: String, apiKey: String, days: Int) {
+    fun addLocation(cityName: String,lat:Double,lon:Double, lang: String, apiKey: String, days: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = UserCustomLocationScreenState.Loading
             try {
@@ -121,7 +121,7 @@ class UserCustomLocationViewModel(
                     userCustomLocationLocalRepository.saveLocation(loc)
                 }
 
-                val location = UserCustomLocation(cityName = cityName, isSelected = true)
+                val location = UserCustomLocation(cityName = cityName, lat = lat, lon = lon, isSelected = true)
                 userCustomLocationLocalRepository.saveLocation(location)
                 log("Custom location: $cityName added.", false)
 
@@ -189,7 +189,6 @@ class UserCustomLocationViewModel(
 
     fun clean() {
         _error.value = null
-        _screenState.value = UserCustomLocationScreenState.Idle
     }
 
     fun retryLastOperation(lang: String, apiKey: String, days: Int) {

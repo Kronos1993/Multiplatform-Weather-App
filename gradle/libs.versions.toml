@@ -43,6 +43,8 @@ androidx-sqliteBundled = "2.5.2"
 
 #android location sevice
 android-location = "21.3.0"
+map-libre = "0.11.1"
+swift-package-manager = "1.0.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -109,7 +111,7 @@ androidx-sqliteBundled = { group = "androidx.sqlite", name = "sqlite-bundled", v
 
 #android location
 androidx-location-service = {group = "com.google.android.gms", name = "play-services-location", version.ref = "android-location"}
-
+maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "map-libre" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -121,6 +123,7 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidxRoom = { id = "androidx.room", version.ref = "androidx-room" }
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+swiftPackageManager = { id = "io.github.frankois944.spmForKmp", version.ref = "swift-package-manager" }
 
 [bundles]
 ktor = [

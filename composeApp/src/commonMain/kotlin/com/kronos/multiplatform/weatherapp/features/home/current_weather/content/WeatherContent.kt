@@ -43,6 +43,7 @@ import com.kronos.multiplatform.weatherapp.components.CurrentWeatherCompactItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherLandscapeCompactItem
 import com.kronos.multiplatform.weatherapp.components.DailyWeatherList
+import com.kronos.multiplatform.weatherapp.components.FixMapView
 import com.kronos.multiplatform.weatherapp.components.HourlyItemIndicator
 import com.kronos.multiplatform.weatherapp.components.WeatherIndicatorList
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
@@ -339,6 +340,19 @@ fun WeatherContentSection(
             }
         }
 
+        item {
+            FixMapView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .height(300.dp),
+                lat = currentWeather.location.lat,
+                lon = currentWeather.location.lon,
+                onMapClick = {},
+                onMapLongClick = {},
+                darkTheme = isDarkTheme
+            )
+        }
+
         // Espacio al final
         item {
             Spacer(modifier = Modifier.height(32.dp))
@@ -555,6 +569,19 @@ fun WeatherContentSectionLandscape(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+        }
+
+        item {
+            FixMapView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .height(300.dp),
+                lat = currentWeather.location.lat,
+                lon = currentWeather.location.lon,
+                onMapClick = {},
+                onMapLongClick = {},
+                darkTheme = isDarkTheme
+            )
         }
 
         // Espacio al final

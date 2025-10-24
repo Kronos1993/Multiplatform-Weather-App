@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.net.URI
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -9,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidxRoom)
+    alias(libs.plugins.swiftPackageManager)
 }
 
 kotlin {
@@ -17,26 +19,29 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosX64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
+        iosTarget.compilations {
+            val main by getting {
+                cinterops.create("maplibre")
+            }
+        }
+
         iosTarget.binaries.framework {
-            //export(libs.kmpnotifier)
             baseName = "ComposeApp"
             linkerOpts.add("-lsqlite3")
             isStatic = true
         }
     }
-    
-    /*jvm()*/
 
     sourceSets.commonMain {
         kotlin.srcDir("build/generated/ksp/metadata")
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -50,6 +55,9 @@ kotlin {
             implementation(libs.androidx.room.runtime)
 
             implementation(libs.androidx.location.service)
+
+            // MapLibre para Android
+            //implementation(libs.maplibre.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -72,7 +80,6 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.mp)
             implementation(libs.coil.network.ktor)
-
 
             api(libs.moko.permissions)
             api(libs.moko.permissions.compose)
@@ -101,17 +108,26 @@ kotlin {
 
             api(libs.kmpnotifier)
 
+            // Remover maplibre.compose de commonMain si es específico de Android
+            implementation(libs.maplibre.compose)
         }
 
-        nativeMain.dependencies {
+        iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+    }
 
-        /*jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
-            implementation(libs.ktor.client.okhttp)
-        }*/
+    swiftPackageConfig {
+        create("maplibre") {
+            dependency {
+                // Usar el repositorio principal que tiene mejor estructura
+                remotePackageVersion(
+                    url = URI("https://github.com/maplibre/maplibre-gl-native-distribution.git"),
+                    products = { add("MapLibre") },
+                    version = "6.17.1"
+                )
+            }
+        }
     }
 }
 
@@ -145,18 +161,6 @@ android {
 dependencies {
     debugImplementation(compose.uiTooling)
 }
-
-/*compose.desktop {
-    application {
-        mainClass = "com.kronos.multiplatform.weatherapp.MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.kronos.multiplatform.weatherapp"
-            packageVersion = "1.0.0"
-        }
-    }
-}*/
 
 room {
     schemaDirectory("$projectDir/schemas")
