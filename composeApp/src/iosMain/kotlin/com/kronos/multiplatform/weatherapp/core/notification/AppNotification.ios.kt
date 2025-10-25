@@ -1,5 +1,6 @@
 package com.kronos.multiplatform.weatherapp.core.notification
 
+import androidx.compose.ui.graphics.ImageBitmap
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNNotificationSound
@@ -10,9 +11,11 @@ actual class AppNotification : INotifications {
 
     override fun createNotification(
         title: String,
+        shortDescription: String,
         description: String,
+        notificationImageUrl: String,
         group: NotificationGroup,
-        notificationsId: NotificationType
+        notificationsId: NotificationType,
     ) {
         val content = UNMutableNotificationContent().apply {
             setTitle(title)

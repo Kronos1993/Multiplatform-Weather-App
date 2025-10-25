@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">Weather-App</string>
+    <string name="app_name" translatable="false">Weather-App</string>
+
+    <string name="notification_title">%s° | %s</string>
+    <string name="notification_short_details">%s. Feels like %s°C</string>
+    <string name="notification_long_details">%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%%</string>
 </resources>

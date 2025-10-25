@@ -40,6 +40,7 @@ import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.denied_location_permission_message
 import weather_app.composeapp.generated.resources.denied_notification_permission_message
@@ -47,6 +48,9 @@ import weather_app.composeapp.generated.resources.exit_dialog_body
 import weather_app.composeapp.generated.resources.exit_dialog_no
 import weather_app.composeapp.generated.resources.exit_dialog_title
 import weather_app.composeapp.generated.resources.exit_dialog_yes
+import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_title
 import weather_app.composeapp.generated.resources.title_about
 import weather_app.composeapp.generated.resources.title_location
 import weather_app.composeapp.generated.resources.title_settings
@@ -64,6 +68,8 @@ fun HomeScreen(
     defaultCity: String,
     deviceScreenConfiguration: DeviceScreenConfiguration,
 ) {
+    val viewModel = koinViewModel<HomeViewModel>()
+
     val factory = rememberPermissionsControllerFactory()
     val controller = remember(factory) {
         factory.createPermissionsController()
@@ -195,6 +201,12 @@ fun HomeScreen(
         showExitDialog = true
     }
 
+    viewModel.initNotificationsString(
+        stringResource(Res.string.notification_title),
+        stringResource(Res.string.notification_short_details),
+        stringResource(Res.string.notification_long_details),
+    )
+
 
     val tabs = listOf(
         TabItem(
@@ -210,7 +222,10 @@ fun HomeScreen(
                 imageQuality,
                 amountOfDays,
                 defaultCity,
-                isDarkTheme
+                isDarkTheme,
+                {
+                    viewModel.setForecast(it)
+                }
             )
         },
 
@@ -277,6 +292,8 @@ fun HomeScreen(
             body = stringResource(Res.string.exit_dialog_body),
             confirmText = stringResource(Res.string.exit_dialog_yes),
             onConfirm = {
+
+                viewModel.closeApp()
                 showExitDialog = false
             },
             cancelText = stringResource(Res.string.exit_dialog_no),

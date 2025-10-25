@@ -34,6 +34,7 @@ import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentLandscape
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentPortrait
 import org.koin.compose.viewmodel.koinViewModel
@@ -50,10 +51,10 @@ fun WeatherScreen(
     amountOfDays: Int,
     defaultCity: String,
     isDarkTheme: Boolean,
+    onForecastAdquired: (Forecast) -> Unit,
 ) {
     val viewModel = koinViewModel<WeatherViewModel>()
     val weather by viewModel.weather.collectAsStateWithLifecycle()
-    val selectedUserLocation by viewModel.selectedUserLocation.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
 
@@ -169,6 +170,7 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
+                                            onForecastAdquired(weather!!)
                                             WeatherContentPortrait(
                                                 weather = weather!!,
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
@@ -210,6 +212,7 @@ fun WeatherScreen(
 
                                 WeatherScreenState.WeatherObtained -> {
                                     if (weather != null) {
+                                        onForecastAdquired(weather!!)
                                         WeatherContentLandscape(
                                             weather = weather!!,
                                             isDarkTheme = isDarkTheme,
@@ -255,6 +258,7 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
+                                            onForecastAdquired(weather!!)
                                             WeatherContentPortrait(
                                                 weather = weather!!,
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
@@ -302,6 +306,7 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
+                                            onForecastAdquired(weather!!)
                                             WeatherContentLandscape(
                                                 weather = weather!!,
                                                 isDarkTheme = isDarkTheme,

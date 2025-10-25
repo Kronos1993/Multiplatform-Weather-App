@@ -4,7 +4,9 @@ interface INotifications {
 
     fun createNotification(
         title: String,
+        shortDescription: String,
         description: String,
+        notificationImageUrl: String,
         group: NotificationGroup,
         notificationsId: NotificationType,
     )

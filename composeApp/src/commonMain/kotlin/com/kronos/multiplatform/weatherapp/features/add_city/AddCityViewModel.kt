@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.features.home.add_city
+package com.kronos.multiplatform.weatherapp.features.add_city
 
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.core.result.onError

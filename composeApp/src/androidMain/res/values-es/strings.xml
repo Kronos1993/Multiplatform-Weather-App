@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_title">%s° | %s</string>
+    <string name="notification_short_details">%s. Sensación térmica %s°C</string>
+    <string name="notification_long_details">%s\nSensación térmica %s°C\nTemp min %s°C - max %s°C\nPosibilidad de lluvia %s%%</string>
+</resources>

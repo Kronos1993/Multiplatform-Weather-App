@@ -15,18 +15,16 @@ import com.kronos.multiplatform.weatherapp.job.WeatherNotificationJob
 import com.kronos.multiplatform.weatherapp.job.notificationJobId
 import com.mmk.kmpnotifier.notification.NotifierManager
 import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
-import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import java.util.Date
-import kotlin.jvm.java
 
 
-const val NOTIFICATION_CHANNEL = "WEATHER_NOTIFICATION_CHANNEL"
+const val NOTIFICATION_CHANNEL = "KMP_WEATHER_NOTIFICATION_CHANNEL"
 const val TAG = "WeatherApp"
 
 
-class WeatherApplication: Application(){
+class WeatherApplication: Application() {
 
     private val exceptionHandler: ExceptionHandler by inject()
 
@@ -36,9 +34,9 @@ class WeatherApplication: Application(){
             androidContext(this@WeatherApplication)
         }
         createNotificationChanel()
-        runBlocking {
-            scheduleJob(applicationContext, 15 * 60000L)
-        }
+
+        scheduleJobIfNeeded(applicationContext, 60 * 60000L)
+
         NotifierManager.initialize(
             configuration = NotificationPlatformConfiguration.Android(
                 notificationIconResId = R.drawable.ic_weather_app_icon,
@@ -54,7 +52,7 @@ class WeatherApplication: Application(){
         try {
             exceptionHandler.init()
             Log.d(TAG, "App open on ${Date().toLocaleString()}")
-        }catch (e: Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
@@ -62,7 +60,7 @@ class WeatherApplication: Application(){
     private fun createNotificationChanel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                NOTIFICATION_CHANNEL, NOTIFICATION_CHANNEL, NotificationManager.IMPORTANCE_HIGH
+                NOTIFICATION_CHANNEL, NOTIFICATION_CHANNEL, NotificationManager.IMPORTANCE_LOW
             )
             notificationChannel.description = NOTIFICATION_CHANNEL
             val notificationManager = getSystemService(
@@ -72,8 +70,15 @@ class WeatherApplication: Application(){
         }
     }
 
-    private fun scheduleJob(context: Context, periodic: Long) {
-        // Asegúrate de que el intervalo sea al menos de 15 minutos
+    private fun scheduleJobIfNeeded(context: Context, periodic: Long) {
+        val scheduler = context.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
+
+        val pendingJob = scheduler.getPendingJob(notificationJobId)
+        if (pendingJob != null) {
+            Log.d(TAG, "Job already scheduled with ID $notificationJobId")
+            return
+        }
+
         val validInterval = if (periodic < 15 * 60000L) {
             15 * 60000L // Establecer al menos 15 minutos
         } else {
@@ -85,19 +90,16 @@ class WeatherApplication: Application(){
         val jobInfo = JobInfo.Builder(notificationJobId, componentName)
             .setPersisted(true)
             .setPeriodic(validInterval) // Establecer intervalo válido
-            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY) // O cualquier condición necesaria (ej. red, carga de batería)
-            .setBackoffCriteria(60000L, JobInfo.BACKOFF_POLICY_EXPONENTIAL) // Establecer políticas de retroceso
+            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
             .build()
 
-        val scheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
         val resultCode = scheduler.schedule(jobInfo)
 
         if (resultCode == JobScheduler.RESULT_SUCCESS) {
-            Log.d(TAG, "Job service scheduled successfully with job ID $notificationJobId")
+            Log.d(TAG, "Job service scheduled successfully with job ID $notificationJobId, interval: ${validInterval / 60000} minutes")
         } else {
             Log.d(TAG, "Job service schedule failed with job ID $notificationJobId")
         }
     }
-
 
 }

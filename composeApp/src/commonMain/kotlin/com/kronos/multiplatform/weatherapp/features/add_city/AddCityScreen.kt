@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.features.home.add_city
+package com.kronos.multiplatform.weatherapp.features.add_city
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
