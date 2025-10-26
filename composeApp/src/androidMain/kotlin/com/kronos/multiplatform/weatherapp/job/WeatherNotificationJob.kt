@@ -186,9 +186,3 @@ class WeatherNotificationJob : JobService() {
         jobScope.cancel()
     }
 }
-
-
-
-
-
-

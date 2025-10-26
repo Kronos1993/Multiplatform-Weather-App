@@ -1,0 +1,16 @@
+package com.kronos.multiplatform.weatherapp.widget
+
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+
+class WeatherWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = WeatherGlanceWidget()
+}
+
+class MediumWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = MediumWeatherGlanceWidget()
+}
+
+class LargeWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = LargeWeatherGlanceWidget()
+}
