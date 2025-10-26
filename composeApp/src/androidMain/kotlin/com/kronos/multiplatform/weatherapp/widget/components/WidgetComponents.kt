@@ -130,7 +130,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 }
 
 @Composable
-fun WeatherWidgetContent(weatherData: WeatherWidgetData?) {
+fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
     Column(
         modifier = GlanceModifier.fillMaxSize().padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -313,13 +313,17 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                 ForecastDayItem(
                     dayName = weatherData.day1Name,
                     iconUrl = weatherData.day1IconUrl,
-                    modifier = GlanceModifier
+                    modifier = GlanceModifier,
+                    horizontal = Alignment.Start
                 )
+
+                Spacer(modifier = GlanceModifier.width(20.dp))
 
                 ForecastDayItem(
                     dayName = weatherData.day2Name,
                     iconUrl = weatherData.day2IconUrl,
-                    modifier = GlanceModifier
+                    modifier = GlanceModifier,
+                    horizontal = Alignment.End
                 )
             }
         }
@@ -330,11 +334,12 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 private fun ForecastDayItem(
     dayName: String,
     iconUrl: String,
-    modifier: GlanceModifier
+    modifier: GlanceModifier,
+    horizontal: Alignment.Horizontal = Alignment.CenterHorizontally
 ) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = horizontal
     ) {
         Text(
             text = dayName,

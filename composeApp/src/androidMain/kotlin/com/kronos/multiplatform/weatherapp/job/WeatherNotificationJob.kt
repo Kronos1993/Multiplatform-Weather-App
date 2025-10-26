@@ -12,6 +12,7 @@ import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import com.kronos.multiplatform.weatherapp.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -150,7 +151,10 @@ class WeatherNotificationJob : JobService() {
             NotificationGroup.GENERAL,
             NotificationType.FROM_APP
         )
-        //updateWidget(applicationContext, WeatherWidgetProvider::class.java)
+        val widgetUpdater = WidgetUpdater(applicationContext)
+        jobScope.launch {
+            widgetUpdater.updateAllWeatherWidgets()
+        }
     }
 
     private data class WeatherParams(
