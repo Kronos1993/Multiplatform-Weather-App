@@ -13,7 +13,6 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -33,7 +32,7 @@ import java.net.URL
 @Composable
 fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
     Column(
-        modifier = GlanceModifier.fillMaxSize().padding(16.dp),
+        modifier = GlanceModifier.fillMaxSize().padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (weatherData == null) {
@@ -48,7 +47,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_locations_widget),
                     contentDescription = "Location",
-                    modifier = GlanceModifier.size(14.dp)
+                    modifier = GlanceModifier.size(10.dp)
                 )
 
                 Spacer(modifier = GlanceModifier.width(8.dp))
@@ -66,7 +65,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                 Text(
                     text = weatherData.time,
                     style = TextStyle(
-                        fontSize = 14.sp, // Aumentado de 12sp a 14sp
+                        fontSize = 12.sp, // Aumentado de 12sp a 14sp
                         color = ColorProvider(Color.White)
                     )
                 )
@@ -76,7 +75,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 
             // Main Content
             Row(
-                modifier = GlanceModifier.fillMaxWidth().fillMaxHeight(),
+                modifier = GlanceModifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -107,7 +106,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     )
                 )
 
-                Spacer(modifier = GlanceModifier.width(8.dp))
+                Spacer(modifier = GlanceModifier.width(4.dp))
 
                 // Forecast Days
                 ForecastDayItem(
@@ -160,40 +159,26 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     text = weatherData.currentTemp,
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp, // Aumentado de 16sp a 18sp
+                        fontSize = 24.sp, // Aumentado de 16sp a 18sp
                         color = ColorProvider(Color.White)
                     )
                 )
             }
 
-            Spacer(modifier = GlanceModifier.height(4.dp))
+            Text(
+                text = weatherData.currentCondition,
+                style = TextStyle(
+                    fontSize = 16.sp, // Aumentado de 9sp a 11sp
+                    color = ColorProvider(Color.White),
+                ),
+                maxLines = 1
+            )
 
             Text(
                 text = weatherData.location,
                 style = TextStyle(
                     fontSize = 12.sp, // Aumentado de 10sp a 12sp
                     color = ColorProvider(Color.White)
-                ),
-                maxLines = 1
-            )
-
-            Spacer(modifier = GlanceModifier.height(2.dp))
-
-            Text(
-                text = weatherData.time,
-                style = TextStyle(
-                    fontSize = 11.sp, // Aumentado de 9sp a 11sp
-                    color = ColorProvider(Color.White.copy(alpha = 0.8f))
-                )
-            )
-
-            Spacer(modifier = GlanceModifier.height(4.dp))
-
-            Text(
-                text = weatherData.currentCondition,
-                style = TextStyle(
-                    fontSize = 11.sp, // Aumentado de 9sp a 11sp
-                    color = ColorProvider(Color.White),
                 ),
                 maxLines = 1
             )
@@ -218,7 +203,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_locations_widget),
                     contentDescription = "Location",
-                    modifier = GlanceModifier.size(26.dp) // Aumentado
+                    modifier = GlanceModifier.size(18.dp) // Aumentado
                 )
 
                 Spacer(modifier = GlanceModifier.width(8.dp))
