@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.widget
+package com.kronos.multiplatform.weatherapp.core.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -7,15 +7,18 @@ import android.content.Intent
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import com.kronos.multiplatform.weatherapp.widget.LargeWeatherGlanceWidget
+import com.kronos.multiplatform.weatherapp.widget.LargeWeatherWidgetReceiver
+import com.kronos.multiplatform.weatherapp.widget.MediumWeatherGlanceWidget
+import com.kronos.multiplatform.weatherapp.widget.MediumWeatherWidgetReceiver
+import com.kronos.multiplatform.weatherapp.widget.WeatherGlanceWidget
+import com.kronos.multiplatform.weatherapp.widget.WeatherWidgetReceiver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class WidgetUpdater(private val context: Context) {
+actual class WidgetUpdater(private val context: Context) : IWidgetUpdater {
 
-    /**
-     * Actualiza todos los widgets del clima instalados
-     */
-    suspend fun updateAllWeatherWidgets() = withContext(Dispatchers.IO) {
+    override suspend fun updateAllWeatherWidgets() {
         try {
             updateGlanceWidgets()
 
@@ -70,15 +73,12 @@ class WidgetUpdater(private val context: Context) {
         try {
             val allGlanceIds: List<GlanceId> =
                 glanceAppWidgetManager.getGlanceIds(glanceWidget::class.java)
-            val widgetGlanceIds = allGlanceIds.filter { glanceId ->
-                belongsToWidget(glanceId, glanceWidget::class.java, widgetName)
-            }
 
-            if (widgetGlanceIds.isNotEmpty()) {
-                widgetGlanceIds.forEach { glanceId ->
+            if (allGlanceIds.isNotEmpty()) {
+                allGlanceIds.forEach { glanceId ->
                     glanceWidget.update(context, glanceId)
                 }
-                log("$widgetName glance widget updated for ${widgetGlanceIds.size} instances")
+                log("$widgetName glance widget updated for ${allGlanceIds.size} instances")
             } else {
                 log("No active $widgetName glance widgets found")
             }

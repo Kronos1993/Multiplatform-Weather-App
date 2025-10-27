@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,11 +35,23 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.default_days_key
+import weather_app.composeapp.generated.resources.default_days_values
+import weather_app.composeapp.generated.resources.default_image_quality_key
+import weather_app.composeapp.generated.resources.default_image_quality_value
 import weather_app.composeapp.generated.resources.default_lang_key
 import weather_app.composeapp.generated.resources.lang_preference_default_value
 import weather_app.composeapp.generated.resources.preference_app_theme_entries
 import weather_app.composeapp.generated.resources.preference_app_theme_values
+import weather_app.composeapp.generated.resources.preference_days_entries
+import weather_app.composeapp.generated.resources.preference_days_subtitle
+import weather_app.composeapp.generated.resources.preference_days_title
+import weather_app.composeapp.generated.resources.preference_image_quality_entries
+import weather_app.composeapp.generated.resources.preference_image_quality_subtitle
+import weather_app.composeapp.generated.resources.preference_image_quality_title
 import weather_app.composeapp.generated.resources.preference_lang_entries
+import weather_app.composeapp.generated.resources.preference_lang_subtitle
+import weather_app.composeapp.generated.resources.preference_lang_title
 import weather_app.composeapp.generated.resources.preference_lang_values
 import weather_app.composeapp.generated.resources.preference_theme_subtitle
 import weather_app.composeapp.generated.resources.preference_theme_title
@@ -47,6 +64,7 @@ fun SettingsScreen(
     navHost: NavHostController,
     isDarkTheme: Boolean,
     deviceScreenConfiguration: DeviceScreenConfiguration,
+    onLanguageChange: (String) -> Unit
 ) {
     val viewModel = koinViewModel<PreferenceViewModel>()
 
@@ -58,6 +76,10 @@ fun SettingsScreen(
     val langPreferenceDefault = stringResource(Res.string.lang_preference_default_value)
     val themePreferenceKey = stringResource(Res.string.theme_preference_key)
     val themePreferenceDefault = stringResource(Res.string.theme_preference_default_value)
+    val amountDaysPreferenceKey = stringResource(Res.string.default_days_key)
+    val amountDaysPreferenceDefault = stringResource(Res.string.default_days_values)
+    val imageQualityPreferenceKey = stringResource(Res.string.default_image_quality_key)
+    val imageQualityPreferenceDefault = stringResource(Res.string.default_image_quality_value)
 
     // Obtener preferencias al iniciar
     LaunchedEffect(Unit) {
@@ -67,14 +89,26 @@ fun SettingsScreen(
 
     // Estados locales para las opciones seleccionadas
     var selectedLang by remember { mutableStateOf("") }
+    var selectedDays by remember { mutableStateOf("") }
+    var selectedImageQuality by remember { mutableStateOf("") }
     var selectedTheme by remember { mutableStateOf("") }
-
-    var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     // Observar cambios en los StateFlows
     LaunchedEffect(viewModel.preferenceLangFlow) {
         viewModel.preferenceLangFlow.collect { lang ->
             selectedLang = lang
+        }
+    }
+
+    LaunchedEffect(viewModel.preferenceDays) {
+        viewModel.preferenceDays.collect { days ->
+            selectedDays = days.toString()
+        }
+    }
+
+    LaunchedEffect(viewModel.preferenceImageQuality) {
+        viewModel.preferenceImageQuality.collect { imageQuality ->
+            selectedImageQuality = imageQuality
         }
     }
 
@@ -89,6 +123,18 @@ fun SettingsScreen(
         .split(",")
         .mapIndexed { index, entry ->
             Pair(entry.trim(), stringResource(Res.string.preference_lang_values).split(",")[index].trim())
+        }
+
+    val daysOptions = stringResource(Res.string.preference_days_entries)
+        .split(",")
+        .mapIndexed { index, entry ->
+            Pair(entry.trim(), stringResource(Res.string.preference_days_entries).split(",")[index].trim())
+        }
+
+    val imageQualityOptions = stringResource(Res.string.preference_image_quality_entries)
+        .split(",")
+        .mapIndexed { index, entry ->
+            Pair(entry.trim(), stringResource(Res.string.preference_image_quality_entries).split(",")[index].trim())
         }
 
     val themeOptions = stringResource(Res.string.preference_app_theme_entries)
@@ -132,23 +178,24 @@ fun SettingsScreen(
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
             ) {
-                /*SettingRadioOptions(
-                    title = stringResource(Res.string.lang_title),
-                    subtitle = stringResource(Res.string.lang_subtitle),
-                    icon = Res.drawable.ic_language,
-                    iconDesc = stringResource(Res.string.lang_subtitle),
+                SettingRadioOptions(
+                    title = stringResource(Res.string.preference_lang_title),
+                    subtitle = stringResource(Res.string.preference_lang_subtitle),
+                    icon = Icons.Filled.Language,
+                    iconDesc = stringResource(Res.string.preference_lang_subtitle),
                     options = langOptions,
                     selectedOption = selectedLang,
                     onOptionSelected = {
                         viewModel.savePreference(langPreferenceKey, it)
                         viewModel.setPreferenceLang(it)
+                        onLanguageChange(it)
                     }
-                )*/
+                )
 
                 SettingRadioOptions(
                     title = stringResource(Res.string.preference_theme_title),
                     subtitle = stringResource(Res.string.preference_theme_subtitle),
-                    //icon = Res.drawable.ic_theme,
+                    icon = Icons.Filled.Palette,
                     iconDesc = stringResource(Res.string.preference_theme_subtitle),
                     options = themeOptions,
                     selectedOption = selectedTheme,
@@ -157,6 +204,32 @@ fun SettingsScreen(
                             viewModel.preferenceRepository.setPreference(themePreferenceKey, it)
                         }
                         viewModel.setPreferenceTheme(it)
+                    }
+                )
+
+                SettingRadioOptions(
+                    title = stringResource(Res.string.preference_days_title),
+                    subtitle = stringResource(Res.string.preference_days_subtitle),
+                    icon = Icons.Filled.CalendarToday,
+                    iconDesc = stringResource(Res.string.preference_days_subtitle),
+                    options = daysOptions,
+                    selectedOption = selectedDays,
+                    onOptionSelected = {
+                        viewModel.savePreference(amountDaysPreferenceKey, it)
+                        viewModel.setPreferenceDays(it.toInt())
+                    }
+                )
+
+                SettingRadioOptions(
+                    title = stringResource(Res.string.preference_image_quality_title),
+                    subtitle = stringResource(Res.string.preference_image_quality_subtitle),
+                    icon = Icons.Filled.Image,
+                    iconDesc = stringResource(Res.string.preference_image_quality_subtitle),
+                    options = imageQualityOptions,
+                    selectedOption = selectedImageQuality,
+                    onOptionSelected = {
+                        viewModel.savePreference(imageQualityPreferenceKey, it)
+                        viewModel.setPreferenceImageQuality(it)
                     }
                 )
 

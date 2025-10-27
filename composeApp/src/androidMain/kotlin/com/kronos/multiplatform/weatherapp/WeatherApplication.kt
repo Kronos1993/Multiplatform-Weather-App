@@ -13,11 +13,8 @@ import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.di.initKoin
 import com.kronos.multiplatform.weatherapp.job.WeatherNotificationJob
 import com.kronos.multiplatform.weatherapp.job.notificationJobId
-import com.kronos.multiplatform.weatherapp.widget.WidgetUpdater
 import com.mmk.kmpnotifier.notification.NotifierManager
 import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import java.util.Date
@@ -57,11 +54,6 @@ class WeatherApplication : Application() {
             Log.d(TAG, "App open on ${Date().toLocaleString()}")
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-
-        runBlocking(Dispatchers.IO) {
-            val widgetUpdater = WidgetUpdater(applicationContext)
-            widgetUpdater.updateAllWeatherWidgets()
         }
     }
 

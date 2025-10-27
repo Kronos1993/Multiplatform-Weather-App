@@ -38,7 +38,7 @@ class PreferenceViewModel(
     val preferenceCurrentCityFlow: StateFlow<String> = _preferenceCurrentCityFlow.asStateFlow()
 
     fun savePreference(key: String, value: Any) {
-        viewModelScope.launch{
+        viewModelScope.launch {
             try {
                 when (value) {
                     is String -> preferenceRepository.setPreference(key, value)
@@ -46,7 +46,7 @@ class PreferenceViewModel(
                     is Boolean -> preferenceRepository.setPreference(key, value)
                     is Double -> preferenceRepository.setPreference(key, value)
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
                 val err = HashMap<String, String>()
                 err["error"] = e.message.orEmpty()
@@ -58,6 +58,7 @@ class PreferenceViewModel(
     fun getPreferenceLang(key: String, defaultValue: String) {
         viewModelScope.launch {
             _preferenceLangFlow.value = preferenceRepository.getPreference(key, defaultValue)
+            changeLang.onLangChange(_preferenceLangFlow.value)
         }
     }
 
@@ -118,5 +119,8 @@ class PreferenceViewModel(
     fun changeLanguage(lang: String) {
         changeLang.onLangChange(lang)
     }
+
+    fun getSystemLanguage() =
+        changeLang.getSystemLang()
 
 }

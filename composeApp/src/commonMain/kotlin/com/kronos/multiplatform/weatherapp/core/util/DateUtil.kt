@@ -3,6 +3,7 @@ package com.kronos.multiplatform.weatherapp.core.util
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
@@ -14,7 +15,8 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 fun formatDateTime(
     instant: Instant,
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    language: String = "en"
 ): String {
     val localDateTime = instant.toLocalDateTime(timeZone)
 
@@ -27,7 +29,7 @@ fun formatDateTime(
     val minute = localDateTime.minute.toString().padStart(2, '0')
     val second = localDateTime.second.toString().padStart(2, '0')
 
-    val amPm = if (hour24 < 12) "AM" else "PM"
+    val amPm = if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
 
     return "$day/$month/$year $hour12:$minute:$second $amPm"
 }
@@ -36,7 +38,8 @@ fun formatDateTime(
 fun formatDateTime(
     instant: Instant,
     format: String,
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
+    language: String = "en",
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {
     val localDateTime = instant.toLocalDateTime(timeZone)
 
@@ -51,9 +54,20 @@ fun formatDateTime(
             val minute = localDateTime.minute.toString().padStart(2, '0')
             val second = localDateTime.second.toString().padStart(2, '0')
 
-            val amPm = if (hour24 < 12) "AM" else "PM"
+            val amPm = if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
 
             "$day/$month/$year $hour12:$minute:$second $amPm"
+        }
+
+        "dd-MMM hh:mm aa" -> {
+            val day = localDateTime.dayOfMonth.toString().padStart(2, '0')
+            val month = getMonthName(localDateTime.month, language, short = true)
+            val hour24 = localDateTime.hour
+            val hour12 = if (hour24 % 12 == 0) 12 else hour24 % 12
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            val amPm = if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
+
+            "$day-$month $hour12:$minute $amPm"
         }
 
         "yyyy-MM-dd HH:mm:ss" -> {
@@ -69,7 +83,7 @@ fun formatDateTime(
         }
 
         "MMM dd, yyyy" -> {
-            val month = localDateTime.month.name.take(3)
+            val month = getMonthName(localDateTime.month, language, short = true)
             val day = localDateTime.dayOfMonth.toString().padStart(2, '0')
             val year = localDateTime.year.toString()
 
@@ -77,19 +91,76 @@ fun formatDateTime(
         }
 
         "EEE MMM d | h:mm aa" -> {
-            val dayOfWeek = localDateTime.dayOfWeek.name.take(3)
-            val month = localDateTime.month.name
+            val dayOfWeek = getDayOfWeekName(localDateTime.dayOfWeek, language, short = true)
+            val month = getMonthName(localDateTime.month, language, short = false)
             val day = localDateTime.dayOfMonth
             val hour = localDateTime.hour % 12.let { if (it == 0) 12 else it }
             val minute = localDateTime.minute.toString().padStart(2, '0')
-            val amPm = if (localDateTime.hour < 12) "AM" else "PM"
+            val amPm = if (localDateTime.hour < 12) getAmPmText(language, true) else getAmPmText(language, false)
 
             "$dayOfWeek $month $day | $hour:$minute $amPm"
+        }
+
+        "HH:mm" -> {
+            val hour = localDateTime.hour.toString().padStart(2, '0')
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            "$hour:$minute"
+        }
+
+        "dd/MM" -> {
+            val day = localDateTime.dayOfMonth.toString().padStart(2, '0')
+            val month = localDateTime.monthNumber.toString().padStart(2, '0')
+            "$day/$month"
         }
 
         else -> {
             localDateTime.toString()
         }
+    }
+}
+
+// Función auxiliar para obtener texto AM/PM según el idioma
+private fun getAmPmText(language: String, isAm: Boolean): String {
+    return when (language) {
+        "es" -> if (isAm) "a.m." else "p.m."
+        else -> if (isAm) "AM" else "PM"
+    }
+}
+
+// Función auxiliar para obtener nombre del mes según el idioma
+private fun getMonthName(month: Month, language: String, short: Boolean = false): String {
+    return when (language) {
+        "es" -> when (month) {
+            Month.JANUARY -> if (short) "Ene" else "Enero"
+            Month.FEBRUARY -> if (short) "Feb" else "Febrero"
+            Month.MARCH -> if (short) "Mar" else "Marzo"
+            Month.APRIL -> if (short) "Abr" else "Abril"
+            Month.MAY -> if (short) "May" else "Mayo"
+            Month.JUNE -> if (short) "Jun" else "Junio"
+            Month.JULY -> if (short) "Jul" else "Julio"
+            Month.AUGUST -> if (short) "Ago" else "Agosto"
+            Month.SEPTEMBER -> if (short) "Sep" else "Septiembre"
+            Month.OCTOBER -> if (short) "Oct" else "Octubre"
+            Month.NOVEMBER -> if (short) "Nov" else "Noviembre"
+            Month.DECEMBER -> if (short) "Dic" else "Diciembre"
+        }
+        else -> if (short) month.name.take(3) else month.name
+    }
+}
+
+// Función auxiliar para obtener nombre del día de la semana según el idioma
+private fun getDayOfWeekName(dayOfWeek: DayOfWeek, language: String, short: Boolean = false): String {
+    return when (language) {
+        "es" -> when (dayOfWeek) {
+            DayOfWeek.MONDAY -> if (short) "Lun" else "Lunes"
+            DayOfWeek.TUESDAY -> if (short) "Mar" else "Martes"
+            DayOfWeek.WEDNESDAY -> if (short) "Mié" else "Miércoles"
+            DayOfWeek.THURSDAY -> if (short) "Jue" else "Jueves"
+            DayOfWeek.FRIDAY -> if (short) "Vie" else "Viernes"
+            DayOfWeek.SATURDAY -> if (short) "Sáb" else "Sábado"
+            DayOfWeek.SUNDAY -> if (short) "Dom" else "Domingo"
+        }
+        else -> if (short) dayOfWeek.name.take(3) else dayOfWeek.name
     }
 }
 
@@ -160,11 +231,14 @@ fun Instant.Companion.of(
 
 // Extensión para obtener la hora en formato 12h (similar a Date.getHour())
 @OptIn(ExperimentalTime::class)
-fun Instant.getHour(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
+fun Instant.getHour(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    language: String = "en"
+): String {
     val localDateTime = this.toLocalDateTime(timeZone)
     val hour24 = localDateTime.hour
     val hour12 = if (hour24 % 12 == 0) 12 else hour24 % 12
-    val amPm = if (hour24 < 12) "a.m." else "p.m."
+    val amPm = if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
 
     return "$hour12 $amPm"
 }

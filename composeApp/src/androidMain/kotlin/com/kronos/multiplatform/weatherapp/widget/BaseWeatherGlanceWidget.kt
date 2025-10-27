@@ -1,11 +1,15 @@
 package com.kronos.multiplatform.weatherapp.widget
 
 import android.content.Context
-import android.icu.util.Calendar
 import androidx.glance.appwidget.GlanceAppWidget
 import com.kronos.multiplatform.weatherapp.R
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.result.Result
+import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
+import com.kronos.multiplatform.weatherapp.core.util.isToday
+import com.kronos.multiplatform.weatherapp.core.util.isTomorrow
+import com.kronos.multiplatform.weatherapp.core.util.of
+import com.kronos.multiplatform.weatherapp.core.util.toDayOfWeekText
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
@@ -15,10 +19,13 @@ import com.kronos.multiplatform.weatherapp.widget.model.WeatherParams
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
@@ -98,14 +105,19 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         forecast: Forecast,
         imageQuality: String
     ): WeatherWidgetData {
+        val currentLanguage = preferenceRepository.getPreference(
+            context.getString(R.string.default_lang_key),
+            context.getString(R.string.default_language_value)
+        )
+
         val futureDays = forecast.forecast.forecastDay.filterNot { isToday(it.date) }.take(2)
 
-        val day1 = if (futureDays.isNotEmpty()) getDayName(context, futureDays[0]) else ""
-        val day2 = if (futureDays.size > 1) getDayName(context, futureDays[1]) else ""
+        val day1 = if (futureDays.isNotEmpty()) getDayName(context, futureDays[0], currentLanguage) else ""
+        val day2 = if (futureDays.size > 1) getDayName(context, futureDays[1], currentLanguage) else ""
 
         return WeatherWidgetData(
             location = forecast.location.name,
-            time = formatLocalTime(forecast.location.localtime),
+            time = formatLocalTime(forecast.location.localtime, currentLanguage),
             currentTemp = context.getString(R.string.temp_celsius_widget).format(forecast.current.tempC),
             currentCondition = forecast.current.condition.description,
             humidity = forecast.current.humidity.toString(),
@@ -120,59 +132,66 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun isToday(dateString: String): Boolean = try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val date = inputFormat.parse(dateString)
-        val today = Calendar.getInstance()
-        val targetDate = Calendar.getInstance().apply { time = date!! }
-        today.get(Calendar.YEAR) == targetDate.get(Calendar.YEAR) &&
-                today.get(Calendar.DAY_OF_YEAR) == targetDate.get(Calendar.DAY_OF_YEAR)
+        val instant = Instant.of(dateString, includeHours = false)
+        instant?.isToday() ?: false
     } catch (e: Exception) {
         false
     }
 
-    private fun formatLocalTime(localTime: String): String = try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("hh:mm aa dd-MMM", Locale.getDefault())
-        val date = inputFormat.parse(localTime)
-        outputFormat.format(date!!)
-    } catch (e: Exception) {
-        ""
-    }
-
-    private suspend fun getDayName(context: Context, dailyForecast: DailyForecast): String = try {
-        val dateString = dailyForecast.date
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val date = inputFormat.parse(dateString) ?: return ""
-        val calendar = Calendar.getInstance().apply { time = date }
-        val today = Calendar.getInstance()
-
-        when {
-            isSameDay(calendar, today) -> context.getString(R.string.today)
-            isTomorrow(calendar, today) -> context.getString(R.string.tomorrow)
-            else -> {
-                val locale = if (
-                    preferenceRepository.getPreference(
-                        context.getString(R.string.default_lang_key),
-                        context.getString(R.string.default_language_value)
-                    ) == "en"
-                ) Locale.US else Locale.getDefault()
-                SimpleDateFormat("EEEE", locale).format(date).capitalize()
-            }
+    @OptIn(ExperimentalTime::class)
+    private fun formatLocalTime(localTime: String, language: String): String = try {
+        // Parsear el string "yyyy-MM-dd HH:mm" a Instant
+        val instant = Instant.of(localTime, includeHours = true, timezone = TimeZone.currentSystemDefault())
+        if (instant != null) {
+            // Usar el formato "dd-MMM hh:mm aa" con el idioma correspondiente
+            formatDateTime(instant, "dd-MMM hh:mm aa", language = language)
+        } else {
+            ""
         }
     } catch (e: Exception) {
         ""
     }
 
-    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean =
-        cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    @OptIn(ExperimentalTime::class)
+    private suspend fun getDayName(context: Context, dailyForecast: DailyForecast, language: String): String = try {
+        val dateString = dailyForecast.date
+        val instant = Instant.of(dateString, includeHours = false)
 
-    private fun isTomorrow(target: Calendar, today: Calendar): Boolean {
-        val tomorrow = (today.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, 1) }
-        return isSameDay(target, tomorrow)
+        if (instant != null) {
+            when {
+                instant.isToday() -> context.getString(R.string.today)
+                instant.isTomorrow() -> context.getString(R.string.tomorrow)
+                else -> {
+                    when (instant.toDayOfWeekText()) {
+                        DayOfWeek.MONDAY -> context.getString(R.string.monday).capitalize(language)
+                        DayOfWeek.TUESDAY -> context.getString(R.string.tuesday).capitalize(language)
+                        DayOfWeek.WEDNESDAY -> context.getString(R.string.wednesday).capitalize(language)
+                        DayOfWeek.THURSDAY -> context.getString(R.string.thursday).capitalize(language)
+                        DayOfWeek.FRIDAY -> context.getString(R.string.friday).capitalize(language)
+                        DayOfWeek.SATURDAY -> context.getString(R.string.saturday).capitalize(language)
+                        DayOfWeek.SUNDAY -> context.getString(R.string.sunday).capitalize(language)
+                        else -> ""
+                    }
+                }
+            }
+        } else {
+            ""
+        }
+    } catch (e: Exception) {
+        ""
+    }
+
+    // Función auxiliar para capitalizar según el idioma
+    private fun String.capitalize(language: String): String {
+        return when (language) {
+            "es" -> this.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale("es", "ES")) else it.toString()
+            }
+            else -> this.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+            }
+        }
     }
 }
-
-private fun String.capitalize(): String =
-    replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }

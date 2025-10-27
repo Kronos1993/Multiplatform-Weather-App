@@ -84,6 +84,7 @@ fun WeatherContentPortrait(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
 ) {
     var isCompact by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
@@ -130,6 +131,7 @@ fun WeatherContentPortrait(
             isDarkTheme = isDarkTheme,
             urlProvider = urlProvider,
             imageQuality = imageQuality,
+            currentLang = currentLang,
             modifier = Modifier.fillMaxWidth(),
             isCompactMode = actualCompactMode,
         )
@@ -139,6 +141,7 @@ fun WeatherContentPortrait(
             isDarkTheme = isDarkTheme,
             urlProvider = urlProvider,
             imageQuality = imageQuality,
+            currentLang = currentLang,
             scrollState = scrollState,
             modifier = Modifier
                 .fillMaxWidth()
@@ -154,6 +157,7 @@ fun WeatherHeaderSection(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang:String,
     modifier: Modifier = Modifier,
     isCompactMode: Boolean = false
 ) {
@@ -172,6 +176,7 @@ fun WeatherHeaderSection(
                 darkTheme = isDarkTheme,
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
+                currentLang = currentLang,
                 modifier = Modifier.wrapContentHeight()
             )
         } else {
@@ -180,6 +185,7 @@ fun WeatherHeaderSection(
                 darkTheme = isDarkTheme,
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
+                currentLang = currentLang,
                 modifier = Modifier.wrapContentHeight()
             )
         }
@@ -193,6 +199,7 @@ fun WeatherContentSection(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
     scrollState: LazyListState,
     modifier: Modifier = Modifier
 ) {
@@ -334,6 +341,7 @@ fun WeatherContentSection(
                         darkTheme = isDarkTheme,
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
+                        currentLang = currentLang,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -366,6 +374,7 @@ fun WeatherContentLandscape(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
     modifier: Modifier = Modifier,
     deviceScreenConfiguration: DeviceScreenConfiguration,
 ) {
@@ -391,6 +400,7 @@ fun WeatherContentLandscape(
                         isDarkTheme = isDarkTheme,
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
+                        currentLang = currentLang,
                     )
                 }
 
@@ -400,6 +410,7 @@ fun WeatherContentLandscape(
                         darkTheme = isDarkTheme,
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
+                        currentLang = currentLang,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -410,6 +421,7 @@ fun WeatherContentLandscape(
                         darkTheme = isDarkTheme,
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
+                        currentLang = currentLang,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -426,6 +438,7 @@ fun WeatherContentLandscape(
                 isDarkTheme = isDarkTheme,
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
+                currentLang = currentLang,
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -439,6 +452,7 @@ fun WeatherContentSectionLandscape(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
     modifier: Modifier = Modifier
 ) {
     val currentDayForecast = remember(currentWeather) {
@@ -566,6 +580,7 @@ fun WeatherContentSectionLandscape(
                     darkTheme = isDarkTheme,
                     urlProvider = urlProvider,
                     imageQuality = imageQuality,
+                    currentLang = currentLang,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

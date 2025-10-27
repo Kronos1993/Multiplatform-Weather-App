@@ -1,6 +1,18 @@
 <resources>
-    <string name="app_description">WeatherApp es una aplicación de pronóstico del tiempo que utiliza WeatherAPI para proporcionar información sobre el clima actual y pronósticos de la semana. Se almacenan los datos de las ubicaciones definidas por el usuario y utiliza el GPS del dispositivo para determinar la ubicación actual y mostrar el clima correspondiente.</string>
-    <string name="programmer_group">Info del programador</string>
-    <string name="menu_about">Acerca de</string>
-    <string name="app_data_group">Versión</string>
+    <!-- About Screen -->
+    <string name="about_app_description">Weather App es una aplicación multiplataforma desarrollada con Kotlin Multiplatform que te permite consultar el clima actual y pronósticos de manera precisa y elegante. Con una interfaz moderna y datos en tiempo real, mantente informado sobre las condiciones climáticas donde sea que estés.</string>
+    <string name="about_developer">Kronos Tech</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_version">Versión: %s</string>
+    <string name="about_copyright">2024 Kronos Tech. Todos los derechos reservados.</string>
+    <string name="about_features_title">Características</string>
+    <string name="about_feature_1">• Clima actual en tiempo real</string>
+    <string name="about_feature_2">• Pronósticos extendidos</string>
+    <string name="about_feature_3">• Multiplataforma (Android e iOS)</string>
+    <string name="about_feature_4">• Interfaz moderna y intuitiva</string>
+    <string name="about_technologies">Tecnologías utilizadas</string>
+    <string name="about_tech_1">• Kotlin Multiplatform</string>
+    <string name="about_tech_2">• Clean Architecture</string>
+    <string name="about_tech_3">• Material Design 3</string>
+    <string name="about_tech_4">• APIs meteorológicas</string>
 </resources>

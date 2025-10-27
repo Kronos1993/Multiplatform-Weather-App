@@ -1,17 +1,25 @@
 package com.kronos.multiplatform.weatherapp.features.home
 
+import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
+import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.util.ICloseApp
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
+import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private var closeApp: ICloseApp,
-    private var notifications: INotifications
+    private var notifications: INotifications,
+    private var widgetUpdater: IWidgetUpdater,
+    private var changeLang: IChangeLang
 ) : ParentViewModel() {
 
     private val _weather = MutableStateFlow<Forecast?>(null)
@@ -55,12 +63,21 @@ class HomeViewModel(
         }
     }
 
+    fun updateAppLanguage(lang:String){
+        changeLang.onLangChange(lang)
+    }
+
     fun closeApp() {
-        createWeatherNotification()
-        closeApp.closeApp()
+        viewModelScope.launch(Dispatchers.IO) {
+            createWeatherNotification()
+            closeApp.closeApp()
+        }
     }
 
     fun setForecast(it: Forecast) {
-        _weather.value = it
+        viewModelScope.launch(Dispatchers.IO) {
+            _weather.value = it
+            widgetUpdater.updateAllWeatherWidgets()
+        }
     }
 }

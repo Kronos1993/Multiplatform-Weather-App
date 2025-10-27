@@ -55,30 +55,6 @@
 
     <string name="add_location_button_content_description">Add location</string>
 
-
-    <string name="preference_lang_title">App language</string>
-    <string name="preference_lang_subtitle">Select the language of the app</string>
-    <string name="preference_lang_entries">English,Spanish</string>
-    <string name="preference_lang_values">en,es</string>
-
-    <string name="preference_theme_title">App theme</string>
-    <string name="preference_theme_subtitle">Select the theme of the app</string>
-    <string name="preference_app_theme_entries">Dark,Light</string>
-    <string name="preference_app_theme_values">dark,light</string>
-
-    <string name="preference_city_title">Default City</string>
-    <string name="preference_city_subtitle">Select the default city</string>
-
-    <string name="preference_days_title">Amount of days</string>
-    <string name="preference_days_subtitle">Select the amount of days to get</string>
-    <string name="preference_days_entries">3,7,15</string>
-    <string name="preference_days_values">3,7,15</string>
-
-    <string name="preference_image_quality_title">Image Quality</string>
-    <string name="preference_image_quality_subtitle">Select the image quality</string>
-    <string name="preference_image_quality_entries">Low,Medium,High</string>
-    <string name="preference_image_quality_values">low,medium,high</string>
-
     <string name="denied_notification_permission_message">You can\'t use notifications without permission. You can enable it in Settings</string>
     <string name="denied_location_permission_message">You can\'t use location without permission. You can enable it in Settings</string>
 

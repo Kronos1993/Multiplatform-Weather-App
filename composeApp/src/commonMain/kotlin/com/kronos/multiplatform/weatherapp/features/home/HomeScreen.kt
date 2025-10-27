@@ -34,8 +34,10 @@ import com.kronos.multiplatform.weatherapp.components.TabItem
 import com.kronos.multiplatform.weatherapp.core.util.BackPressHandlerEffect
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.features.about.AboutScreen
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.WeatherScreen
 import com.kronos.multiplatform.weatherapp.features.home.user_location.UserCustomLocationScreen
+import com.kronos.multiplatform.weatherapp.features.setting.SettingsScreen
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
@@ -233,7 +235,7 @@ fun HomeScreen(
             stringResource(Res.string.title_location),
             Icons.Filled.LocationOn,
             Icons.Outlined.LocationOn,
-            1
+            2
         ) {
             UserCustomLocationScreen(
                 navHost,
@@ -250,18 +252,25 @@ fun HomeScreen(
             stringResource(Res.string.title_settings),
             Icons.Filled.Settings,
             Icons.Outlined.Settings,
-            1
+            3
         ) {
-
+            SettingsScreen(
+                navHost,
+                isDarkTheme,
+                deviceScreenConfiguration,
+                {
+                    viewModel.updateAppLanguage(it)
+                }
+            )
         },
 
         TabItem(
             stringResource(Res.string.title_about),
             Icons.Filled.Info,
             Icons.Outlined.Info,
-            1
+            4
         ) {
-
+            AboutScreen(navHost,isDarkTheme,deviceScreenConfiguration)
         },
     )
 

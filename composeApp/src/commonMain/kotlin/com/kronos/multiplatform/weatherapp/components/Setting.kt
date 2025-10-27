@@ -149,6 +149,78 @@ fun SettingRadioOption(
 }
 
 @Composable
+fun SettingRadioOptions(
+    title: String,
+    subtitle: String,
+    icon: ImageVector? = null,
+    iconDesc: String? = null,
+    iconTint: Color = Color.Unspecified,
+    options: List<Pair<String, String>>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit
+) {
+    Surface(
+        color = Color.Transparent,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        tint = iconTint,
+                        contentDescription = iconDesc,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                }
+                TitleText(
+                    text = title,
+                    modifier = Modifier
+                )
+            }
+            BodyText(
+                text = subtitle,
+                modifier = Modifier,
+                size = ComponentSize.LARGE
+            )
+            options.forEach { option ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onOptionSelected(option.second)
+                        }
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween, // Align items with space between
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BodyText(
+                        text = option.first,
+                        modifier = Modifier,
+                        size = ComponentSize.LARGE
+                    )
+                    RadioButton(
+                        selected = selectedOption == option.second,
+                        onClick = { onOptionSelected(option.second) }
+                    )
+                }
+            }
+            HorizontalDivider()
+        }
+
+    }
+}
+
+@Composable
 fun SettingSwitchOptions(
     title: StringResource,
     subtitle: StringResource?,

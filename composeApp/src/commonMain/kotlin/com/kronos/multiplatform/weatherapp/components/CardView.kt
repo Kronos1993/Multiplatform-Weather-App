@@ -264,6 +264,7 @@ fun CurrentWeatherItem(
     darkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang:String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -298,7 +299,7 @@ fun CurrentWeatherItem(
 
         val date = Instant.of(currentWeather.location.localtime, true)
 
-        val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
+        val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa",currentLang)
 
         BodyText(
             stringDate,
@@ -340,6 +341,7 @@ fun CurrentWeatherCompactItem(
     darkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -385,7 +387,7 @@ fun CurrentWeatherCompactItem(
         ) {
             val date = Instant.of(currentWeather.location.localtime, true)
 
-            val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
+            val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa",currentLang)
 
             BodyText(
                 stringDate,
@@ -434,6 +436,7 @@ fun CurrentWeatherLandscapeCompactItem(
     darkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -484,7 +487,7 @@ fun CurrentWeatherLandscapeCompactItem(
 
                 val date = Instant.of(currentWeather.location.localtime, true)
 
-                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
+                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa", currentLang)
 
                 BodyText(
                     stringDate,
@@ -543,6 +546,7 @@ fun CurrentWeatherBigScreenCompactItem(
     darkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
     modifier: Modifier = Modifier,
 ) {
 
@@ -594,7 +598,7 @@ fun CurrentWeatherBigScreenCompactItem(
 
                 val date = Instant.of(currentWeather.location.localtime, true)
 
-                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa")
+                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa",currentLang)
 
                 TitleText(
                     stringDate,
@@ -654,6 +658,7 @@ fun DailyWeatherItemIndicator(
     item: DailyForecast,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang:String,
     darkTheme: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -774,6 +779,7 @@ fun DailyWeatherList(
     darkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
+    currentLang: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -787,6 +793,7 @@ fun DailyWeatherList(
                 item = day,
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
+                currentLang = currentLang,
                 darkTheme = darkTheme,
                 modifier = Modifier.fillMaxWidth()
             )

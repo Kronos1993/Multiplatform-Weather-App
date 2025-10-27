@@ -51,6 +51,13 @@ fun App() {
     val imageQualityPreferenceDefault = stringResource(Res.string.default_image_quality_value)
     val apiKey = stringResource(Res.string.api_key)
 
+    val isDarkTheme by viewModel.preferenceThemeFlow.collectAsStateWithLifecycle()
+    val currentLang by viewModel.preferenceLangFlow.collectAsStateWithLifecycle()
+    val amountDays by viewModel.preferenceDays.collectAsStateWithLifecycle()
+    val imageQuality by viewModel.preferenceImageQuality.collectAsStateWithLifecycle()
+    val defaultCity by viewModel.preferenceDefaultCity.collectAsStateWithLifecycle()
+    val apiKeyRemember by remember { mutableStateOf(apiKey) }
+
     LaunchedEffect(Unit) {
         viewModel.getPreferenceTheme(
             themePreferenceKey,
@@ -78,17 +85,9 @@ fun App() {
         )
     }
 
-    val isDarkTheme by viewModel.preferenceThemeFlow.collectAsStateWithLifecycle()
-    val currentLang by viewModel.preferenceLangFlow.collectAsStateWithLifecycle()
-    val amountDays by viewModel.preferenceDays.collectAsStateWithLifecycle()
-    val imageQuality by viewModel.preferenceImageQuality.collectAsStateWithLifecycle()
-    val defaultCity by viewModel.preferenceDefaultCity.collectAsStateWithLifecycle()
-    val apiKeyRemember by remember { mutableStateOf(apiKey) }
-
-
-    /*LaunchedEffect(currentLang) {
-        viewModel.changeLanguage(currentLang) // Cambia el idioma desde el ViewModel
-    }*/
+    LaunchedEffect(currentLang) {
+        viewModel.changeLanguage(currentLang)
+    }
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceScreenConfiguration =
@@ -126,28 +125,6 @@ fun App() {
                     )
                 }
             }
-
-            /*ConfirmDialog(
-                title = Res.string.log_out_dialog_title,
-                body = Res.string.log_out_dialog_body,
-                showDialog = showLogout,
-                confirmText = Res.string.button_text_ok,
-                onConfirm = {
-                    scope.launch {
-                        viewModelLogout.logOut()
-                        viewModelLogout.showLogOut(false)
-                        navController.navigate(Destinations.LOGIN.name) {
-                            popUpTo(0)
-                        }
-                    }
-                },
-                cancelText = Res.string.button_text_cancel,
-                onCancel = {
-                    scope.launch {
-                        viewModelLogout.showLogOut(false)
-                    }
-                }
-            )*/
         }
     }
 }

@@ -176,6 +176,7 @@ fun WeatherScreen(
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
                                                 isDarkTheme = isDarkTheme,
                                                 urlProvider = viewModel.urlProvider,
+                                                currentLang = currentLang,
                                                 imageQuality = imageQuality,
                                             )
                                         } else {
@@ -218,6 +219,7 @@ fun WeatherScreen(
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
                                             imageQuality = imageQuality,
+                                            currentLang = currentLang,
                                             modifier = rootModifier,
                                             deviceScreenConfiguration = deviceScreenConfiguration
                                         )
@@ -265,6 +267,7 @@ fun WeatherScreen(
                                                 isDarkTheme = isDarkTheme,
                                                 urlProvider = viewModel.urlProvider,
                                                 imageQuality = imageQuality,
+                                                currentLang = currentLang,
                                             )
                                         } else {
                                             NoWeatherItem(
@@ -312,6 +315,7 @@ fun WeatherScreen(
                                                 isDarkTheme = isDarkTheme,
                                                 urlProvider = viewModel.urlProvider,
                                                 imageQuality = imageQuality,
+                                                currentLang = currentLang,
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
                                             )
                                         } else {

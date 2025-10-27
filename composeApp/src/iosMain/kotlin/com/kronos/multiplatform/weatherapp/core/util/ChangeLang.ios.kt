@@ -13,4 +13,8 @@ actual class ChangeLang () : IChangeLang {
         Logger.i("Current System Lang Code $currentLangCode")
         Logger.i("Current System Lang  $currentLang")
     }
+
+    override fun getSystemLang(): String {
+        return "en"
+    }
 }

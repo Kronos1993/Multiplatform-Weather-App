@@ -23,6 +23,13 @@
     <string name="visibility_km">%s KM</string>
     <string name="today">Hoy</string>
     <string name="tomorrow">Mañana</string>
+    <string name="monday">Lunes</string>
+    <string name="tuesday">Martes</string>
+    <string name="wednesday">Miércoles</string>
+    <string name="thursday">Jueves</string>
+    <string name="friday">Viernes</string>
+    <string name="saturday">Sábado</string>
+    <string name="sunday">Domingo</string>
 
     <string name="widget_name">Info del clima</string>
 
