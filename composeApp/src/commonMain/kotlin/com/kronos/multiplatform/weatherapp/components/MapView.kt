@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorDashboardAcceptedDark
-import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorDashboardAcceptedLight
+import com.kronos.multiplatform.weatherapp.components.theme.extendedDark
+import com.kronos.multiplatform.weatherapp.components.theme.extendedLight
 import io.github.dellisd.spatialk.geojson.Position
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
@@ -32,15 +32,15 @@ fun FixMapView(
 ) {
 
     val cardBackgroundColor = if (darkTheme) {
-        BackgroundCardColorDashboardAcceptedDark
+        extendedDark.backgroundCardColor.color
     } else {
-        BackgroundCardColorDashboardAcceptedLight
+        extendedLight.backgroundCardColor.color
     }
 
     val camera =
         rememberCameraState(
-            firstPosition =  CameraPosition(
-                    target = Position(lon,lat), zoom = 5.5
+            firstPosition = CameraPosition(
+                target = Position(lon, lat), zoom = 5.5
             )
         )
 

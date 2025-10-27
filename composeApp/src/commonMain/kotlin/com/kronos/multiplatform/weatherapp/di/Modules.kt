@@ -1,6 +1,6 @@
 package com.kronos.multiplatform.weatherapp.di
 
-import com.kronos.multiplatform.weatherapp.features.about.AboutViewModel
+import com.kronos.multiplatform.weatherapp.features.home.about.AboutViewModel
 import com.kronos.multiplatform.weatherapp.features.add_city.AddCityViewModel
 import com.kronos.multiplatform.weatherapp.features.home.HomeViewModel
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.WeatherViewModel

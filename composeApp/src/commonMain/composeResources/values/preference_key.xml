@@ -15,4 +15,7 @@
     <string name="default_image_quality_key" translatable="false">default_image_quality</string>
     <string name="image_quality_preference_default_value">low</string>
 
+    <string name="current_weather_key" translatable="false">current_weather</string>
+    <string name="current_weather_preference_default_value">""</string>
+
 </resources>

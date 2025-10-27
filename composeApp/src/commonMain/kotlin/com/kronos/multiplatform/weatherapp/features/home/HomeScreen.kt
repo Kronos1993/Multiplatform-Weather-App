@@ -27,17 +27,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.kronos.multiplatform.weatherapp.Destinations
 import com.kronos.multiplatform.weatherapp.components.ConfirmDialog
 import com.kronos.multiplatform.weatherapp.components.ScrollableTabView
 import com.kronos.multiplatform.weatherapp.components.TabItem
-import com.kronos.multiplatform.weatherapp.core.util.BackPressHandlerEffect
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
-import com.kronos.multiplatform.weatherapp.features.about.AboutScreen
+import com.kronos.multiplatform.weatherapp.features.home.about.AboutScreen
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.WeatherScreen
+import com.kronos.multiplatform.weatherapp.features.home.setting.SettingsScreen
 import com.kronos.multiplatform.weatherapp.features.home.user_location.UserCustomLocationScreen
-import com.kronos.multiplatform.weatherapp.features.setting.SettingsScreen
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
@@ -50,9 +48,6 @@ import weather_app.composeapp.generated.resources.exit_dialog_body
 import weather_app.composeapp.generated.resources.exit_dialog_no
 import weather_app.composeapp.generated.resources.exit_dialog_title
 import weather_app.composeapp.generated.resources.exit_dialog_yes
-import weather_app.composeapp.generated.resources.notification_long_details
-import weather_app.composeapp.generated.resources.notification_short_details
-import weather_app.composeapp.generated.resources.notification_title
 import weather_app.composeapp.generated.resources.title_about
 import weather_app.composeapp.generated.resources.title_location
 import weather_app.composeapp.generated.resources.title_settings
@@ -197,18 +192,11 @@ fun HomeScreen(
 
     var showExitDialog by remember { mutableStateOf(false) }
 
-    BackPressHandlerEffect(
+    /*BackPressHandlerEffect(
         enabled = navHost.currentBackStackEntry?.destination?.route == Destinations.HOME.name
     ) {
         showExitDialog = true
-    }
-
-    viewModel.initNotificationsString(
-        stringResource(Res.string.notification_title),
-        stringResource(Res.string.notification_short_details),
-        stringResource(Res.string.notification_long_details),
-    )
-
+    }*/
 
     val tabs = listOf(
         TabItem(
@@ -224,10 +212,7 @@ fun HomeScreen(
                 imageQuality,
                 amountOfDays,
                 defaultCity,
-                isDarkTheme,
-                {
-                    viewModel.setForecast(it)
-                }
+                isDarkTheme
             )
         },
 
@@ -276,7 +261,7 @@ fun HomeScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.secondaryContainer
+        color = MaterialTheme.colorScheme.onPrimary,
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize().systemBarsPadding(),

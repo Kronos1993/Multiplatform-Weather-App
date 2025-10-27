@@ -1,9 +1,14 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
 import androidx.lifecycle.viewModelScope
+import com.kronos.multiplatform.weatherapp.core.notification.INotifications
+import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
+import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
+import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
+import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
@@ -21,6 +26,8 @@ class WeatherViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
     private val locationRepository: LocationRepository,
+    private var notifications: INotifications,
+    private var widgetUpdater: IWidgetUpdater,
     val urlProvider: UrlProvider,
 ) : ParentViewModel() {
 
@@ -36,6 +43,24 @@ class WeatherViewModel(
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+
+    private var weatherPrefKey = ""
+    private var notificationTitle = ""
+    private var notificationShortDetails = ""
+    private var notificationLongDetails = ""
+
+    fun initNotificationsString(
+        weatherPrefKey: String,
+        notificationTitle: String,
+        notificationShortDetails: String,
+        notificationLongDetails: String
+    ) {
+
+        this.weatherPrefKey = weatherPrefKey
+        this.notificationTitle = notificationTitle
+        this.notificationShortDetails = notificationShortDetails
+        this.notificationLongDetails = notificationLongDetails
+    }
 
     // Inicialización
     fun initLocations(lang: String, apiKey: String, days: Int, defaultCity: String = "") {
@@ -157,6 +182,9 @@ class WeatherViewModel(
             weatherRemoteRepository.getWeatherDataForecast(lat, lon, lang, apiKey, days)
                 .onSuccess { forecast ->
                     _weather.value = forecast
+                    weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey,forecast)
+                    createWeatherNotification()
+                    widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
                     log("Weather from coordinates acquired: ${forecast.location.name}", false)
@@ -177,6 +205,9 @@ class WeatherViewModel(
             weatherRemoteRepository.getWeatherDataForecast(city, lang, apiKey, days)
                 .onSuccess { forecast ->
                     _weather.value = forecast
+                    weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey,forecast)
+                    createWeatherNotification()
+                    widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
                     log("Weather from city acquired: ${forecast.location.name}", false)
@@ -246,6 +277,31 @@ class WeatherViewModel(
         _error.value = "Error: ${e.message}"
         _screenState.value = WeatherScreenState.NoWeather
         log("General error: ${e.message}", isError = true)
+    }
+
+    private fun createWeatherNotification() {
+        if (_weather.value != null) {
+            notifications.createNotification(
+                notificationTitle.format(
+                    _weather.value!!.current.tempC,
+                    _weather.value!!.location.region.orEmpty()
+                ),
+                notificationShortDetails.format(
+                    _weather.value!!.current.condition.description,
+                    _weather.value!!.current.feelslikeC
+                ),
+                notificationLongDetails.format(
+                    _weather.value!!.current.condition.description,
+                    _weather.value!!.current.feelslikeC,
+                    _weather.value!!.forecast.forecastDay[0].day.mintempC.toString(),
+                    _weather.value!!.forecast.forecastDay[0].day.maxtempC.toString(),
+                    _weather.value!!.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+                ),
+                "https:${_weather.value!!.current.condition.icon}",
+                NotificationGroup.GENERAL,
+                NotificationType.FROM_APP
+            )
+        }
     }
 }
 

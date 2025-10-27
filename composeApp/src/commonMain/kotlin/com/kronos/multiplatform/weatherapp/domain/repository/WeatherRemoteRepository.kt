@@ -26,4 +26,13 @@ interface WeatherRemoteRepository {
         apiKey: String,
         days: Int = 1
     ): Result<Forecast, Error>
+
+    suspend fun getLastWeatherForecast(
+        prefKey: String,
+    ): Result<Forecast, Error>
+
+    suspend fun setLastWeatherForecast(
+        prefKey: String,
+        forecast: Forecast,
+    ): Result<Boolean, Error>
 }

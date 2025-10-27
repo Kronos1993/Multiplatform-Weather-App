@@ -36,6 +36,14 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     protected suspend fun loadWeatherData(context: Context): WeatherWidgetData? = withContext(Dispatchers.IO) {
         try {
+            // Primero intentar cargar el clima guardado
+            val cachedWeatherResult = loadCachedWeather()
+            if (cachedWeatherResult != null) {
+                val weatherParams = getWeatherParams(context)
+                return@withContext createWeatherWidgetData(context, cachedWeatherResult, weatherParams.imageQuality)
+            }
+
+            // Si no hay caché, cargar de la API como antes
             val currentCity = userCustomLocationLocalRepository.getSelectedLocation()
                 ?: userCustomLocationLocalRepository.getCurrentLocation()
 
@@ -78,6 +86,23 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            null
+        }
+    }
+
+    /**
+     * Intenta cargar el clima desde la caché (preferencias)
+     */
+    private suspend fun loadCachedWeather(): Forecast? {
+        return try {
+            val cachedResult = weatherRemoteRepository.getLastWeatherForecast("last_weather_data")
+            when (cachedResult) {
+                is Result.Success -> {
+                    cachedResult.data
+                }
+                is Result.Error -> null
+            }
+        } catch (e: Exception) {
             null
         }
     }

@@ -15,8 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import com.kronos.multiplatform.weatherapp.components.theme.AppTheme
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
-import com.kronos.multiplatform.weatherapp.features.home.HomeScreen
 import com.kronos.multiplatform.weatherapp.features.add_city.AddCityScreen
+import com.kronos.multiplatform.weatherapp.features.home.HomeScreen
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -71,7 +71,9 @@ fun App() {
 
         viewModel.getPreferenceDays(
             daysPreferenceKey,
-            daysPreferenceDefault.toInt()
+            if (daysPreferenceDefault.isEmpty()) {
+                3
+            } else daysPreferenceDefault.toInt()
         )
 
         viewModel.getPreferenceDefaultCity(
@@ -97,7 +99,7 @@ fun App() {
 
     Scaffold(
     ) {
-        AppTheme (
+        AppTheme(
             darkTheme = isDarkTheme == stringResource(Res.string.theme_preference_default_value)
         ) {
             NavHost(

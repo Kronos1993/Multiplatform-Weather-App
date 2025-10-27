@@ -35,7 +35,7 @@ class WeatherApplication : Application() {
         }
         createNotificationChanel()
 
-        scheduleJobIfNeeded(applicationContext, 60 * 60000L)
+        scheduleJobIfNeeded(applicationContext, 15 * 60000L)
 
         NotifierManager.initialize(
             configuration = NotificationPlatformConfiguration.Android(

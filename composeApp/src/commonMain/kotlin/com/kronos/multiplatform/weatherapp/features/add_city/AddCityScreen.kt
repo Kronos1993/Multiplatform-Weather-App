@@ -71,12 +71,13 @@ fun AddCityScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding(),
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             snackbarHost = {
                 SnackbarHost(snackbarHostState) { data ->
                     Snackbar(

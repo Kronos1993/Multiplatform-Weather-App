@@ -1,5 +1,6 @@
 package com.kronos.multiplatform.weatherapp.data.remote.datasources
 
+import com.kronos.multiplatform.weatherapp.core.preferences.datasource.PreferenceDataSource
 import com.kronos.multiplatform.weatherapp.core.result.Error
 import com.kronos.multiplatform.weatherapp.core.result.Result
 import com.kronos.multiplatform.weatherapp.data.mapper.toCurrentForecast
@@ -28,6 +29,7 @@ class WeatherRemoteDataSourceImpl(
     private val urlProvider: UrlProvider,
     private val httpClient: KtorClientFactory,
     private val httpEngine: KtorEngineFactory,
+    private val preferenceDataSource: PreferenceDataSource
 ) : WeatherRemoteDataSource {
 
 
@@ -564,5 +566,49 @@ class WeatherRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun getLastWeatherForecast(
+        prefKey: String,
+    ): Result<Forecast, Error> {
+        val json = preferenceDataSource.getPreference(prefKey, "")
+
+        if (json.isEmpty()) {
+            return Result.Error(
+                FullNetworkError(
+                    NetworkError.UNKNOWN,
+                    "UNKNOWN",
+                    0
+                )
+            )
+        }
+        val jsonConfig = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            coerceInputValues = true
+            explicitNulls = false
+            useAlternativeNames = false
+        }
+        val weatherData = jsonConfig.decodeFromString<ForecastResponseDto>(json)
+        return Result.Success(weatherData.toForecast())
+    }
+
+    override suspend fun setLastWeatherForecast(
+        prefKey: String,
+        forecast: Forecast,
+    ): Result<Boolean, Error> {
+        val jsonConfig = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            coerceInputValues = true
+            explicitNulls = false
+            useAlternativeNames = false
+        }
+        val json = jsonConfig.encodeToString(forecast)
+        preferenceDataSource.setPreference(prefKey, json)
+
+        val data = preferenceDataSource.getPreference(prefKey, "")
+
+        return Result.Success(data.isNotEmpty())
+
+    }
 
 }

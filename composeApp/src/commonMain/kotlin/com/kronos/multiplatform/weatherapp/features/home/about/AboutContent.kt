@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.features.about
+package com.kronos.multiplatform.weatherapp.features.home.about
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -95,6 +95,7 @@ fun AboutInfoSection(
             modifier = Modifier.padding(horizontal = 8.dp),
             size = ComponentSize.MEDIUM,
             maxLines = Int.MAX_VALUE,
+            textColor = Color.White,
             textAlign = TextAlign.Justify
         )
 
@@ -103,23 +104,28 @@ fun AboutInfoSection(
         TitleText(
             text = featuresTitle,
             size = ComponentSize.SMALL,
+            textColor = Color.White,
             fontWeight = FontWeight.Bold
         )
 
         BodyText(
             text = stringResource(Res.string.about_feature_1),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
         BodyText(
             text = stringResource(Res.string.about_feature_2),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
         BodyText(
             text = stringResource(Res.string.about_feature_3),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
         BodyText(
             text = stringResource(Res.string.about_feature_4),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
 
@@ -128,23 +134,28 @@ fun AboutInfoSection(
         TitleText(
             text = technologiesTitle,
             size = ComponentSize.SMALL,
+            textColor = Color.White,
             fontWeight = FontWeight.Bold
         )
 
         BodyText(
             text = stringResource(Res.string.about_tech_1),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
         BodyText(
             text = stringResource(Res.string.about_tech_2),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
         BodyText(
             text = stringResource(Res.string.about_tech_3),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
         BodyText(
             text = stringResource(Res.string.about_tech_4),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
 
@@ -153,6 +164,8 @@ fun AboutInfoSection(
         BodyText(
             text = stringResource(Res.string.about_github),
             vector = vectorResource(Res.drawable.ic_github),
+            iconTint = Color.White,
+            textColor = Color.White,
             modifier = Modifier.clickable {
                 expectedIntents.openBrowser(githubUrl)
             },
@@ -162,12 +175,14 @@ fun AboutInfoSection(
         BodyText(
             text = stringResource(Res.string.about_version).format(appVersion),
             vector = vectorResource(Res.drawable.compose_multiplatform),
+            textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
 
         BodyText(
             vector = vectorResource(Res.drawable.ic_copyright),
             iconTint = Color.White,
+            textColor = Color.White,
             text = copyright,
             size = ComponentSize.MEDIUM
         )

@@ -37,10 +37,8 @@ import coil3.request.ImageRequest
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.TempIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WaterDropsIndicator
-import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorDashboardAcceptedDark
-import com.kronos.multiplatform.weatherapp.components.theme.BackgroundCardColorDashboardAcceptedLight
-import com.kronos.multiplatform.weatherapp.components.theme.backgroundCardColorDark
-import com.kronos.multiplatform.weatherapp.components.theme.backgroundCardColorLight
+import com.kronos.multiplatform.weatherapp.components.theme.extendedDark
+import com.kronos.multiplatform.weatherapp.components.theme.extendedLight
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
 import com.kronos.multiplatform.weatherapp.core.util.getHour
@@ -83,9 +81,9 @@ fun HourlyItemIndicator(
     modifier: Modifier = Modifier,
 ) {
     val cardBackgroundColor = if (darkTheme) {
-        BackgroundCardColorDashboardAcceptedDark
+        extendedDark.backgroundCardColor.color
     } else {
-        BackgroundCardColorDashboardAcceptedLight
+        extendedLight.backgroundCardColor.color
     }
 
     Card(
@@ -183,10 +181,10 @@ fun WeatherIndicatorList(
     darkTheme: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val cardColor = if (darkTheme) {
-        backgroundCardColorDark
+    val cardBackgroundColor = if (darkTheme) {
+        extendedDark.backgroundCardColor.color
     } else {
-        backgroundCardColorLight
+        extendedLight.backgroundCardColor.color
     }
 
     val displayIndicators = indicators.take(6)
@@ -198,7 +196,7 @@ fun WeatherIndicatorList(
         modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
         elevation = CardDefaults.cardElevation(0.dp),
     ) {
         Column(
@@ -663,9 +661,9 @@ fun DailyWeatherItemIndicator(
     modifier: Modifier = Modifier,
 ) {
     val cardBackgroundColor = if (darkTheme) {
-        BackgroundCardColorDashboardAcceptedDark
+        extendedDark.backgroundCardColor.color
     } else {
-        BackgroundCardColorDashboardAcceptedLight
+        extendedLight.backgroundCardColor.color
     }
 
     Card(
@@ -874,9 +872,9 @@ fun UserCustomLocationItem(
 ) {
 
     val cardBackgroundColor = if (darkTheme) {
-        BackgroundCardColorDashboardAcceptedDark
+        extendedDark.backgroundCardColor.color
     } else {
-        BackgroundCardColorDashboardAcceptedLight
+        extendedLight.backgroundCardColor.color
     }
 
     SwipeActionContainer(

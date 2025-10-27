@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.features.about
+package com.kronos.multiplatform.weatherapp.features.home.about
 
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.core.util.AppInfo

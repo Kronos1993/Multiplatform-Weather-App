@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.features.setting
+package com.kronos.multiplatform.weatherapp.features.home.setting
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.components.SettingRadioOptions
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
@@ -49,6 +50,7 @@ import weather_app.composeapp.generated.resources.preference_days_title
 import weather_app.composeapp.generated.resources.preference_image_quality_entries
 import weather_app.composeapp.generated.resources.preference_image_quality_subtitle
 import weather_app.composeapp.generated.resources.preference_image_quality_title
+import weather_app.composeapp.generated.resources.preference_image_quality_values
 import weather_app.composeapp.generated.resources.preference_lang_entries
 import weather_app.composeapp.generated.resources.preference_lang_subtitle
 import weather_app.composeapp.generated.resources.preference_lang_title
@@ -134,7 +136,7 @@ fun SettingsScreen(
     val imageQualityOptions = stringResource(Res.string.preference_image_quality_entries)
         .split(",")
         .mapIndexed { index, entry ->
-            Pair(entry.trim(), stringResource(Res.string.preference_image_quality_entries).split(",")[index].trim())
+            Pair(entry.trim(), stringResource(Res.string.preference_image_quality_values).split(",")[index].trim())
         }
 
     val themeOptions = stringResource(Res.string.preference_app_theme_entries)
@@ -158,7 +160,6 @@ fun SettingsScreen(
     // UI
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.secondaryContainer
     ){
         Scaffold(
             snackbarHost = {
@@ -170,7 +171,9 @@ fun SettingsScreen(
                     )
                 }
             },
-            modifier = Modifier.fillMaxSize().statusBarsPadding()
+            modifier = Modifier.fillMaxSize().statusBarsPadding(),
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -181,6 +184,8 @@ fun SettingsScreen(
                 SettingRadioOptions(
                     title = stringResource(Res.string.preference_lang_title),
                     subtitle = stringResource(Res.string.preference_lang_subtitle),
+                    textColor = Color.White,
+                    iconTint = Color.White,
                     icon = Icons.Filled.Language,
                     iconDesc = stringResource(Res.string.preference_lang_subtitle),
                     options = langOptions,
@@ -195,6 +200,8 @@ fun SettingsScreen(
                 SettingRadioOptions(
                     title = stringResource(Res.string.preference_theme_title),
                     subtitle = stringResource(Res.string.preference_theme_subtitle),
+                    textColor = Color.White,
+                    iconTint = Color.White,
                     icon = Icons.Filled.Palette,
                     iconDesc = stringResource(Res.string.preference_theme_subtitle),
                     options = themeOptions,
@@ -210,12 +217,14 @@ fun SettingsScreen(
                 SettingRadioOptions(
                     title = stringResource(Res.string.preference_days_title),
                     subtitle = stringResource(Res.string.preference_days_subtitle),
+                    textColor = Color.White,
+                    iconTint = Color.White,
                     icon = Icons.Filled.CalendarToday,
                     iconDesc = stringResource(Res.string.preference_days_subtitle),
                     options = daysOptions,
                     selectedOption = selectedDays,
                     onOptionSelected = {
-                        viewModel.savePreference(amountDaysPreferenceKey, it)
+                        viewModel.savePreference(amountDaysPreferenceKey, it.toInt())
                         viewModel.setPreferenceDays(it.toInt())
                     }
                 )
@@ -223,6 +232,8 @@ fun SettingsScreen(
                 SettingRadioOptions(
                     title = stringResource(Res.string.preference_image_quality_title),
                     subtitle = stringResource(Res.string.preference_image_quality_subtitle),
+                    textColor = Color.White,
+                    iconTint = Color.White,
                     icon = Icons.Filled.Image,
                     iconDesc = stringResource(Res.string.preference_image_quality_subtitle),
                     options = imageQualityOptions,

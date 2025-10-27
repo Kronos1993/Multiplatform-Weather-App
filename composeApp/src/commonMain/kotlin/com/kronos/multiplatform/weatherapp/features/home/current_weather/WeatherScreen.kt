@@ -1,6 +1,5 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -25,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
@@ -34,13 +31,17 @@ import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
-import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentLandscape
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentPortrait
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.current_weather_key
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
+import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_title
 
 @Composable
 fun WeatherScreen(
@@ -51,7 +52,6 @@ fun WeatherScreen(
     amountOfDays: Int,
     defaultCity: String,
     isDarkTheme: Boolean,
-    onForecastAdquired: (Forecast) -> Unit,
 ) {
     val viewModel = koinViewModel<WeatherViewModel>()
     val weather by viewModel.weather.collectAsStateWithLifecycle()
@@ -60,6 +60,14 @@ fun WeatherScreen(
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+
+    viewModel.initNotificationsString(
+        stringResource(Res.string.current_weather_key),
+        stringResource(Res.string.notification_title),
+        stringResource(Res.string.notification_short_details),
+        stringResource(Res.string.notification_long_details),
+    )
 
     LaunchedEffect(Unit) {
         viewModel.initLocations(currentLang, apiKey, amountOfDays, defaultCity)
@@ -93,12 +101,13 @@ fun WeatherScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding(),
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             snackbarHost = {
                 SnackbarHost(snackbarHostState) { data ->
                     Snackbar(
@@ -131,15 +140,6 @@ fun WeatherScreen(
                     val rootModifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 15.dp,
-                                topEnd = 15.dp
-                            )
-                        )
-                        .background(
-                            MaterialTheme.colorScheme.surface
-                        )
                         .consumeWindowInsets(WindowInsets.navigationBars)
 
                     when (deviceScreenConfiguration) {
@@ -170,7 +170,6 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
-                                            onForecastAdquired(weather!!)
                                             WeatherContentPortrait(
                                                 weather = weather!!,
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
@@ -213,7 +212,6 @@ fun WeatherScreen(
 
                                 WeatherScreenState.WeatherObtained -> {
                                     if (weather != null) {
-                                        onForecastAdquired(weather!!)
                                         WeatherContentLandscape(
                                             weather = weather!!,
                                             isDarkTheme = isDarkTheme,
@@ -260,7 +258,6 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
-                                            onForecastAdquired(weather!!)
                                             WeatherContentPortrait(
                                                 weather = weather!!,
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
@@ -309,7 +306,6 @@ fun WeatherScreen(
 
                                     WeatherScreenState.WeatherObtained -> {
                                         if (weather != null) {
-                                            onForecastAdquired(weather!!)
                                             WeatherContentLandscape(
                                                 weather = weather!!,
                                                 isDarkTheme = isDarkTheme,

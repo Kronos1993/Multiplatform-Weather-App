@@ -2,7 +2,6 @@ package com.kronos.multiplatform.weatherapp.components.button
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
@@ -44,11 +43,6 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,9 +51,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kronos.multiplatform.weatherapp.components.BodyText
-import com.kronos.multiplatform.weatherapp.components.IconPosition
 import com.kronos.multiplatform.weatherapp.components.ComponentSize
-import kotlinx.coroutines.delay
+import com.kronos.multiplatform.weatherapp.components.IconPosition
 
 @Composable
 fun Button(
@@ -344,7 +337,7 @@ private fun getButtonColors(
         ButtonStyle.PRIMARY -> when (type) {
             ButtonType.FILLED -> ButtonColors(
                 containerColor = colors.primary,
-                contentColor = colors.onPrimary,
+                contentColor = Color.White,
                 disabledContainerColor = colors.primaryContainer.copy(alpha = 0.12f),
                 disabledContentColor = colors.onPrimary.copy(alpha = 0.38f)
             )

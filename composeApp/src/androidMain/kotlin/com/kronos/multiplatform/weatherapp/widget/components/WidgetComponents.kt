@@ -48,7 +48,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_locations_widget),
                     contentDescription = "Location",
-                    modifier = GlanceModifier.size(22.dp)
+                    modifier = GlanceModifier.size(14.dp)
                 )
 
                 Spacer(modifier = GlanceModifier.width(8.dp))
@@ -57,7 +57,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     text = weatherData.location,
                     style = TextStyle(
                         fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp, // Aumentado
+                        fontSize = 14.sp, // Aumentado
                         color = ColorProvider(Color.White)
                     ),
                     modifier = GlanceModifier.defaultWeight()
@@ -346,8 +346,6 @@ private fun ForecastDayItem(
                 color = ColorProvider(Color.White)
             )
         )
-
-        Spacer(modifier = GlanceModifier.height(4.dp))
 
         val image = runBlocking(Dispatchers.IO) {
             BitmapFactory.decodeStream(

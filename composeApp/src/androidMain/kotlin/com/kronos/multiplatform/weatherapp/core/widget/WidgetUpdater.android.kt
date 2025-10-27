@@ -11,7 +11,7 @@ import com.kronos.multiplatform.weatherapp.widget.LargeWeatherGlanceWidget
 import com.kronos.multiplatform.weatherapp.widget.LargeWeatherWidgetReceiver
 import com.kronos.multiplatform.weatherapp.widget.MediumWeatherGlanceWidget
 import com.kronos.multiplatform.weatherapp.widget.MediumWeatherWidgetReceiver
-import com.kronos.multiplatform.weatherapp.widget.WeatherGlanceWidget
+import com.kronos.multiplatform.weatherapp.widget.SmallWeatherGlanceWidget
 import com.kronos.multiplatform.weatherapp.widget.WeatherWidgetReceiver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,7 +38,7 @@ actual class WidgetUpdater(private val context: Context) : IWidgetUpdater {
             val glanceAppWidgetManager = GlanceAppWidgetManager(context)
 
             try {
-                val smallGlanceWidget = WeatherGlanceWidget()
+                val smallGlanceWidget = SmallWeatherGlanceWidget()
                 updateGlanceWidget(glanceAppWidgetManager, smallGlanceWidget, "Small")
             } catch (e: Exception) {
                 log("Error updating small glance widget: ${e.message}", true)
@@ -171,7 +171,7 @@ actual class WidgetUpdater(private val context: Context) : IWidgetUpdater {
 
             when (widgetClass) {
                 WeatherWidgetReceiver::class.java -> {
-                    val glanceWidget = WeatherGlanceWidget()
+                    val glanceWidget = SmallWeatherGlanceWidget()
                     updateGlanceWidget(glanceAppWidgetManager, glanceWidget, "Small")
                 }
 

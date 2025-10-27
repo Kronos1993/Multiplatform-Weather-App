@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -152,6 +154,7 @@ fun SettingRadioOption(
 fun SettingRadioOptions(
     title: String,
     subtitle: String,
+    textColor: Color = Color.Unspecified,
     icon: ImageVector? = null,
     iconDesc: String? = null,
     iconTint: Color = Color.Unspecified,
@@ -165,7 +168,7 @@ fun SettingRadioOptions(
             .fillMaxWidth()
             .padding(4.dp)
     ) {
-        Column {
+        Column(Modifier.padding(4.dp)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,13 +187,15 @@ fun SettingRadioOptions(
                 }
                 TitleText(
                     text = title,
-                    modifier = Modifier
+                    modifier = Modifier,
+                    textColor = textColor
                 )
             }
             BodyText(
                 text = subtitle,
                 modifier = Modifier,
-                size = ComponentSize.LARGE
+                size = ComponentSize.LARGE,
+                textColor = textColor
             )
             options.forEach { option ->
                 Row(
@@ -199,18 +204,23 @@ fun SettingRadioOptions(
                         .clickable {
                             onOptionSelected(option.second)
                         }
-                        .padding(vertical = 4.dp),
+                        .padding(horizontal = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween, // Align items with space between
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     BodyText(
                         text = option.first,
                         modifier = Modifier,
-                        size = ComponentSize.LARGE
+                        size = ComponentSize.LARGE,
+                        textColor = textColor
                     )
                     RadioButton(
                         selected = selectedOption == option.second,
-                        onClick = { onOptionSelected(option.second) }
+                        onClick = { onOptionSelected(option.second) },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colorScheme.inversePrimary,
+                            unselectedColor = MaterialTheme.colorScheme.inversePrimary
+                        )
                     )
                 }
             }

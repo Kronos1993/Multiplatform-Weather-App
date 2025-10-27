@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.features.about
+package com.kronos.multiplatform.weatherapp.features.home.about
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,12 +42,13 @@ fun AboutScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding(),
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         ) { innerPadding ->
 
             val rootModifier = Modifier

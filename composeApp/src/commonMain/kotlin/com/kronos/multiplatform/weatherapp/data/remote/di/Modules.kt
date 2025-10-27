@@ -27,6 +27,7 @@ val commonRemoteModules = module {
             get(),
             get(named(KtorClientFactoryType.PUBLIC)),
             get(),
+            get()
         )
     }.bind<WeatherRemoteDataSource>()
 
