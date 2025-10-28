@@ -40,6 +40,8 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     private val preferenceRepository: PreferenceRepository by inject()
     private val urlProvider: UrlProvider by inject()
 
+    protected abstract fun getClassName(): Class<out GlanceAppWidget>
+
     /**
      * Carga los datos del clima desde cache o API.
      * Luego los guarda en el estado del widget (GlanceState).
@@ -47,7 +49,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     protected suspend fun loadWeatherData(context: Context): WeatherWidgetData? = withContext(Dispatchers.IO) {
         try {
             // Primero intentar cargar el clima guardado en caché local (repositorio)
-            val cachedWeatherResult = loadCachedWeather()
+            val cachedWeatherResult = loadCachedWeather(context)
             if (cachedWeatherResult != null) {
                 val weatherParams = getWeatherParams(context)
                 val data = createWeatherWidgetData(context, cachedWeatherResult, weatherParams.imageQuality)
@@ -109,9 +111,9 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     /**
      * Intenta cargar el clima desde la caché (preferencias locales del repositorio)
      */
-    private suspend fun loadCachedWeather(): Forecast? {
+    private suspend fun loadCachedWeather(context: Context): Forecast? {
         return try {
-            val cachedResult = weatherRemoteRepository.getLastWeatherForecast("last_weather_data")
+            val cachedResult = weatherRemoteRepository.getLastWeatherForecast(context.getString(R.string.current_weather_key))
             when (cachedResult) {
                 is Result.Success -> cachedResult.data
                 is Result.Error -> null
@@ -177,7 +179,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     private suspend fun saveWeatherToGlance(context: Context, data: WeatherWidgetData) {
         val manager = GlanceAppWidgetManager(context)
-        val glanceIds = manager.getGlanceIds(this::class.java)
+        val glanceIds = manager.getGlanceIds(getClassName())
         glanceIds.forEach { glanceId ->
             updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
                 prefs.toMutablePreferences().apply {
@@ -201,7 +203,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     private suspend fun loadLastGlanceData(context: Context): WeatherWidgetData? {
         val manager = GlanceAppWidgetManager(context)
-        val glanceIds = manager.getGlanceIds(this::class.java)
+        val glanceIds = manager.getGlanceIds(getClassName())
         if (glanceIds.isEmpty()) return null
         val glanceId = glanceIds.first()
 

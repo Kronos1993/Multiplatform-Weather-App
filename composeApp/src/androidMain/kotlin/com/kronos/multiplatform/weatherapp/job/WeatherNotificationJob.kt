@@ -124,6 +124,7 @@ class WeatherNotificationJob : JobService() {
 
         result
             .onSuccess { forecast ->
+                weatherRemoteRepository.setLastWeatherForecast(resources.getString(R.string.current_weather_key),forecast)
                 createWeatherNotification(forecast)
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }

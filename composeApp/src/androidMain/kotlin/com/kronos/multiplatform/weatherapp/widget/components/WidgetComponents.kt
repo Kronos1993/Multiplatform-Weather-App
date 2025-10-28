@@ -1,8 +1,10 @@
 package com.kronos.multiplatform.weatherapp.widget.components
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -237,7 +239,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 }
 
 @Composable
-fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?) {
+fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?,context: Context) {
     Box(
         modifier = GlanceModifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -334,14 +336,14 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     Column(
                         horizontalAlignment = Alignment.Start
                     ) {
-                        WeatherDetailItem("Humidity", "${weatherData.humidity}%")
+                        WeatherDetailItem(context.getString(R.string.humidity), "${weatherData.humidity}%")
                         Spacer(modifier = GlanceModifier.height(8.dp))
                         WeatherDetailItem(
-                            "Wind",
+                            context.getString(R.string.wind),
                             "${weatherData.windSpeed} ${weatherData.windDirection}"
                         )
                         Spacer(modifier = GlanceModifier.height(8.dp))
-                        WeatherDetailItem("UV", weatherData.uvIndex)
+                        WeatherDetailItem(context.getString(R.string.uv_index), weatherData.uvIndex)
                     }
                 }
 
@@ -442,7 +444,7 @@ private fun LoadingWidget() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            "Loading...", style = TextStyle(
+            stringResource(R.string.loading_dialog_text), style = TextStyle(
                 fontSize = 14.sp, // Aumentado de 12sp a 14sp
                 color = ColorProvider(Color.White)
             )
