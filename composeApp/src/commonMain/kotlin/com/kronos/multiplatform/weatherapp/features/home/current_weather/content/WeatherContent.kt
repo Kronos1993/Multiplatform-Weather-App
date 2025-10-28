@@ -41,7 +41,6 @@ import com.kronos.multiplatform.weatherapp.components.CurrentWeatherCompactItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherLandscapeCompactItem
 import com.kronos.multiplatform.weatherapp.components.DailyWeatherList
-import com.kronos.multiplatform.weatherapp.components.FixMapView
 import com.kronos.multiplatform.weatherapp.components.HourlyItemIndicator
 import com.kronos.multiplatform.weatherapp.components.WeatherIndicatorList
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
@@ -52,6 +51,8 @@ import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SunS
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.VisibilityIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WaterDropsIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WindIndicator
+import com.kronos.multiplatform.weatherapp.components.maps.FixMapView
+import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.util.isToday
 import com.kronos.multiplatform.weatherapp.core.util.of
@@ -116,7 +117,8 @@ fun WeatherContentPortrait(
         .nestedScroll(nestedScrollConnection)
         .consumeWindowInsets(WindowInsets.navigationBars)
 
-    val shouldUseCompactBehavior = deviceScreenConfiguration == DeviceScreenConfiguration.MOBILE_PORTRAIT
+    val shouldUseCompactBehavior =
+        deviceScreenConfiguration == DeviceScreenConfiguration.MOBILE_PORTRAIT
     val actualCompactMode = isCompact && shouldUseCompactBehavior
 
     Column(
@@ -154,7 +156,7 @@ fun WeatherHeaderSection(
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
-    currentLang:String,
+    currentLang: String,
     modifier: Modifier = Modifier,
     isCompactMode: Boolean = false
 ) {
@@ -350,8 +352,16 @@ fun WeatherContentSection(
                 modifier = Modifier
                     .fillMaxSize()
                     .height(300.dp),
-                lat = currentWeather.location.lat,
-                lon = currentWeather.location.lon,
+                markers = listOf(
+                    MapMarker(
+                        id = "1",
+                        latitude = currentWeather.location.lat,
+                        longitude = currentWeather.location.lon,
+                        title = currentWeather.location.name,
+                        description = currentWeather.location.region,
+                        customProperties = mapOf()
+                    )
+                ),
                 onMapClick = {},
                 onMapLongClick = {},
                 darkTheme = isDarkTheme
@@ -389,7 +399,7 @@ fun WeatherContentLandscape(
 
             when (deviceScreenConfiguration) {
                 DeviceScreenConfiguration.MOBILE_PORTRAIT,
-                DeviceScreenConfiguration.TABLET_PORTRAIT-> {
+                DeviceScreenConfiguration.TABLET_PORTRAIT -> {
                     WeatherContentPortrait(
                         weather = weather!!,
                         deviceScreenConfiguration = deviceScreenConfiguration,
@@ -400,7 +410,7 @@ fun WeatherContentLandscape(
                     )
                 }
 
-                DeviceScreenConfiguration.MOBILE_LANDSCAPE->{
+                DeviceScreenConfiguration.MOBILE_LANDSCAPE -> {
                     CurrentWeatherLandscapeCompactItem(
                         currentWeather = weather,
                         darkTheme = isDarkTheme,
@@ -410,6 +420,7 @@ fun WeatherContentLandscape(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
                 DeviceScreenConfiguration.TABLET_LANDSCAPE,
                 DeviceScreenConfiguration.DESKTOP -> {
                     CurrentWeatherBigScreenCompactItem(
@@ -587,8 +598,16 @@ fun WeatherContentSectionLandscape(
                 modifier = Modifier
                     .fillMaxSize()
                     .height(300.dp),
-                lat = currentWeather.location.lat,
-                lon = currentWeather.location.lon,
+                markers = listOf(
+                    MapMarker(
+                        id = "1",
+                        latitude = currentWeather.location.lat,
+                        longitude = currentWeather.location.lon,
+                        title = currentWeather.location.name,
+                        description = currentWeather.location.region,
+                        customProperties = mapOf()
+                    )
+                ),
                 onMapClick = {},
                 onMapLongClick = {},
                 darkTheme = isDarkTheme

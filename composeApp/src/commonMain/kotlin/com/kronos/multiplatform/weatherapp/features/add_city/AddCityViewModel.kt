@@ -1,6 +1,7 @@
 package com.kronos.multiplatform.weatherapp.features.add_city
 
 import androidx.lifecycle.viewModelScope
+import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
@@ -19,6 +20,9 @@ class AddCityViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
 ) : ParentViewModel() {
+
+    private val _markers = MutableStateFlow<List<MapMarker>>(listOf())
+    val markers: StateFlow<List<MapMarker>> = _markers.asStateFlow()
 
     private val _forecast = MutableStateFlow<Forecast?>(null)
     val forecast: StateFlow<Forecast?> = _forecast.asStateFlow()
@@ -73,6 +77,24 @@ class AddCityViewModel(
                     _screenState.value = AddCityScreenState.NoCity
                 }
             }
+        }
+    }
+
+    fun getLocationMarkers() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val list = mutableListOf<MapMarker>()
+            userCustomLocationLocalRepository.listAll().forEach { location ->
+                val marker = MapMarker(
+                    id = location.id.toString(),
+                    latitude = location.lat?:0.0,
+                    longitude = location.lon?:0.0,
+                    title = location.cityName,
+                    description = location.cityName,
+                    customProperties = mapOf()
+                )
+                list.add(marker)
+            }
+            _markers.value = list.toList()
         }
     }
 

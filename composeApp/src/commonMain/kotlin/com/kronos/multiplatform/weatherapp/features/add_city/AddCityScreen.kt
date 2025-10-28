@@ -28,7 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.components.ComponentSize
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
-import com.kronos.multiplatform.weatherapp.components.MapView
+import com.kronos.multiplatform.weatherapp.components.maps.MapView
 import com.kronos.multiplatform.weatherapp.components.ShowCityInfoDialog
 import com.kronos.multiplatform.weatherapp.components.button.IconButton
 import org.koin.compose.viewmodel.koinViewModel
@@ -45,6 +45,7 @@ fun AddCityScreen(
 ) {
     val viewModel = koinViewModel<AddCityViewModel>()
     val forecast by viewModel.forecast.collectAsStateWithLifecycle()
+    val markers by viewModel.markers.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
 
@@ -67,6 +68,10 @@ fun AddCityScreen(
         if (screenState == AddCityScreenState.CityAdded) {
             navController.popBackStack()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.getLocationMarkers()
     }
 
     Surface(
@@ -103,6 +108,7 @@ fun AddCityScreen(
                 ){
                     MapView(
                         darkTheme = isDarkTheme,
+                        markers = markers,
                         onMapClick = { coordinate ->
                             viewModel.onMapClick(
                                 coordinate.latitude,

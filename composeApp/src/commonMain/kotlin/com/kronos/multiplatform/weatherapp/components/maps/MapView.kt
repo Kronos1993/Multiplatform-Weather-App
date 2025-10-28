@@ -1,35 +1,54 @@
-package com.kronos.multiplatform.weatherapp.components
+package com.kronos.multiplatform.weatherapp.components.maps
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import com.kronos.multiplatform.weatherapp.components.maps.markers.GeoJsonMapper
+import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.components.theme.extendedDark
 import com.kronos.multiplatform.weatherapp.components.theme.extendedLight
 import io.github.dellisd.spatialk.geojson.Position
+import org.jetbrains.compose.resources.painterResource
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.expressions.dsl.asString
+import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.format
+import org.maplibre.compose.expressions.dsl.image
+import org.maplibre.compose.expressions.dsl.offset
+import org.maplibre.compose.expressions.dsl.span
+import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
+import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
+import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.ic_locations
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun FixMapView(
-    lat: Double,
-    lon: Double,
+    markers: List<MapMarker> = listOf(),
     darkTheme: Boolean,
     onMapClick: (Position) -> Unit,
     onMapLongClick: (Position) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val marker = painterResource(Res.drawable.ic_locations)
 
     val cardBackgroundColor = if (darkTheme) {
         extendedDark.backgroundCardColor.color
@@ -40,7 +59,7 @@ fun FixMapView(
     val camera =
         rememberCameraState(
             firstPosition = CameraPosition(
-                target = Position(lon, lat), zoom = 5.5
+                target = Position(markers[0].longitude, markers[0].latitude), zoom = 5.5
             )
         )
 
@@ -87,12 +106,39 @@ fun FixMapView(
             },
         ) {
 
+            val myMarkerGeoJson = remember(markers) {
+                GeoJsonMapper.markersToJsonString(markers)
+            }
+
+            val myMarkerSource = rememberGeoJsonSource(
+                data = GeoJsonData.JsonString(myMarkerGeoJson)
+            )
+
+            SymbolLayer(
+                id = "current-location",
+                source = myMarkerSource,
+                onClick = { features ->
+                    features.firstOrNull()
+                    ClickResult.Consume
+                },
+                iconImage = image(marker),
+                iconSize = const(.5f),
+                iconColor = const(Color.Black),
+                textField =
+                    format(
+                        span(feature["title"].asString(), textSize = const(1f.em)),
+                    ),
+                textFont = const(listOf("Noto Sans Regular")),
+                textColor = const(Color.Black),
+                textOffset = offset(0.em, 0.6.em),
+            )
         }
     }
 }
 
 @Composable
 fun MapView(
+    markers: List<MapMarker> = listOf(),
     darkTheme: Boolean,
     onMapClick: (Position) -> Unit,
     onMapLongClick: (Position) -> Unit,
@@ -102,6 +148,8 @@ fun MapView(
     val camera = rememberCameraState()
 
     val styleState = rememberStyleState()
+
+    val marker = painterResource(Res.drawable.ic_locations)
 
     LaunchedEffect(Unit) {
         camera.animateTo(
@@ -136,6 +184,31 @@ fun MapView(
             ClickResult.Pass
         },
     ) {
+        val myMarkerGeoJson = remember(markers) {
+            GeoJsonMapper.markersToJsonString(markers)
+        }
 
+        val myMarkerSource = rememberGeoJsonSource(
+            data = GeoJsonData.JsonString(myMarkerGeoJson)
+        )
+
+        SymbolLayer(
+            id = "current-locations",
+            source = myMarkerSource,
+            onClick = { features ->
+                features.firstOrNull()
+                ClickResult.Consume
+            },
+            iconImage = image(marker),
+            iconSize = const(.5f),
+            iconColor = const(Color.Black),
+            textField =
+                format(
+                    span(feature["title"].asString(), textSize = const(1f.em)),
+                ),
+            textFont = const(listOf("Noto Sans Regular")),
+            textColor = const(Color.Black),
+            textOffset = offset(0.em, 0.6.em),
+        )
     }
 }
