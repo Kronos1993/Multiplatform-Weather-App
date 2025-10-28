@@ -115,11 +115,13 @@ fun WeatherScreen(
                         containerColor = when {
                             data.visuals.message.contains("error", ignoreCase = true) ->
                                 MaterialTheme.colorScheme.error
+
                             else -> MaterialTheme.colorScheme.primary
                         },
                         contentColor = when {
                             data.visuals.message.contains("error", ignoreCase = true) ->
                                 MaterialTheme.colorScheme.onError
+
                             else -> MaterialTheme.colorScheme.onPrimary
                         }
                     )
@@ -130,7 +132,7 @@ fun WeatherScreen(
                 innerPadding = paddingValues,
                 isRefreshing = screenState == WeatherScreenState.Loading,
                 onRefresh = {
-                    viewModel.refreshWeather(currentLang, apiKey, amountOfDays)
+                    viewModel.refreshWeather(currentLang, apiKey, amountOfDays, imageQuality)
                 }
             ) {
 
@@ -164,7 +166,14 @@ fun WeatherScreen(
                                     WeatherScreenState.NoWeather -> {
                                         NoWeatherItem(
                                             modifier = Modifier.fillMaxSize(),
-                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                            onRetry = {
+                                                viewModel.retryLastOperation(
+                                                    currentLang,
+                                                    apiKey,
+                                                    amountOfDays,
+                                                    imageQuality
+                                                )
+                                            }
                                         )
                                     }
 
@@ -181,7 +190,14 @@ fun WeatherScreen(
                                         } else {
                                             NoWeatherItem(
                                                 modifier = Modifier.fillMaxSize(),
-                                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                                onRetry = {
+                                                    viewModel.retryLastOperation(
+                                                        currentLang,
+                                                        apiKey,
+                                                        amountOfDays,
+                                                        imageQuality
+                                                    )
+                                                }
                                             )
                                         }
                                     }
@@ -206,7 +222,14 @@ fun WeatherScreen(
                                 WeatherScreenState.NoWeather -> {
                                     NoWeatherItem(
                                         modifier = rootModifier,
-                                        onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                        onRetry = {
+                                            viewModel.retryLastOperation(
+                                                currentLang,
+                                                apiKey,
+                                                amountOfDays,
+                                                imageQuality
+                                            )
+                                        }
                                     )
                                 }
 
@@ -224,14 +247,21 @@ fun WeatherScreen(
                                     } else {
                                         NoWeatherItem(
                                             modifier = rootModifier,
-                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                            onRetry = {
+                                                viewModel.retryLastOperation(
+                                                    currentLang,
+                                                    apiKey,
+                                                    amountOfDays,
+                                                    imageQuality
+                                                )
+                                            }
                                         )
                                     }
                                 }
                             }
                         }
 
-                        DeviceScreenConfiguration.TABLET_PORTRAIT->{
+                        DeviceScreenConfiguration.TABLET_PORTRAIT -> {
                             Column(
                                 modifier = rootModifier,
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -252,7 +282,14 @@ fun WeatherScreen(
                                     WeatherScreenState.NoWeather -> {
                                         NoWeatherItem(
                                             modifier = Modifier.fillMaxSize(),
-                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                            onRetry = {
+                                                viewModel.retryLastOperation(
+                                                    currentLang,
+                                                    apiKey,
+                                                    amountOfDays,
+                                                    imageQuality
+                                                )
+                                            }
                                         )
                                     }
 
@@ -269,13 +306,21 @@ fun WeatherScreen(
                                         } else {
                                             NoWeatherItem(
                                                 modifier = Modifier.fillMaxSize(),
-                                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                                onRetry = {
+                                                    viewModel.retryLastOperation(
+                                                        currentLang,
+                                                        apiKey,
+                                                        amountOfDays,
+                                                        imageQuality
+                                                    )
+                                                }
                                             )
                                         }
                                     }
                                 }
                             }
                         }
+
                         DeviceScreenConfiguration.TABLET_LANDSCAPE,
                         DeviceScreenConfiguration.DESKTOP -> {
                             Column(
@@ -300,7 +345,14 @@ fun WeatherScreen(
                                     WeatherScreenState.NoWeather -> {
                                         NoWeatherItem(
                                             modifier = Modifier.fillMaxSize(),
-                                            onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                            onRetry = {
+                                                viewModel.retryLastOperation(
+                                                    currentLang,
+                                                    apiKey,
+                                                    amountOfDays,
+                                                    imageQuality
+                                                )
+                                            }
                                         )
                                     }
 
@@ -317,7 +369,14 @@ fun WeatherScreen(
                                         } else {
                                             NoWeatherItem(
                                                 modifier = Modifier.fillMaxSize(),
-                                                onRetry = { viewModel.retryLastOperation(currentLang, apiKey, amountOfDays) }
+                                                onRetry = {
+                                                    viewModel.retryLastOperation(
+                                                        currentLang,
+                                                        apiKey,
+                                                        amountOfDays,
+                                                        imageQuality
+                                                    )
+                                                }
                                             )
                                         }
                                     }

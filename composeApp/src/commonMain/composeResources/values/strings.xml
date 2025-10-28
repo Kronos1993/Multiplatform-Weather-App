@@ -63,4 +63,7 @@
     <string name="exit_dialog_yes">Yes</string>
     <string name="exit_dialog_no">No</string>
 
+    <string name="marker_to_close">Can't create a marker to close to another</string>
+    <string name="add_city">Add City</string>
+    <string name="close">Close</string>
 </resources>

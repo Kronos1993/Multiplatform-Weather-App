@@ -62,4 +62,9 @@
     <string name="exit_dialog_body">Estas seguro que quieres salir?</string>
     <string name="exit_dialog_yes">Yes</string>
     <string name="exit_dialog_no">No</string>
+
+    <string name="marker_to_close">No puedes crear un marcador tan cerca de otro</string>
+    <string name="add_city">Añadir ciudad</string>
+    <string name="close">Cerrar</string>
+
 </resources>

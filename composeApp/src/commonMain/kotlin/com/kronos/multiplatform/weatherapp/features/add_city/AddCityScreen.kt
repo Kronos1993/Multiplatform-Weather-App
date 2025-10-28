@@ -30,11 +30,16 @@ import com.kronos.multiplatform.weatherapp.components.ComponentSize
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.components.maps.MapView
 import com.kronos.multiplatform.weatherapp.components.ShowCityInfoDialog
+import com.kronos.multiplatform.weatherapp.components.ShowSelectedCityInfoDialog
 import com.kronos.multiplatform.weatherapp.components.button.IconButton
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.add_city
+import weather_app.composeapp.generated.resources.close
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
+import weather_app.composeapp.generated.resources.marker_to_close
 
 @Composable
 fun AddCityScreen(
@@ -46,8 +51,11 @@ fun AddCityScreen(
     val viewModel = koinViewModel<AddCityViewModel>()
     val forecast by viewModel.forecast.collectAsStateWithLifecycle()
     val markers by viewModel.markers.collectAsStateWithLifecycle()
+    val markerSelected by viewModel.markerSelected.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
+
+    val errorMessage = stringResource(Res.string.marker_to_close)
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -109,15 +117,24 @@ fun AddCityScreen(
                     MapView(
                         darkTheme = isDarkTheme,
                         markers = markers,
-                        onMapClick = { coordinate ->
-                            viewModel.onMapClick(
-                                coordinate.latitude,
-                                coordinate.longitude,
-                                currentLang,
-                                apiKey
-                            )
+                        onMarkerClick = {
+                            viewModel.setMarkerSelected(it)
                         },
-                        onMapLongClick = {},
+                        onMapClick = { coordinate,canAdd ->
+                            if (canAdd){
+                                viewModel.onMapClick(
+                                    coordinate.latitude,
+                                    coordinate.longitude,
+                                    currentLang,
+                                    apiKey
+                                )
+                            }else{
+                                viewModel.setError(errorMessage)
+                            }
+                        },
+                        onMapLongClick = {coordinate,canAdd->
+
+                        },
                         modifier = Modifier.fillMaxSize()
                     )
 
@@ -146,11 +163,21 @@ fun AddCityScreen(
                 cityName = forecast?.location?.name ?: "",
                 temp = "${forecast?.current?.tempC ?: ""}°C",
                 showDialog = screenState == AddCityScreenState.CityObtained,
-                confirmText = "Add city",
+                confirmText = stringResource(Res.string.add_city),
                 onConfirm = { viewModel.addLocation() },
-                cancelText = "Cancel",
+                cancelText = stringResource(Res.string.close),
                 onCancel = { viewModel.dismissCityInfo() },
                 onClose = { viewModel.dismissCityInfo() }
+            )
+
+            ShowSelectedCityInfoDialog(
+                cityName = markerSelected?.title ?: "",
+                temp = "${markerSelected?.customProperties["temp"] ?: ""}°C",
+                iconUrl = markerSelected?.customProperties["icon"] ?: "",
+                showDialog = screenState == AddCityScreenState.ShowCityInfo,
+                confirmText = stringResource(Res.string.close),
+                onConfirm = { viewModel.dismissMarkerInfo() },
+                onClose = { viewModel.dismissMarkerInfo() }
             )
         }
     }

@@ -11,7 +11,9 @@ internal fun UserCustomLocationEntity.toDomain(): UserCustomLocation =
         isCurrent = isCurrent,
         isSelected = isSelected,
         lat = lat,
-        lon = lon
+        lon = lon,
+        tempC = tempC,
+        icon = icon
     )
 
 internal fun UserCustomLocation.toEntity(): UserCustomLocationEntity =
@@ -21,6 +23,8 @@ internal fun UserCustomLocation.toEntity(): UserCustomLocationEntity =
         isCurrent = isCurrent,
         isSelected = isSelected,
         lat = lat!!,
-        lon = lon!!
+        lon = lon!!,
+        tempC = tempC,
+        icon = icon
     )
 

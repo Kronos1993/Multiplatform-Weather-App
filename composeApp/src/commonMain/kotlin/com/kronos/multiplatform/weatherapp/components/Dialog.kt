@@ -1,9 +1,12 @@
 package com.kronos.multiplatform.weatherapp.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -16,7 +19,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
@@ -191,6 +200,66 @@ fun ShowCityInfoDialog(
                 }
             },
             shape = MaterialTheme.shapes.medium
+        )
+    }
+}
+
+@Composable
+fun ShowSelectedCityInfoDialog(
+    cityName: String,
+    temp: String,
+    iconUrl: String,
+    showDialog: Boolean,
+    confirmText: String,
+    onConfirm: () -> Unit,
+    onClose: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onClose,
+            title = {
+                TitleText(
+                    text = cityName,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (iconUrl.isNotEmpty()) {
+                        val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+                            .data(iconUrl)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .build()
+
+                        AsyncImage(
+                            model = imageRequest,
+                            contentDescription = "Weather",
+                            modifier = Modifier.size(64.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+
+                    TitleText(
+                        text = temp,
+                        fontWeight = FontWeight.Bold,
+                        size = ComponentSize.MEDIUM
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onConfirm() }) {
+                    Text(
+                        text = confirmText,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            dismissButton = null
         )
     }
 }

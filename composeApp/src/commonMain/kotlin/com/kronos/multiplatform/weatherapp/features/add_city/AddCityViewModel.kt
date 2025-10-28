@@ -5,6 +5,7 @@ import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
+import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 class AddCityViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
+    private val urlProvider: UrlProvider
 ) : ParentViewModel() {
 
     private val _markers = MutableStateFlow<List<MapMarker>>(listOf())
@@ -27,11 +29,19 @@ class AddCityViewModel(
     private val _forecast = MutableStateFlow<Forecast?>(null)
     val forecast: StateFlow<Forecast?> = _forecast.asStateFlow()
 
+    private val _markerSelected = MutableStateFlow<MapMarker?>(null)
+    val markerSelected: StateFlow<MapMarker?> = _markerSelected.asStateFlow()
+
     private val _screenState = MutableStateFlow<AddCityScreenState>(AddCityScreenState.Idle)
     val screenState: StateFlow<AddCityScreenState> = _screenState.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    fun setMarkerSelected(markerSelected: MapMarker?) {
+        _markerSelected.value = markerSelected
+        _screenState.value = AddCityScreenState.ShowCityInfo
+    }
 
     fun onMapClick(lat: Double, lon: Double, lang: String, apiKey: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -68,7 +78,9 @@ class AddCityViewModel(
                         lat = currentForecast.location.lat,
                         lon = currentForecast.location.lon,
                         isSelected = true,
-                        isCurrent = false
+                        isCurrent = false,
+                        tempC = currentForecast.current.tempC,
+                        icon = urlProvider.getImageUrl(currentForecast.current.condition.icon,"")
                     )
                     userCustomLocationLocalRepository.saveLocation(newLocation)
                     _screenState.value = AddCityScreenState.CityAdded
@@ -86,11 +98,14 @@ class AddCityViewModel(
             userCustomLocationLocalRepository.listAll().forEach { location ->
                 val marker = MapMarker(
                     id = location.id.toString(),
-                    latitude = location.lat?:0.0,
-                    longitude = location.lon?:0.0,
+                    latitude = location.lat ?: 0.0,
+                    longitude = location.lon ?: 0.0,
                     title = location.cityName,
-                    description = location.cityName,
-                    customProperties = mapOf()
+                    description = "",
+                    customProperties = mapOf(
+                        "temp" to location.tempC.toString(),
+                        "icon" to location.icon
+                    )
                 )
                 list.add(marker)
             }
@@ -102,6 +117,13 @@ class AddCityViewModel(
         _screenState.value = AddCityScreenState.Idle
     }
 
+    fun dismissMarkerInfo() {
+        _screenState.value = AddCityScreenState.Idle
+    }
+
+    fun setError(error:String) {
+        _error.value = error
+    }
     fun clearError() {
         _error.value = null
     }
@@ -112,5 +134,6 @@ sealed class AddCityScreenState {
     object Loading : AddCityScreenState()
     object NoCity : AddCityScreenState()
     object CityObtained : AddCityScreenState()
+    object ShowCityInfo : AddCityScreenState()
     object CityAdded : AddCityScreenState()
 }

@@ -14,6 +14,7 @@ import com.kronos.multiplatform.weatherapp.components.maps.markers.GeoJsonMapper
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.components.theme.extendedDark
 import com.kronos.multiplatform.weatherapp.components.theme.extendedLight
+import io.github.dellisd.spatialk.geojson.Feature
 import io.github.dellisd.spatialk.geojson.Position
 import org.jetbrains.compose.resources.painterResource
 import org.maplibre.compose.camera.CameraPosition
@@ -37,7 +38,12 @@ import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.ic_locations
+import kotlin.math.PI
 import kotlin.time.Duration.Companion.seconds
+import kotlin.math.sin
+import kotlin.math.cos
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 @Composable
 fun FixMapView(
@@ -105,7 +111,6 @@ fun FixMapView(
                 ClickResult.Pass
             },
         ) {
-
             val myMarkerGeoJson = remember(markers) {
                 GeoJsonMapper.markersToJsonString(markers)
             }
@@ -140,21 +145,20 @@ fun FixMapView(
 fun MapView(
     markers: List<MapMarker> = listOf(),
     darkTheme: Boolean,
-    onMapClick: (Position) -> Unit,
-    onMapLongClick: (Position) -> Unit,
-    modifier: Modifier = Modifier
+    onMarkerClick: (MapMarker) -> Unit,
+    onMapClick: (Position,canAdd: Boolean) -> Unit,
+    onMapLongClick: (Position,canAdd: Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    minDistanceBetweenMarkers: Double = 100.0
 ) {
 
     val camera = rememberCameraState()
-
     val styleState = rememberStyleState()
-
     val marker = painterResource(Res.drawable.ic_locations)
 
     LaunchedEffect(Unit) {
         camera.animateTo(
-            finalPosition =
-                camera.position.copy(),
+            finalPosition = camera.position.copy(),
             duration = 3.seconds,
         )
     }
@@ -171,16 +175,27 @@ fun MapView(
         onMapClick = { pos, offset ->
             val features = camera.projection?.queryRenderedFeatures(offset)
             if (!features.isNullOrEmpty()) {
-                println("Clicked on ${features[0].json()} at $pos")
-                onMapClick(pos)
-                ClickResult.Consume
+                val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
+                onMapClick(pos,!isTooClose)
+                if (!isTooClose) {
+                    println("Long click at $pos - Marker created")
+                    ClickResult.Consume
+                } else {
+                    println("Long click at $pos - Too close to existing marker, ignoring")
+                    ClickResult.Pass
+                }
             } else {
                 ClickResult.Pass
             }
         },
         onMapLongClick = { pos, offset ->
-            println("Long click at $pos")
-            onMapLongClick(pos)
+            val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
+            onMapLongClick(pos,!isTooClose)
+            if (!isTooClose) {
+                println("Long click at $pos - Marker created")
+            } else {
+                println("Long click at $pos - Too close to existing marker, ignoring")
+            }
             ClickResult.Pass
         },
     ) {
@@ -191,24 +206,70 @@ fun MapView(
         val myMarkerSource = rememberGeoJsonSource(
             data = GeoJsonData.JsonString(myMarkerGeoJson)
         )
-
         SymbolLayer(
             id = "current-locations",
             source = myMarkerSource,
             onClick = { features ->
-                features.firstOrNull()
+                val feat = features.firstOrNull()
+                val clickedMarker = getMarkerFromFeatures(features, markers)
+                if (clickedMarker != null) {
+                    onMarkerClick(clickedMarker)
+                }
                 ClickResult.Consume
             },
             iconImage = image(marker),
-            iconSize = const(.5f),
+            iconSize = const(1f),
             iconColor = const(Color.Black),
-            textField =
-                format(
-                    span(feature["title"].asString(), textSize = const(1f.em)),
-                ),
+            textField = format(
+                span(feature["title"].asString(), textSize = const(1f.em)),
+            ),
             textFont = const(listOf("Noto Sans Regular")),
             textColor = const(Color.Black),
             textOffset = offset(0.em, 0.6.em),
         )
     }
 }
+
+/**
+ * Encuentra el marker correspondiente a las features clickeadas
+ */
+private fun getMarkerFromFeatures(features: List<Feature>, markers: List<MapMarker>): MapMarker? {
+    return features.firstOrNull()?.let { feature ->
+        val featureId = feature.id?.toString()
+        markers.find { it.id == featureId }
+    }
+}
+
+/**
+ * Verifica si una posición está demasiado cerca de markers existentes
+ * Solo se usa para validar NUEVOS markers antes de crearlos
+ */
+private fun isPositionTooCloseToExistingMarkers(
+    position: Position,
+    existingMarkers: List<MapMarker>,
+    minDistance: Double
+): Boolean {
+    return existingMarkers.any { marker ->
+        calculateDistance(
+            position.latitude,
+            position.longitude,
+            marker.latitude,
+            marker.longitude
+        ) < minDistance
+    }
+}
+
+/**
+ * Calcula la distancia entre dos puntos en metros usando fórmula Haversine
+ */
+private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    val R = 6371000.0 // Earth radius in meters
+    val dLat = (lat2 - lat1) * PI / 180.0
+    val dLon = (lon2 - lon1) * PI / 180.0
+    val a = sin(dLat / 2) * sin(dLat / 2) +
+            cos(lat1 * PI / 180.0) * cos(lat2 * PI / 180.0) *
+            sin(dLon / 2) * sin(dLon / 2)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
+}
+

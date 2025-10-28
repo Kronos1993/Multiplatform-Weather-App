@@ -63,7 +63,13 @@ class WeatherViewModel(
     }
 
     // Inicialización
-    fun initLocations(lang: String, apiKey: String, days: Int, defaultCity: String = "") {
+    fun initLocations(
+        lang: String,
+        apiKey: String,
+        days: Int,
+        imageQuality: String,
+        defaultCity: String = ""
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _screenState.value = WeatherScreenState.Loading
@@ -86,7 +92,7 @@ class WeatherViewModel(
 
                     userLocation != null -> {
                         // Usar ciudad guardada
-                        getWeather(userLocation.cityName, lang, apiKey, days)
+                        getWeather(userLocation.cityName, lang, apiKey, days, imageQuality)
                     }
 
                     else -> {
@@ -94,7 +100,7 @@ class WeatherViewModel(
                             // Intentar usar GPS o fallback
                             getGpsLocation(null, lang, apiKey, days, defaultCity)
                         } else {
-                            getWeather(defaultCity, lang, apiKey, days)
+                            getWeather(defaultCity, lang, apiKey, days, imageQuality)
                         }
                     }
                 }
@@ -109,6 +115,7 @@ class WeatherViewModel(
         lang: String,
         apiKey: String,
         days: Int,
+        imageQuality: String,
         defaultCity: String = ""
     ) {
         try {
@@ -123,8 +130,13 @@ class WeatherViewModel(
 
             if (currentLocation != null) {
                 // Usar ubicación GPS obtenida
-                getWeather(currentLocation.latitude, currentLocation.longitude, lang, apiKey, days)
-                saveCurrentLocation(currentLocation)
+                getWeather(
+                    currentLocation,
+                    lang,
+                    apiKey,
+                    days,
+                    imageQuality
+                )
             } else {
                 // Fallback si no se pudo obtener ubicación GPS
                 handleLocationFallback(userLocation, lang, apiKey, days, defaultCity)
@@ -139,19 +151,20 @@ class WeatherViewModel(
         lang: String,
         apiKey: String,
         days: Int,
+        imageQuality: String,
         defaultCity: String = ""
     ) {
         message = hashMapOf("warning" to "GPS desactivado, usando ubicación guardada")
 
         if (userLocation != null) {
             if (userLocation.lat != null && userLocation.lon != null) {
-                getWeather(userLocation.lat!!, userLocation.lon!!, lang, apiKey, days)
+                getWeather(userLocation.lat!!, userLocation.lon!!, lang, apiKey, days, imageQuality)
             } else {
-                getWeather(userLocation.cityName, lang, apiKey, days)
+                getWeather(userLocation.cityName, lang, apiKey, days, imageQuality)
             }
         } else {
             // Ciudad por defecto
-            getWeather(defaultCity, lang, apiKey, days)
+            getWeather(defaultCity, lang, apiKey, days, imageQuality)
         }
     }
 
@@ -160,29 +173,50 @@ class WeatherViewModel(
         lang: String,
         apiKey: String,
         days: Int,
-        defaultCity: String = ""
+        imageQuality: String,
+        defaultCity: String = "",
     ) {
         message = hashMapOf("warning" to "No se pudo obtener ubicación GPS")
 
         if (userLocation != null) {
             if (userLocation.lat != null && userLocation.lon != null) {
-                getWeather(userLocation.lat!!, userLocation.lon!!, lang, apiKey, days)
+                getWeather(userLocation.lat!!, userLocation.lon!!, lang, apiKey, days, imageQuality)
             } else {
-                getWeather(userLocation.cityName, lang, apiKey, days)
+                getWeather(userLocation.cityName, lang, apiKey, days, imageQuality)
             }
         } else {
-            getWeather(defaultCity, lang, apiKey, days)
+            getWeather(defaultCity, lang, apiKey, days, imageQuality)
         }
     }
 
-    private fun getWeather(lat: Double, lon: Double, lang: String, apiKey: String, days: Int) {
+    private fun getWeather(
+        lat: Double,
+        lon: Double,
+        lang: String,
+        apiKey: String,
+        days: Int,
+        imageQuality: String
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = WeatherScreenState.Loading
 
             weatherRemoteRepository.getWeatherDataForecast(lat, lon, lang, apiKey, days)
                 .onSuccess { forecast ->
                     _weather.value = forecast
-                    weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey,forecast)
+                    weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey, forecast)
+                    saveCurrentLocation(
+                        LocationModel(
+                            latitude = forecast.location.lat,
+                            longitude = forecast.location.lon,
+                            cityName = forecast.location.name,
+                            temp = forecast.current.tempC,
+                            icon = urlProvider.getImageUrl(
+                                forecast.current.condition.icon,
+                                imageQuality
+                            ),
+                            current = false
+                        )
+                    )
                     createWeatherNotification()
                     widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
@@ -198,14 +232,75 @@ class WeatherViewModel(
         }
     }
 
-    private fun getWeather(city: String, lang: String, apiKey: String, days: Int) {
+    private fun getWeather(
+        location: LocationModel,
+        lang: String,
+        apiKey: String,
+        days: Int,
+        imageQuality: String
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _screenState.value = WeatherScreenState.Loading
+
+            weatherRemoteRepository.getWeatherDataForecast(location.latitude, location.longitude, lang, apiKey, days)
+                .onSuccess { forecast ->
+                    _weather.value = forecast
+                    weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey, forecast)
+                    saveCurrentLocation(
+                        LocationModel(
+                            latitude = forecast.location.lat,
+                            longitude = forecast.location.lon,
+                            cityName = forecast.location.name,
+                            temp = forecast.current.tempC,
+                            icon = urlProvider.getImageUrl(
+                                forecast.current.condition.icon,
+                                imageQuality
+                            ),
+                            current = true
+                        )
+                    )
+                    createWeatherNotification()
+                    widgetUpdater.updateAllWeatherWidgets()
+                    _screenState.value = WeatherScreenState.WeatherObtained
+                    _error.value = null
+                    log("Weather from coordinates acquired: ${forecast.location.name}", false)
+                }
+                .onError { error ->
+                    _error.value = "Error getting weather: ${error.errorMessage}"
+                    _screenState.value = WeatherScreenState.NoWeather
+                    _weather.value = null
+                    log("Weather error: ${error.errorMessage}", isError = true)
+                }
+        }
+    }
+
+    private fun getWeather(
+        city: String,
+        lang: String,
+        apiKey: String,
+        days: Int,
+        imageQuality: String
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = WeatherScreenState.Loading
 
             weatherRemoteRepository.getWeatherDataForecast(city, lang, apiKey, days)
                 .onSuccess { forecast ->
                     _weather.value = forecast
-                    weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey,forecast)
+                    weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey, forecast)
+                    saveCurrentLocation(
+                        LocationModel(
+                            latitude = forecast.location.lat,
+                            longitude = forecast.location.lon,
+                            cityName = city,
+                            temp = forecast.current.tempC,
+                            icon = urlProvider.getImageUrl(
+                                forecast.current.condition.icon,
+                                imageQuality
+                            ),
+                            current = false
+                        )
+                    )
                     createWeatherNotification()
                     widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
@@ -226,10 +321,12 @@ class WeatherViewModel(
             try {
                 val userLocation = UserCustomLocation(
                     cityName = location.cityName ?: "Current Location",
-                    isCurrent = true,
+                    isCurrent = location.current,
                     isSelected = true,
                     lat = location.latitude,
-                    lon = location.longitude
+                    lon = location.longitude,
+                    tempC = location.temp ?: 0.0,
+                    icon = location.icon.orEmpty()
                 )
 
                 _selectedUserLocation.value?.id?.let { userLocation.id = it }
@@ -254,8 +351,8 @@ class WeatherViewModel(
         }
     }
 
-    fun refreshWeather(lang: String, apiKey: String, days: Int) {
-        initLocations(lang, apiKey, days)
+    fun refreshWeather(lang: String, apiKey: String, days: Int, imageQuality: String) {
+        initLocations(lang, apiKey, days, imageQuality)
     }
 
     fun clean() {
@@ -268,8 +365,8 @@ class WeatherViewModel(
         _screenState.value = WeatherScreenState.NoWeather
     }
 
-    fun retryLastOperation(lang: String, apiKey: String, days: Int) {
-        refreshWeather(lang, apiKey, days)
+    fun retryLastOperation(lang: String, apiKey: String, days: Int, imageQuality: String) {
+        refreshWeather(lang, apiKey, days, imageQuality)
     }
 
     private fun handleError(e: Exception) {

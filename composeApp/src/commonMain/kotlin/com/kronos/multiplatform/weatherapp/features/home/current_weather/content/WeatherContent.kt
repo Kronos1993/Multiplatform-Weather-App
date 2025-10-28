@@ -359,7 +359,11 @@ fun WeatherContentSection(
                         longitude = currentWeather.location.lon,
                         title = currentWeather.location.name,
                         description = currentWeather.location.region,
-                        customProperties = mapOf()
+                        customProperties = mapOf(
+                            "temp" to currentWeather.current.tempC.toString(),
+                            "condition" to currentWeather.current.condition.description,
+                            "icon" to currentWeather.current.condition.icon
+                        )
                     )
                 ),
                 onMapClick = {},
