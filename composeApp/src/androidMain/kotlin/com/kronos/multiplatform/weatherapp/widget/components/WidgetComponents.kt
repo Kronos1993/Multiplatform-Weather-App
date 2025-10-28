@@ -21,6 +21,7 @@ import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.kronos.multiplatform.weatherapp.R
@@ -31,284 +32,369 @@ import java.net.URL
 
 @Composable
 fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize().padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Box(
+        modifier = GlanceModifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         if (weatherData == null) {
             LoadingWidget()
         } else {
-            // Header
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = GlanceModifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    provider = ImageProvider(R.drawable.ic_locations_widget),
-                    contentDescription = "Location",
-                    modifier = GlanceModifier.size(10.dp)
-                )
-
-                Spacer(modifier = GlanceModifier.width(8.dp))
-
-                Text(
-                    text = weatherData.location,
-                    style = TextStyle(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp, // Aumentado
-                        color = ColorProvider(Color.White)
-                    ),
-                    modifier = GlanceModifier.defaultWeight()
-                )
-
-                Text(
-                    text = weatherData.time,
-                    style = TextStyle(
-                        fontSize = 12.sp, // Aumentado de 12sp a 14sp
-                        color = ColorProvider(Color.White)
+                Row(
+                    modifier = GlanceModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_locations_widget),
+                        contentDescription = "Location",
+                        modifier = GlanceModifier.size(10.dp)
                     )
-                )
-            }
 
-            Spacer(modifier = GlanceModifier.height(4.dp))
+                    Spacer(modifier = GlanceModifier.width(8.dp))
 
-            // Main Content
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Current Weather
-                val image = runBlocking(Dispatchers.IO) {
-                    BitmapFactory.decodeStream(
-                        URL(weatherData.currentIconUrl).openConnection()
-                            .getInputStream()
+                    Text(
+                        text = weatherData.location,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp,
+                            color = ColorProvider(Color.White)
+                        )
+                    )
+
+                    Spacer(modifier = GlanceModifier.width(12.dp))
+
+                    Text(
+                        text = weatherData.time,
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            color = ColorProvider(Color.White)
+                        )
                     )
                 }
 
-                Image(
-                    ImageProvider(
-                        image
-                    ),
-                    contentDescription = "Current weather",
-                    modifier = GlanceModifier.size(44.dp) // Aumentado
-                )
+                Spacer(modifier = GlanceModifier.height(8.dp))
 
-                Spacer(modifier = GlanceModifier.width(8.dp))
+                Row(
+                    modifier = GlanceModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val image = runBlocking(Dispatchers.IO) {
+                        BitmapFactory.decodeStream(
+                            URL(weatherData.currentIconUrl).openConnection()
+                                .getInputStream()
+                        )
+                    }
 
-                Text(
-                    text = weatherData.currentTemp,
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp, // Aumentado de 20sp a 24sp
-                        color = ColorProvider(Color.White)
+                    Image(
+                        ImageProvider(image),
+                        contentDescription = "Current weather",
+                        modifier = GlanceModifier.size(44.dp)
                     )
-                )
 
-                Spacer(modifier = GlanceModifier.width(4.dp))
+                    Spacer(modifier = GlanceModifier.width(12.dp))
 
-                // Forecast Days
-                ForecastDayItem(
-                    dayName = weatherData.day1Name,
-                    iconUrl = weatherData.day1IconUrl,
-                    modifier = GlanceModifier.defaultWeight()
-                )
+                    Text(
+                        text = weatherData.currentTemp,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            color = ColorProvider(Color.White)
+                        )
+                    )
 
-                ForecastDayItem(
-                    dayName = weatherData.day2Name,
-                    iconUrl = weatherData.day2IconUrl,
-                    modifier = GlanceModifier.defaultWeight()
-                )
+                    Spacer(modifier = GlanceModifier.width(16.dp))
+
+                    MediumForecastDayItem(
+                        dayName = weatherData.day1Name,
+                        iconUrl = weatherData.day1IconUrl,
+                        modifier = GlanceModifier
+                    )
+
+                    Spacer(modifier = GlanceModifier.width(12.dp))
+
+                    MediumForecastDayItem(
+                        dayName = weatherData.day2Name,
+                        iconUrl = weatherData.day2IconUrl,
+                        modifier = GlanceModifier
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
+private fun MediumForecastDayItem(
+    dayName: String,
+    iconUrl: String,
+    modifier: GlanceModifier
+) {
     Column(
-        modifier = GlanceModifier.fillMaxSize().padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (weatherData == null) {
-            LoadingWidget()
-        } else {
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val image = runBlocking(Dispatchers.IO) {
-                    BitmapFactory.decodeStream(
-                        URL(weatherData.currentIconUrl).openConnection()
-                            .getInputStream()
+        Text(
+            text = dayName,
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = ColorProvider(Color.White)
+            )
+        )
+
+        Spacer(modifier = GlanceModifier.height(4.dp))
+
+        val image = runBlocking(Dispatchers.IO) {
+            BitmapFactory.decodeStream(
+                URL(iconUrl).openConnection()
+                    .getInputStream()
+            )
+        }
+
+        Image(
+            ImageProvider(image),
+            contentDescription = "Forecast weather",
+            modifier = GlanceModifier.size(32.dp)
+        )
+    }
+}
+
+
+@Composable
+fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
+    Box(
+        modifier = GlanceModifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = GlanceModifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (weatherData == null) {
+                LoadingWidget()
+            } else {
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val image = runBlocking(Dispatchers.IO) {
+                        BitmapFactory.decodeStream(
+                            URL(weatherData.currentIconUrl).openConnection()
+                                .getInputStream()
+                        )
+                    }
+
+                    Image(
+                        ImageProvider(image),
+                        contentDescription = "Current weather",
+                        modifier = GlanceModifier.size(36.dp)
+                    )
+
+                    Spacer(modifier = GlanceModifier.width(8.dp))
+
+                    Text(
+                        text = weatherData.currentTemp,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            color = ColorProvider(Color.White)
+                        )
                     )
                 }
 
-                Image(
-                    ImageProvider(image),
-                    contentDescription = "Current weather",
-                    modifier = GlanceModifier.size(36.dp) // Aumentado
-                )
-
-                Spacer(modifier = GlanceModifier.width(8.dp))
+                Spacer(modifier = GlanceModifier.height(4.dp))
 
                 Text(
-                    text = weatherData.currentTemp,
+                    text = weatherData.currentCondition,
                     style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp, // Aumentado de 16sp a 18sp
+                        fontSize = 16.sp,
+                        color = ColorProvider(Color.White),
+                    ),
+                    maxLines = 1
+                )
+
+                Spacer(modifier = GlanceModifier.height(2.dp))
+
+                Text(
+                    text = weatherData.location,
+                    style = TextStyle(
+                        fontSize = 12.sp,
                         color = ColorProvider(Color.White)
-                    )
+                    ),
+                    maxLines = 1
                 )
             }
-
-            Text(
-                text = weatherData.currentCondition,
-                style = TextStyle(
-                    fontSize = 16.sp, // Aumentado de 9sp a 11sp
-                    color = ColorProvider(Color.White),
-                ),
-                maxLines = 1
-            )
-
-            Text(
-                text = weatherData.location,
-                style = TextStyle(
-                    fontSize = 12.sp, // Aumentado de 10sp a 12sp
-                    color = ColorProvider(Color.White)
-                ),
-                maxLines = 1
-            )
         }
     }
 }
 
 @Composable
 fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize().padding(20.dp),
-        verticalAlignment = Alignment.Top
+    Box(
+        modifier = GlanceModifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         if (weatherData == null) {
             LoadingWidget()
         } else {
-            // Header
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Image(
-                    provider = ImageProvider(R.drawable.ic_locations_widget),
-                    contentDescription = "Location",
-                    modifier = GlanceModifier.size(18.dp) // Aumentado
-                )
-
-                Spacer(modifier = GlanceModifier.width(8.dp))
-
-                Text(
-                    text = weatherData.location,
-                    style = TextStyle(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 18.sp, // Aumentado de 16sp a 18sp
-                        color = ColorProvider(Color.White)
-                    ),
-                    modifier = GlanceModifier.defaultWeight()
-                )
-
-                Text(
-                    text = weatherData.time,
-                    style = TextStyle(
-                        fontSize = 16.sp, // Aumentado de 14sp a 16sp
-                        color = ColorProvider(Color.White)
-                    )
-                )
-            }
-
-            Spacer(modifier = GlanceModifier.height(16.dp))
-
-            // Current Weather Section
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
+            Column(
+                modifier = GlanceModifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val image = runBlocking(Dispatchers.IO) {
-                    BitmapFactory.decodeStream(
-                        URL(weatherData.currentIconUrl).openConnection()
-                            .getInputStream()
+                // Header - Centrado
+                Row(
+                    modifier = GlanceModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_locations_widget),
+                        contentDescription = "Location",
+                        modifier = GlanceModifier.size(18.dp)
                     )
-                }
 
-                Image(
-                    ImageProvider(
-                        image
-                    ),
-                    contentDescription = "Current weather",
-                    modifier = GlanceModifier.size(48.dp) // Aumentado
-                )
+                    Spacer(modifier = GlanceModifier.width(8.dp))
 
-                Spacer(modifier = GlanceModifier.width(16.dp))
-
-                Column {
                     Text(
-                        text = weatherData.currentTemp,
+                        text = weatherData.location,
                         style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 28.sp, // Aumentado de 24sp a 28sp
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 18.sp,
                             color = ColorProvider(Color.White)
                         )
                     )
 
+                    Spacer(modifier = GlanceModifier.width(16.dp))
+
                     Text(
-                        text = weatherData.currentCondition,
+                        text = weatherData.time,
                         style = TextStyle(
-                            fontSize = 16.sp, // Aumentado de 14sp a 16sp
+                            fontSize = 16.sp,
                             color = ColorProvider(Color.White)
                         )
                     )
                 }
 
-                Spacer(modifier = GlanceModifier.width(32.dp))
+                Spacer(modifier = GlanceModifier.height(8.dp))
 
-                // Weather Details
-                Column {
-                    WeatherDetailItem("Humidity", "${weatherData.humidity}%")
-                    Spacer(modifier = GlanceModifier.height(4.dp))
-                    WeatherDetailItem(
-                        "Wind",
-                        "${weatherData.windSpeed} ${weatherData.windDirection}"
-                    )
-                    Spacer(modifier = GlanceModifier.height(4.dp))
-                    WeatherDetailItem("UV", weatherData.uvIndex)
+                Row(
+                    modifier = GlanceModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        val image = runBlocking(Dispatchers.IO) {
+                            BitmapFactory.decodeStream(
+                                URL(weatherData.currentIconUrl).openConnection()
+                                    .getInputStream()
+                            )
+                        }
+
+                        Image(
+                            ImageProvider(image),
+                            contentDescription = "Current weather",
+                            modifier = GlanceModifier.size(64.dp)
+                        )
+
+                        Text(
+                            text = weatherData.currentTemp,
+                            style = TextStyle(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 32.sp,
+                                color = ColorProvider(Color.White)
+                            )
+                        )
+
+                        Spacer(modifier = GlanceModifier.height(4.dp))
+
+                        Text(
+                            text = weatherData.currentCondition,
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                color = ColorProvider(Color.White),
+                                textAlign = TextAlign.Center
+                            ),
+                            maxLines = 2
+                        )
+                    }
+
+                    Spacer(modifier = GlanceModifier.width(32.dp))
+
+                    Column(
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        WeatherDetailItem("Humidity", "${weatherData.humidity}%")
+                        Spacer(modifier = GlanceModifier.height(8.dp))
+                        WeatherDetailItem(
+                            "Wind",
+                            "${weatherData.windSpeed} ${weatherData.windDirection}"
+                        )
+                        Spacer(modifier = GlanceModifier.height(8.dp))
+                        WeatherDetailItem("UV", weatherData.uvIndex)
+                    }
                 }
-            }
 
-            Spacer(modifier = GlanceModifier.height(20.dp))
+                Spacer(modifier = GlanceModifier.height(8.dp))
 
-            // Forecast Section
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ForecastDayItem(
-                    dayName = weatherData.day1Name,
-                    iconUrl = weatherData.day1IconUrl,
+                Row(
                     modifier = GlanceModifier,
-                    horizontal = Alignment.Start
-                )
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ForecastDayItem(
+                        dayName = weatherData.day1Name,
+                        iconUrl = weatherData.day1IconUrl,
+                        modifier = GlanceModifier,
+                        horizontal = Alignment.CenterHorizontally
+                    )
 
-                Spacer(modifier = GlanceModifier.width(20.dp))
+                    Spacer(modifier = GlanceModifier.width(40.dp))
 
-                ForecastDayItem(
-                    dayName = weatherData.day2Name,
-                    iconUrl = weatherData.day2IconUrl,
-                    modifier = GlanceModifier,
-                    horizontal = Alignment.End
-                )
+                    ForecastDayItem(
+                        dayName = weatherData.day2Name,
+                        iconUrl = weatherData.day2IconUrl,
+                        modifier = GlanceModifier,
+                        horizontal = Alignment.CenterHorizontally
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun WeatherDetailItem(label: String, value: String) {
+    Row(
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "$label:",
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = ColorProvider(Color.White)
+            )
+        )
+
+        Spacer(modifier = GlanceModifier.width(8.dp))
+
+        Text(
+            text = value,
+            style = TextStyle(
+                fontSize = 14.sp,
+                color = ColorProvider(Color.White)
+            )
+        )
     }
 }
 
@@ -327,10 +413,12 @@ private fun ForecastDayItem(
             text = dayName,
             style = TextStyle(
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp, // Aumentado de 12sp a 14sp
+                fontSize = 16.sp,
                 color = ColorProvider(Color.White)
             )
         )
+
+        Spacer(modifier = GlanceModifier.height(4.dp))
 
         val image = runBlocking(Dispatchers.IO) {
             BitmapFactory.decodeStream(
@@ -340,32 +428,9 @@ private fun ForecastDayItem(
         }
 
         Image(
-            ImageProvider(
-                image
-            ),
-            contentDescription = "Current weather",
-            modifier = GlanceModifier.size(32.dp) // Aumentado de 36dp a 40dp
-        )
-    }
-}
-
-@Composable
-private fun WeatherDetailItem(label: String, value: String) {
-    Row {
-        Text(
-            text = "$label: ",
-            style = TextStyle(
-                fontSize = 14.sp, // Aumentado de 12sp a 14sp
-                fontWeight = FontWeight.Medium,
-                color = ColorProvider(Color.White)
-            ),
-        )
-        Text(
-            text = value,
-            style = TextStyle(
-                fontSize = 14.sp, // Aumentado de 12sp a 14sp
-                color = ColorProvider(Color.White)
-            )
+            ImageProvider(image),
+            contentDescription = "Forecast weather",
+            modifier = GlanceModifier.size(48.dp)
         )
     }
 }
