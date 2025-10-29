@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -33,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.Destinations
@@ -41,14 +41,12 @@ import com.kronos.multiplatform.weatherapp.components.NoUserCustomLocationItem
 import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.UserCustomLocationIdleState
 import com.kronos.multiplatform.weatherapp.components.UserCustomLocationLoadingState
-import com.kronos.multiplatform.weatherapp.components.button.FabDialActions
-import com.kronos.multiplatform.weatherapp.components.button.FabDialButton
+import com.kronos.multiplatform.weatherapp.components.button.FabButton
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.features.home.user_location.content.GridList
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
-import weather_app.composeapp.generated.resources.add_location
 import weather_app.composeapp.generated.resources.cant_delete_current_location
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
@@ -137,7 +135,7 @@ fun UserCustomLocationScreen(
                             data.visuals.message.contains("error", ignoreCase = true) ->
                                 MaterialTheme.colorScheme.onError
 
-                            else -> MaterialTheme.colorScheme.onPrimary
+                            else -> Color.White
                         }
                     )
                 }
@@ -148,20 +146,10 @@ fun UserCustomLocationScreen(
                     enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
                     exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
                 ) {
-                    FabDialButton(
-                        icon = Icons.Filled.MoreVert,
-                        dialActions = listOf(
-                            FabDialActions(
-                                text = stringResource(Res.string.add_location),
-                                icon = Icons.Filled.AddLocationAlt,
-                                onClick = {
-                                    navHost.navigate(Destinations.ADD_CITY.name)
-                                    fabExpanded = !fabExpanded
-                                }
-                            ),
-                        ),
-                        expanded = fabExpanded,
+                    FabButton(
+                        icon = Icons.Filled.AddLocationAlt,
                         onClick = {
+                            navHost.navigate(Destinations.ADD_CITY.name)
                             fabExpanded = !fabExpanded
                         }
                     )
