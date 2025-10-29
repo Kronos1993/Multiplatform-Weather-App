@@ -39,11 +39,11 @@ import org.maplibre.compose.util.ClickResult
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.ic_locations
 import kotlin.math.PI
-import kotlin.time.Duration.Companion.seconds
-import kotlin.math.sin
-import kotlin.math.cos
 import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun FixMapView(
@@ -146,8 +146,9 @@ fun MapView(
     markers: List<MapMarker> = listOf(),
     darkTheme: Boolean,
     onMarkerClick: (MapMarker) -> Unit,
-    onMapClick: (Position,canAdd: Boolean) -> Unit,
-    onMapLongClick: (Position,canAdd: Boolean) -> Unit,
+    onMapClick: (Position) -> Unit,
+    onMapLongClick: (Position) -> Unit,
+    onMapToCloseTap: () -> Unit,
     modifier: Modifier = Modifier,
     minDistanceBetweenMarkers: Double = 100.0
 ) {
@@ -174,26 +175,43 @@ fun MapView(
         ),
         onMapClick = { pos, offset ->
             val features = camera.projection?.queryRenderedFeatures(offset)
-            if (!features.isNullOrEmpty()) {
+
+            val clickedMarker = getMarkerFromFeatures(features.orEmpty(), markers)
+            if (clickedMarker != null) {
+                println("Clicked on existing marker: ${clickedMarker.title} at $pos")
+                onMarkerClick(clickedMarker)
+                ClickResult.Consume
+            } else if (!features.isNullOrEmpty()) {
                 val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
-                onMapClick(pos,!isTooClose)
                 if (!isTooClose) {
-                    println("Long click at $pos - Marker created")
+                    println("Click at $pos - Marker created")
+                    onMapClick(pos)
                     ClickResult.Consume
                 } else {
-                    println("Long click at $pos - Too close to existing marker, ignoring")
+                    println("Click at $pos - Too close to existing marker, ignoring")
+                    onMapToCloseTap()
                     ClickResult.Pass
                 }
             } else {
-                ClickResult.Pass
+                val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
+                if (!isTooClose) {
+                    println("Click at empty space at $pos - Marker created")
+                    onMapClick(pos)
+                    ClickResult.Consume
+                } else {
+                    println("Click at empty space at $pos - Too close to existing marker, ignoring")
+                    onMapToCloseTap()
+                    ClickResult.Pass
+                }
             }
         },
         onMapLongClick = { pos, offset ->
             val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
-            onMapLongClick(pos,!isTooClose)
             if (!isTooClose) {
                 println("Long click at $pos - Marker created")
+                onMapLongClick(pos)
             } else {
+                onMapToCloseTap()
                 println("Long click at $pos - Too close to existing marker, ignoring")
             }
             ClickResult.Pass
@@ -206,19 +224,20 @@ fun MapView(
         val myMarkerSource = rememberGeoJsonSource(
             data = GeoJsonData.JsonString(myMarkerGeoJson)
         )
+
         SymbolLayer(
             id = "current-locations",
             source = myMarkerSource,
             onClick = { features ->
-                val feat = features.firstOrNull()
                 val clickedMarker = getMarkerFromFeatures(features, markers)
                 if (clickedMarker != null) {
+                    println("SymbolLayer click on marker: ${clickedMarker.title}")
                     onMarkerClick(clickedMarker)
                 }
                 ClickResult.Consume
             },
             iconImage = image(marker),
-            iconSize = const(1f),
+            iconSize = const(.8f),
             iconColor = const(Color.Black),
             textField = format(
                 span(feature["title"].asString(), textSize = const(1f.em)),
@@ -235,7 +254,7 @@ fun MapView(
  */
 private fun getMarkerFromFeatures(features: List<Feature>, markers: List<MapMarker>): MapMarker? {
     return features.firstOrNull()?.let { feature ->
-        val featureId = feature.id?.toString()
+        val featureId = feature.id
         markers.find { it.id == featureId }
     }
 }
