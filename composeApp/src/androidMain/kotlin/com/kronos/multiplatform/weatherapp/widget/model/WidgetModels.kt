@@ -17,6 +17,7 @@ data class WeatherWidgetData(
 )
 
 data class WeatherParams(
+    val defaultCity: String,
     val lang: String,
     val apiKey: String,
     val days: Int,

@@ -5,12 +5,17 @@ import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import com.kronos.multiplatform.weatherapp.widget.components.SmallWeatherWidgetContent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 
 class SmallWeatherGlanceWidget : BaseWeatherGlanceWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val weatherData = loadWeatherData(context)
-        provideContent {
-            SmallWeatherWidgetContent(weatherData)
+        withContext(Dispatchers.IO) {
+            val weatherData = loadWeatherData(context)
+            provideContent {
+                SmallWeatherWidgetContent(weatherData)
+            }
         }
     }
 
