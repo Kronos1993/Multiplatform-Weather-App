@@ -120,20 +120,23 @@ fun AddCityScreen(
                         onMarkerClick = {
                             viewModel.setMarkerSelected(it)
                         },
-                        onMapClick = { coordinate,canAdd ->
-                            if (canAdd){
-                                viewModel.onMapClick(
-                                    coordinate.latitude,
-                                    coordinate.longitude,
-                                    currentLang,
-                                    apiKey
-                                )
-                            }else{
-                                viewModel.setError(errorMessage)
-                            }
+                        onMapClick = { coordinate ->
+                            viewModel.onMapClick(
+                                coordinate.latitude,
+                                coordinate.longitude,
+                                currentLang,
+                                apiKey)
                         },
-                        onMapLongClick = {coordinate,canAdd->
-
+                        onMapLongClick = {coordinate->
+                            viewModel.onMapClick(
+                                coordinate.latitude,
+                                coordinate.longitude,
+                                currentLang,
+                                apiKey
+                            )
+                        },
+                        onMapToCloseTap = {
+                            viewModel.setError(errorMessage)
                         },
                         modifier = Modifier.fillMaxSize()
                     )
