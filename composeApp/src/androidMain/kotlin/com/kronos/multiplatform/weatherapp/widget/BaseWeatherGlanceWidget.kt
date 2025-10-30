@@ -50,7 +50,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         withContext(Dispatchers.IO) {
             try {
                 // Primero intentar cargar el clima guardado en caché local (repositorio)
-                val cachedWeatherResult = loadCachedWeather(context)
+                val cachedWeatherResult = null//loadCachedWeather(context)
                 if (cachedWeatherResult != null) {
                     val weatherParams = getWeatherParams(context)
                     val data = createWeatherWidgetData(

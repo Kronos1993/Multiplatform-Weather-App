@@ -587,8 +587,8 @@ class WeatherRemoteDataSourceImpl(
             explicitNulls = false
             useAlternativeNames = false
         }
-        val weatherData = jsonConfig.decodeFromString<ForecastResponseDto>(json)
-        return Result.Success(weatherData.toForecast())
+        val weatherData = jsonConfig.decodeFromString<Forecast>(json)
+        return Result.Success(weatherData)
     }
 
     override suspend fun setLastWeatherForecast(

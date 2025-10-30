@@ -289,11 +289,12 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?,context: Context) 
                 Spacer(modifier = GlanceModifier.height(8.dp))
 
                 Row(
-                    modifier = GlanceModifier,
+                    modifier = GlanceModifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
+                        modifier = GlanceModifier.defaultWeight(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         val image = runBlocking(Dispatchers.IO) {
@@ -325,7 +326,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?,context: Context) 
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 color = ColorProvider(Color.White),
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
                             ),
                             maxLines = 2
                         )
@@ -334,6 +335,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?,context: Context) 
                     Spacer(modifier = GlanceModifier.width(32.dp))
 
                     Column(
+                        modifier = GlanceModifier.defaultWeight(),
                         horizontalAlignment = Alignment.Start
                     ) {
                         WeatherDetailItem(context.getString(R.string.humidity), "${weatherData.humidity}%")
