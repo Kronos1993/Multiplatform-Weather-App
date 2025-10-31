@@ -6,6 +6,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -171,7 +172,14 @@ fun MapView(
         cameraState = camera,
         options = MapOptions(
             gestureOptions = GestureOptions.Standard,
-            ornamentOptions = OrnamentOptions.AllDisabled,
+            ornamentOptions = OrnamentOptions(
+                isLogoEnabled = true,
+                logoAlignment = Alignment.BottomStart,
+                isCompassEnabled = true,
+                compassAlignment = Alignment.BottomEnd,
+                isScaleBarEnabled = false,
+                isAttributionEnabled = false
+            )
         ),
         onMapClick = { pos, offset ->
             val features = camera.projection?.queryRenderedFeatures(offset)

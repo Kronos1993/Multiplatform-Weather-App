@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -27,6 +29,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.kronos.multiplatform.weatherapp.R
+import com.kronos.multiplatform.weatherapp.widget.OpenAppCallback
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -35,7 +38,9 @@ import java.net.URL
 @Composable
 fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
     Box(
-        modifier = GlanceModifier.fillMaxSize(),
+        modifier = GlanceModifier.fillMaxSize().clickable(
+            actionRunCallback<OpenAppCallback>()
+        ),
         contentAlignment = Alignment.Center
     ) {
         if (weatherData == null) {
@@ -171,7 +176,9 @@ private fun MediumForecastDayItem(
 @Composable
 fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
     Box(
-        modifier = GlanceModifier.fillMaxSize(),
+        modifier = GlanceModifier.fillMaxSize().clickable(
+            actionRunCallback<OpenAppCallback>()
+        ),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -239,9 +246,11 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 }
 
 @Composable
-fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?,context: Context) {
+fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context) {
     Box(
-        modifier = GlanceModifier.fillMaxSize(),
+        modifier = GlanceModifier.fillMaxSize().clickable(
+            actionRunCallback<OpenAppCallback>()
+        ),
         contentAlignment = Alignment.Center
     ) {
         if (weatherData == null) {
@@ -338,7 +347,10 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?,context: Context) 
                         modifier = GlanceModifier.defaultWeight(),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        WeatherDetailItem(context.getString(R.string.humidity), "${weatherData.humidity}%")
+                        WeatherDetailItem(
+                            context.getString(R.string.humidity),
+                            "${weatherData.humidity}%"
+                        )
                         Spacer(modifier = GlanceModifier.height(8.dp))
                         WeatherDetailItem(
                             context.getString(R.string.wind),
@@ -441,13 +453,23 @@ private fun ForecastDayItem(
 
 @Composable
 private fun LoadingWidget() {
-    Box(
+    Column(
         modifier = GlanceModifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Image(
+            provider = ImageProvider(R.drawable.ic_no_weather_data),
+            contentDescription = "Weather loading",
+            modifier = GlanceModifier.size(48.dp)
+        )
+
+        Spacer(modifier = GlanceModifier.height(16.dp))
+
         Text(
-            stringResource(R.string.loading_dialog_text), style = TextStyle(
-                fontSize = 14.sp, // Aumentado de 12sp a 14sp
+            text = stringResource(R.string.loading_dialog_text),
+            style = TextStyle(
+                fontSize = 14.sp,
                 color = ColorProvider(Color.White)
             )
         )
