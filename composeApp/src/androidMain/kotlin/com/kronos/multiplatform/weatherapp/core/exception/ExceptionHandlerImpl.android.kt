@@ -23,7 +23,7 @@ actual class ExceptionHandlerImpl(
     override fun uncaughtException(t: Thread, e: Throwable) {
         Log.e(this.javaClass.name, "uncaughtException: ", e)
         runBlocking {
-            logguer.log(LogLevel.ERROR, TAG, e.message.orEmpty())
+            logguer.log(LogLevel.ERROR, TAG, "uncaughtException: ${e.message.orEmpty()}")
         }
     }
 }
