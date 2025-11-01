@@ -12,6 +12,7 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -472,6 +473,26 @@ private fun LoadingWidget() {
                 fontSize = 14.sp,
                 color = ColorProvider(Color.White)
             )
+        )
+    }
+}
+
+@Composable
+fun WeatherWidgetErrorContent(message: String) {
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(ColorProvider(Color.DarkGray))
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = message,
+            style = TextStyle(
+                color = ColorProvider(Color.White),
+                fontSize = 14.sp
+            ),
+            maxLines = 2
         )
     }
 }

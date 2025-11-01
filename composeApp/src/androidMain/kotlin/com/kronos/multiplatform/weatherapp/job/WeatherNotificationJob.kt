@@ -3,6 +3,8 @@ package com.kronos.multiplatform.weatherapp.job
 import android.app.job.JobParameters
 import android.app.job.JobService
 import com.kronos.multiplatform.weatherapp.R
+import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
+import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
@@ -24,11 +26,14 @@ const val notificationJobId = 1
 
 class WeatherNotificationJob : JobService() {
 
+    private val TAG = this::class.simpleName.orEmpty()
+
     private var jobCancelled = false
     private val weatherRemoteRepository: WeatherRemoteRepository by inject()
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository by inject()
     private val preferenceRepository: PreferenceRepository by inject()
     private val notifications: INotifications by inject()
+    private val loggerManager: ILogManager by inject()
 
     private val widgetUpdater: IWidgetUpdater by inject()
     private val jobScope = CoroutineScope(Dispatchers.IO + Job())
@@ -124,7 +129,10 @@ class WeatherNotificationJob : JobService() {
 
         result
             .onSuccess { forecast ->
-                weatherRemoteRepository.setLastWeatherForecast(resources.getString(R.string.current_weather_key),forecast)
+                weatherRemoteRepository.setLastWeatherForecast(
+                    resources.getString(R.string.current_weather_key),
+                    forecast
+                )
                 createWeatherNotification(forecast)
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }
@@ -179,11 +187,13 @@ class WeatherNotificationJob : JobService() {
         )
     }
 
-    private fun log(item: String, isError: Boolean = false) {
+    private suspend fun log(item: String, isError: Boolean = false) {
         if (isError) {
             println("ERROR: $item")
+            loggerManager.log(LogLevel.ERROR, TAG, item)
         } else {
             println("INFO: $item")
+            loggerManager.log(LogLevel.INFO, TAG, item)
         }
     }
 

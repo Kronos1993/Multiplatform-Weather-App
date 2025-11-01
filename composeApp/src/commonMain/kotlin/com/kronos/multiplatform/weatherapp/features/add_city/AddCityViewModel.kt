@@ -2,6 +2,8 @@ package com.kronos.multiplatform.weatherapp.features.add_city
 
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
+import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
+import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
@@ -20,8 +22,11 @@ import kotlinx.coroutines.launch
 class AddCityViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
-    private val urlProvider: UrlProvider
+    private val urlProvider: UrlProvider,
+    val loggerManager: LogManager
 ) : ParentViewModel() {
+
+    private val TAG = this::class.simpleName
 
     private val _markers = MutableStateFlow<List<MapMarker>>(listOf())
     val markers: StateFlow<List<MapMarker>> = _markers.asStateFlow()
@@ -38,24 +43,33 @@ class AddCityViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    init {
+        log("ViewModel initialized.",false)
+    }
+
     fun setMarkerSelected(markerSelected: MapMarker?) {
         _markerSelected.value = markerSelected
         _screenState.value = AddCityScreenState.ShowCityInfo
+        log("Marker selected: ${markerSelected?.title ?: "none"}",false)
     }
 
     fun onMapClick(lat: Double, lon: Double, lang: String, apiKey: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            log("Map clicked at lat=$lat, lon=$lon. Fetching weather...",false)
             _screenState.value = AddCityScreenState.Loading
             _error.value = null
 
             weatherRemoteRepository.getWeatherDataForecast(lat, lon, lang, apiKey, 1)
                 .onSuccess { forecast ->
+                    log("Weather data received for ${forecast.location.name} (${forecast.location.lat}, ${forecast.location.lon})",false)
                     _forecast.value = forecast
                     _screenState.value = AddCityScreenState.CityObtained
                 }
                 .onError { error ->
-                    _error.value = "Error getting weather: ${error.errorMessage}"
+                    val msg = "Error getting weather: ${error.errorMessage}"
+                    _error.value = msg
                     _screenState.value = AddCityScreenState.NoCity
+                    log(msg, isError = true)
                 }
         }
     }
@@ -65,6 +79,8 @@ class AddCityViewModel(
             val currentForecast = _forecast.value
             if (currentForecast?.location != null) {
                 _screenState.value = AddCityScreenState.Loading
+                log("Adding location: ${currentForecast.location.name}",false)
+
                 try {
                     userCustomLocationLocalRepository.listAll().forEach { location ->
                         userCustomLocationLocalRepository.saveLocation(
@@ -72,7 +88,6 @@ class AddCityViewModel(
                         )
                     }
 
-                    // Guardar nueva ubicación seleccionada
                     val newLocation = UserCustomLocation(
                         cityName = currentForecast.location.name,
                         lat = currentForecast.location.lat,
@@ -80,20 +95,28 @@ class AddCityViewModel(
                         isSelected = true,
                         isCurrent = false,
                         tempC = currentForecast.current.tempC,
-                        icon = urlProvider.getImageUrl(currentForecast.current.condition.icon,"")
+                        icon = urlProvider.getImageUrl(currentForecast.current.condition.icon, "")
                     )
+
                     userCustomLocationLocalRepository.saveLocation(newLocation)
                     _screenState.value = AddCityScreenState.CityAdded
+                    log("Location added successfully: ${newLocation.cityName}",false)
+
                 } catch (e: Exception) {
-                    _error.value = "Error adding location: ${e.message}"
+                    val msg = "Error adding location: ${e.message}"
+                    _error.value = msg
                     _screenState.value = AddCityScreenState.NoCity
+                    log(msg, isError = true)
                 }
+            } else {
+                log("No forecast available to add location.", isError = true)
             }
         }
     }
 
     fun getLocationMarkers() {
         viewModelScope.launch(Dispatchers.IO) {
+            log("Loading saved location markers...",false)
             val list = mutableListOf<MapMarker>()
             userCustomLocationLocalRepository.listAll().forEach { location ->
                 val marker = MapMarker(
@@ -110,6 +133,7 @@ class AddCityViewModel(
                 list.add(marker)
             }
             _markers.value = list.toList()
+            log("Loaded ${list.size} markers.",false)
         }
     }
 
@@ -121,13 +145,28 @@ class AddCityViewModel(
         _screenState.value = AddCityScreenState.Idle
     }
 
-    fun setError(error:String) {
+    fun setError(error: String) {
         _error.value = error
+        log("Manual error set: $error", isError = true)
     }
+
     fun clearError() {
         _error.value = null
     }
+
+    private fun log(item: String, isError: Boolean = false) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (isError) {
+                println("ERROR: $item")
+                loggerManager.log(LogLevel.ERROR, TAG.orEmpty(), item)
+            } else {
+                println("INFO: $item")
+                loggerManager.log(LogLevel.INFO, TAG.orEmpty(), item)
+            }
+        }
+    }
 }
+
 
 sealed class AddCityScreenState {
     object Idle : AddCityScreenState()

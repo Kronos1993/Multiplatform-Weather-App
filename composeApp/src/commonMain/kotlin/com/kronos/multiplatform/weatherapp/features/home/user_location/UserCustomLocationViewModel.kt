@@ -1,6 +1,8 @@
 package com.kronos.multiplatform.weatherapp.features.home.user_location
 
 import androidx.lifecycle.viewModelScope
+import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
+import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
@@ -19,7 +21,10 @@ class UserCustomLocationViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
     val urlProvider: UrlProvider,
+    private val loggerManager: LogManager
 ) : ParentViewModel() {
+
+    private val TAG = this::class.simpleName
 
     private val _locations = MutableStateFlow<List<UserCustomLocation>>(listOf())
     val locations = _locations.asStateFlow()
@@ -196,10 +201,14 @@ class UserCustomLocationViewModel(
     }
 
     private fun log(item: String, isError: Boolean = false) {
-        if (isError) {
-            println("ERROR: $item")
-        } else {
-            println("INFO: $item")
+        viewModelScope.launch(Dispatchers.IO) {
+            if (isError) {
+                println("ERROR: $item")
+                loggerManager.log(LogLevel.ERROR,TAG.orEmpty(),item)
+            } else {
+                println("INFO: $item")
+                loggerManager.log(LogLevel.INFO,TAG.orEmpty(),item)
+            }
         }
     }
 

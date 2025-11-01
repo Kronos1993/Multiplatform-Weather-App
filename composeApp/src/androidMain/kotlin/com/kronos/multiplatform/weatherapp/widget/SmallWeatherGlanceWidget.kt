@@ -6,12 +6,12 @@ import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import com.kronos.multiplatform.weatherapp.R
-import com.kronos.multiplatform.weatherapp.widget.components.LargeWeatherWidgetContent
+import com.kronos.multiplatform.weatherapp.widget.components.SmallWeatherWidgetContent
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetErrorContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class LargeWeatherGlanceWidget : BaseWeatherGlanceWidget() {
+class SmallWeatherGlanceWidget : BaseWeatherGlanceWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         try {
             val weatherData = withContext(Dispatchers.IO) {
@@ -20,7 +20,7 @@ class LargeWeatherGlanceWidget : BaseWeatherGlanceWidget() {
 
             provideContent {
                 if (weatherData != null) {
-                    LargeWeatherWidgetContent(weatherData, context)
+                    SmallWeatherWidgetContent(weatherData)
                 } else {
                     WeatherWidgetErrorContent(context.getString(R.string.widget_error_text))
                 }
@@ -36,6 +36,6 @@ class LargeWeatherGlanceWidget : BaseWeatherGlanceWidget() {
     }
 
     override fun getClassName(): Class<out GlanceAppWidget> {
-        return LargeWeatherGlanceWidget::class.java
+        return SmallWeatherGlanceWidget::class.java
     }
 }

@@ -110,6 +110,10 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqliteBundled)
 
+            //file kit
+            /*implementation(libs.file.kit.core)
+            implementation(libs.file.kit.compose)*/
+
             api(libs.kmpnotifier)
 
             implementation(libs.maplibre.compose)

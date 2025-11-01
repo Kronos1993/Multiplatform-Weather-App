@@ -11,5 +11,9 @@
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Esta app necesita acceso a tu ubicación para mostrar el clima actual</string>
 
+	<key>UIFileSharingEnabled</key>
+    <true/>
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
 </dict>
 </plist>

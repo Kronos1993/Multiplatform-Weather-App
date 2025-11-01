@@ -4,6 +4,8 @@ import com.kronos.multiplatform.weatherapp.core.DevicePlatform
 import com.kronos.multiplatform.weatherapp.core.Platform
 import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandlerImpl
+import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
+import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
 import com.kronos.multiplatform.weatherapp.core.notification.AppNotification
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.preferences.AppPreference
@@ -35,4 +37,5 @@ actual val platformModule = module{
     singleOf(::ChangeLang).bind<IChangeLang>()
     singleOf(::CloseAppImpl).bind<ICloseApp>()
     singleOf(::WidgetUpdater).bind<IWidgetUpdater>()
+    singleOf(::LogManager).bind<ILogManager>()
 }

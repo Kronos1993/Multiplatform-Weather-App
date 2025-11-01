@@ -32,5 +32,6 @@
     <string name="sunday">Domingo</string>
 
     <string name="widget_name">Info del clima</string>
+    <string name="widget_error_text">Abre la aplicación para obtener datos nuevos</string>
 
 </resources>

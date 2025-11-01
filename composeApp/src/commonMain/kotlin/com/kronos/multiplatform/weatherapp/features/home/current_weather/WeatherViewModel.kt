@@ -1,6 +1,8 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
 import androidx.lifecycle.viewModelScope
+import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
+import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
@@ -29,8 +31,10 @@ class WeatherViewModel(
     private var notifications: INotifications,
     private var widgetUpdater: IWidgetUpdater,
     val urlProvider: UrlProvider,
+    private val loggerManager: LogManager
 ) : ParentViewModel() {
 
+    private val TAG = this::class.simpleName
     // States
     private val _weather = MutableStateFlow<Forecast?>(null)
     val weather = _weather.asStateFlow()
@@ -345,8 +349,10 @@ class WeatherViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             if (isError) {
                 println("ERROR: $item")
+                loggerManager.log(LogLevel.ERROR,TAG.orEmpty(),item)
             } else {
                 println("INFO: $item")
+                loggerManager.log(LogLevel.INFO,TAG.orEmpty(),item)
             }
         }
     }

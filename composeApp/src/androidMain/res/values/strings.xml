@@ -34,4 +34,5 @@
     <string name="sunday">Sunday</string>
 
     <string name="widget_name">Weather Info</string>
+    <string name="widget_error_text">Open app to get data</string>
 </resources>

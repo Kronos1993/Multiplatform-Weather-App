@@ -73,12 +73,6 @@ class WeatherApplication : Application() {
     private fun scheduleJobIfNeeded(context: Context, periodic: Long) {
         val scheduler = context.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
 
-        val pendingJob = scheduler.getPendingJob(notificationJobId)
-        if (pendingJob != null) {
-            Log.d(TAG, "Job already scheduled with ID $notificationJobId")
-            return
-        }
-
         val validInterval = if (periodic < 15 * 60000L) {
             15 * 60000L // Establecer al menos 15 minutos
         } else {
