@@ -2,10 +2,17 @@ package com.kronos.multiplatform.weatherapp.core.exception
 
 import android.content.Context
 import android.util.Log
+import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
+import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
+import kotlinx.coroutines.runBlocking
 
 actual class ExceptionHandlerImpl(
-    private val context: Context
+    private val context: Context,
+    var logguer: ILogManager
 ) : ExceptionHandler,Thread.UncaughtExceptionHandler {
+
+    private val TAG = "Weather-App Exception"
+
     private var mDefaultHandler: Thread.UncaughtExceptionHandler? = null
 
     override fun init() {
@@ -15,5 +22,8 @@ actual class ExceptionHandlerImpl(
 
     override fun uncaughtException(t: Thread, e: Throwable) {
         Log.e(this.javaClass.name, "uncaughtException: ", e)
+        runBlocking {
+            logguer.log(LogLevel.ERROR, TAG, e.message.orEmpty())
+        }
     }
 }
