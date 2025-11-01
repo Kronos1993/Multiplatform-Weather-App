@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 actual class ExceptionHandlerImpl(
@@ -22,7 +23,7 @@ actual class ExceptionHandlerImpl(
 
     override fun uncaughtException(t: Thread, e: Throwable) {
         Log.e(this.javaClass.name, "uncaughtException: ", e)
-        runBlocking {
+        runBlocking(Dispatchers.IO) {
             logguer.log(LogLevel.ERROR, TAG, "uncaughtException: ${e.message.orEmpty()}")
         }
     }
