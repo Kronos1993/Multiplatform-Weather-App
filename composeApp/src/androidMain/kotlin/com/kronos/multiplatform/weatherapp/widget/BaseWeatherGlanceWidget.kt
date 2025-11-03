@@ -53,8 +53,8 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
      */
     protected suspend fun loadWeatherData(context: Context): WeatherWidgetData? {
         log("Iniciando carga de datos del clima (GlanceWidget)")
-
-        return try {
+        var weatherData: WeatherWidgetData? = null
+        try {
             // Primero intentar cargar el clima guardado en caché local (repositorio)
             log("Intentando cargar datos desde caché local...")
             val cachedWeatherResult = loadCachedWeather(context)
@@ -67,77 +67,80 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                     weatherParams.imageQuality
                 )
                 saveWeatherToGlance(context, data)
-                data
+                weatherData = data
+            } else {
+                // Si no hay caché, obtener de la API
+                log("No se encontró caché. Solicitando datos desde API...")
+                val currentCity = userCustomLocationLocalRepository.getSelectedLocation()
+                    ?: userCustomLocationLocalRepository.getCurrentLocation()
+
+                val weatherParams = getWeatherParams(context)
+
+                val result = when {
+                    currentCity != null && currentCity.lat != null && currentCity.lon != null -> {
+                        weatherRemoteRepository.getWeatherDataForecast(
+                            currentCity.lat!!,
+                            currentCity.lon!!,
+                            weatherParams.lang,
+                            weatherParams.apiKey,
+                            weatherParams.days
+                        )
+                    }
+
+                    currentCity != null -> {
+                        weatherRemoteRepository.getWeatherDataForecast(
+                            currentCity.cityName,
+                            weatherParams.lang,
+                            weatherParams.apiKey,
+                            weatherParams.days
+                        )
+                    }
+
+                    else -> {
+                        log("No hay ubicación seleccionada ni actual. Usando ciudad por defecto.")
+                        weatherRemoteRepository.getWeatherDataForecast(
+                            weatherParams.defaultCity,
+                            weatherParams.lang,
+                            weatherParams.apiKey,
+                            weatherParams.days
+                        )
+                    }
+                }
+
+                when (result) {
+                    is Result.Success -> {
+                        log("Datos del clima obtenidos exitosamente de la API para ${result.data.location.name}.")
+                        val data = createWeatherWidgetData(
+                            context,
+                            result.data,
+                            weatherParams.imageQuality
+                        )
+                        weatherRemoteRepository.setLastWeatherForecast(
+                            context.getString(R.string.current_weather_key),
+                            result.data
+                        )
+                        saveWeatherToGlance(context, data)
+                        log("Datos guardados en Glance correctamente.")
+                        weatherData = data
+                    }
+
+                    is Result.Error -> {
+                        log(
+                            "Error obteniendo datos del clima desde API: ${result.error.errorMessage}",
+                            isError = true
+                        )
+                        weatherData = loadLastGlanceData(context)
+                    }
+                }
             }
 
-            // Si no hay caché, obtener de la API
-            log("No se encontró caché. Solicitando datos desde API...")
-            val currentCity = userCustomLocationLocalRepository.getSelectedLocation()
-                ?: userCustomLocationLocalRepository.getCurrentLocation()
-
-            val weatherParams = getWeatherParams(context)
-
-            val result = when {
-                currentCity != null && currentCity.lat != null && currentCity.lon != null -> {
-                    weatherRemoteRepository.getWeatherDataForecast(
-                        currentCity.lat!!,
-                        currentCity.lon!!,
-                        weatherParams.lang,
-                        weatherParams.apiKey,
-                        weatherParams.days
-                    )
-                }
-
-                currentCity != null -> {
-                    weatherRemoteRepository.getWeatherDataForecast(
-                        currentCity.cityName,
-                        weatherParams.lang,
-                        weatherParams.apiKey,
-                        weatherParams.days
-                    )
-                }
-
-                else -> {
-                    log("No hay ubicación seleccionada ni actual. Usando ciudad por defecto.")
-                    weatherRemoteRepository.getWeatherDataForecast(
-                        weatherParams.defaultCity,
-                        weatherParams.lang,
-                        weatherParams.apiKey,
-                        weatherParams.days
-                    )
-                }
-            }
-
-            when (result) {
-                is Result.Success -> {
-                    log("Datos del clima obtenidos exitosamente de la API para ${result.data.location.name}.")
-                    val data = createWeatherWidgetData(
-                        context,
-                        result.data,
-                        weatherParams.imageQuality
-                    )
-                    weatherRemoteRepository.setLastWeatherForecast(
-                        context.getString(R.string.current_weather_key),
-                        result.data
-                    )
-                    saveWeatherToGlance(context, data)
-                    log("Datos guardados en Glance correctamente.")
-                    data
-                }
-
-                is Result.Error -> {
-                    log(
-                        "Error obteniendo datos del clima desde API: ${result.error.errorMessage}",
-                        isError = true
-                    )
-                    loadLastGlanceData(context)
-                }
-            }
         } catch (e: Exception) {
             log("Excepción al cargar datos del clima: ${e.message}", isError = true)
             e.printStackTrace()
-            loadLastGlanceData(context)
+            weatherData = loadLastGlanceData(context)
         }
+
+        return weatherData
     }
 
     /**
