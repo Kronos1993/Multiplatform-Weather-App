@@ -3,21 +3,22 @@ package com.kronos.multiplatform.weatherapp
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.content.ComponentName
-import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.di.initKoin
-import com.kronos.multiplatform.weatherapp.job.WeatherNotificationJob
-import com.kronos.multiplatform.weatherapp.job.notificationJobId
+import com.kronos.multiplatform.weatherapp.job.WeatherNotificationWorker
 import com.mmk.kmpnotifier.notification.NotifierManager
 import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 
 const val NOTIFICATION_CHANNEL = "KMP_WEATHER_NOTIFICATION_CHANNEL"
@@ -35,7 +36,7 @@ class WeatherApplication : Application() {
         }
         createNotificationChanel()
 
-        scheduleJobIfNeeded(applicationContext, 60 * 60000L)
+        scheduleWeatherWorker(15)
 
         NotifierManager.initialize(
             configuration = NotificationPlatformConfiguration.Android(
@@ -70,33 +71,23 @@ class WeatherApplication : Application() {
         }
     }
 
-    private fun scheduleJobIfNeeded(context: Context, periodic: Long) {
-        val scheduler = context.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
-
-        val validInterval = if (periodic < 15 * 60000L) {
-            15 * 60000L // Establecer al menos 15 minutos
-        } else {
-            periodic
-        }
-
-        val componentName = ComponentName(context, WeatherNotificationJob::class.java)
-
-        val jobInfo = JobInfo.Builder(notificationJobId, componentName)
-            .setPersisted(true)
-            .setPeriodic(validInterval) // Establecer intervalo válido
-            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+    private fun scheduleWeatherWorker(minutes: Long) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val resultCode = scheduler.schedule(jobInfo)
+        val validMinutes = maxOf(minutes, 15L)
 
-        if (resultCode == JobScheduler.RESULT_SUCCESS) {
-            Log.d(
-                TAG,
-                "Job service scheduled successfully with job ID $notificationJobId, interval: ${validInterval / 60000} minutes"
-            )
-        } else {
-            Log.d(TAG, "Job service schedule failed with job ID $notificationJobId")
-        }
+        val workRequest = PeriodicWorkRequestBuilder<WeatherNotificationWorker>(
+            validMinutes, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            WeatherNotificationWorker::class.java.simpleName,
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
     }
-
 }

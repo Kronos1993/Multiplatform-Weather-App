@@ -7,13 +7,13 @@ androidx-activity = "1.11.0"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
-androidx-lifecycle = "2.9.4"
+androidx-lifecycle = "2.9.5"
 androidx-testExt = "1.3.0"
 composeHotReload = "1.0.0-rc02"
-composeMultiplatform = "1.9.0"
+composeMultiplatform = "1.9.2"
 glanceAppwidget = "1.1.1"
 junit = "4.13.2"
-kotlin = "2.2.20"
+kotlin = "2.2.21"
 kotlinx-coroutines = "1.10.2"
 
 androidx-material = "1.13.0"
@@ -21,14 +21,14 @@ androidx-material3 = "1.4.0"
 
 kermit = "2.0.8"
 kmpnotifier = "1.6.0"
-navigationCompose = "2.9.0"
+navigationCompose = "2.9.1"
 startupRuntime = "1.2.0"
 datastore = "1.1.7"
 
 moko = "0.20.1"
 coil3 = "3.3.0"
 koin = "4.1.1"
-koin-annotations = "2.2.0"
+koin-annotations = "2.3.0"
 adaptive = "1.1.2"
 
 dateTimeVersion = "0.7.1-0.6.x-compat"
@@ -46,7 +46,10 @@ androidx-sqliteBundled = "2.5.2"
 android-location = "21.3.0"
 map-libre = "0.11.1"
 map-libre-composeMaterial3 = "0.11.1"
-swift-package-manager = "1.0.0"
+swift-package-manager = "1.0.2"
+
+#android worker
+workRuntimeKtx = "2.11.0"
 
 #file kit
 #fileKit = "0.10.0"
@@ -127,6 +130,9 @@ androidx-glance-material3 = { module = "androidx.glance:glance-material3", versi
 #file kit
 #file-kit-core = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "fileKit" }
 #file-kit-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "fileKit" }
+
+#android worker
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

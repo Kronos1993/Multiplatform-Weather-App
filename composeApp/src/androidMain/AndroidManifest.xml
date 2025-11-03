@@ -66,9 +66,6 @@
                 android:resource="@xml/widget_provider_info_large" />
         </receiver>
 
-        <service
-            android:name=".job.WeatherNotificationJob"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest>

@@ -62,6 +62,9 @@ kotlin {
             //Glace Widget
             implementation(libs.androidx.glance.appwidget)
             implementation(libs.androidx.glance.material3)
+
+            //worker
+            implementation(libs.androidx.work.runtime.ktx)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
