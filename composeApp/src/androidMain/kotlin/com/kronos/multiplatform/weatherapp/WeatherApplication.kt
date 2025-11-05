@@ -74,6 +74,7 @@ class WeatherApplication : Application() {
     private fun scheduleWeatherWorker(minutes: Long) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(false)
             .build()
 
         val validMinutes = maxOf(minutes, 15L)

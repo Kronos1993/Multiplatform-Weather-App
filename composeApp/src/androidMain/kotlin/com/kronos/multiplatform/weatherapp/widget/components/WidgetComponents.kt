@@ -1,7 +1,7 @@
 package com.kronos.multiplatform.weatherapp.widget.components
 
 import android.content.Context
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -13,6 +13,7 @@ import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.background
+import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -28,13 +29,9 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import com.kronos.multiplatform.weatherapp.R
 import com.kronos.multiplatform.weatherapp.widget.OpenAppCallback
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import java.net.URL
 
 @Composable
 fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
@@ -70,7 +67,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                         style = TextStyle(
                             fontWeight = FontWeight.Medium,
                             fontSize = 14.sp,
-                            color = ColorProvider(Color.White)
+                            color = ColorProvider(Color.White,Color.White)
                         )
                     )
 
@@ -80,7 +77,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                         text = weatherData.time,
                         style = TextStyle(
                             fontSize = 12.sp,
-                            color = ColorProvider(Color.White)
+                            color = ColorProvider(Color.White,Color.White)
                         )
                     )
                 }
@@ -92,18 +89,19 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val image = runBlocking(Dispatchers.IO) {
-                        BitmapFactory.decodeStream(
-                            URL(weatherData.currentIconUrl).openConnection()
-                                .getInputStream()
-                        )
-                    }
 
-                    Image(
-                        ImageProvider(image),
-                        contentDescription = "Current weather",
-                        modifier = GlanceModifier.size(44.dp)
-                    )
+                    if (weatherData.currentIconBitmap!=null)
+                        Image(
+                            ImageProvider(weatherData.currentIconBitmap),
+                            contentDescription = "Current weather",
+                            modifier = GlanceModifier.size(44.dp)
+                        )
+                    else
+                        Image(
+                            ImageProvider(R.drawable.ic_weather_app_icon),
+                            contentDescription = "Current weather",
+                            modifier = GlanceModifier.size(44.dp)
+                        )
 
                     Spacer(modifier = GlanceModifier.width(12.dp))
 
@@ -112,7 +110,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp,
-                            color = ColorProvider(Color.White)
+                            color = ColorProvider(Color.White,Color.White)
                         )
                     )
 
@@ -120,7 +118,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 
                     MediumForecastDayItem(
                         dayName = weatherData.day1Name,
-                        iconUrl = weatherData.day1IconUrl,
+                        icon = weatherData.day1IconBitmap,
                         modifier = GlanceModifier
                     )
 
@@ -128,7 +126,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 
                     MediumForecastDayItem(
                         dayName = weatherData.day2Name,
-                        iconUrl = weatherData.day2IconUrl,
+                        icon = weatherData.day2IconBitmap,
                         modifier = GlanceModifier
                     )
                 }
@@ -140,7 +138,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 @Composable
 private fun MediumForecastDayItem(
     dayName: String,
-    iconUrl: String,
+    icon: Bitmap?,
     modifier: GlanceModifier
 ) {
     Column(
@@ -152,24 +150,24 @@ private fun MediumForecastDayItem(
             style = TextStyle(
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
-                color = ColorProvider(Color.White)
+                color = ColorProvider(Color.White,Color.White)
             )
         )
 
         Spacer(modifier = GlanceModifier.height(4.dp))
 
-        val image = runBlocking(Dispatchers.IO) {
-            BitmapFactory.decodeStream(
-                URL(iconUrl).openConnection()
-                    .getInputStream()
+        if (icon!=null)
+            Image(
+                ImageProvider(icon),
+                contentDescription = "Forecast weather",
+                modifier = GlanceModifier.size(32.dp)
             )
-        }
-
-        Image(
-            ImageProvider(image),
-            contentDescription = "Forecast weather",
-            modifier = GlanceModifier.size(32.dp)
-        )
+        else
+            Image(
+                ImageProvider(R.drawable.ic_weather_app_icon),
+                contentDescription = "Forecast weather",
+                modifier = GlanceModifier.size(32.dp)
+            )
     }
 }
 
@@ -195,18 +193,19 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val image = runBlocking(Dispatchers.IO) {
-                        BitmapFactory.decodeStream(
-                            URL(weatherData.currentIconUrl).openConnection()
-                                .getInputStream()
-                        )
-                    }
 
-                    Image(
-                        ImageProvider(image),
-                        contentDescription = "Current weather",
-                        modifier = GlanceModifier.size(36.dp)
-                    )
+                    if (weatherData.currentIconBitmap!=null)
+                        Image(
+                            ImageProvider(weatherData.currentIconBitmap),
+                            contentDescription = "Current weather",
+                            modifier = GlanceModifier.size(36.dp)
+                        )
+                    else
+                        Image(
+                            ImageProvider(R.drawable.ic_weather_app_icon),
+                            contentDescription = "Current weather",
+                            modifier = GlanceModifier.size(36.dp)
+                        )
 
                     Spacer(modifier = GlanceModifier.width(8.dp))
 
@@ -215,7 +214,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp,
-                            color = ColorProvider(Color.White)
+                            color = ColorProvider(Color.White,Color.White)
                         )
                     )
                 }
@@ -226,7 +225,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     text = weatherData.currentCondition,
                     style = TextStyle(
                         fontSize = 16.sp,
-                        color = ColorProvider(Color.White),
+                        color = ColorProvider(Color.White,Color.White),
                     ),
                     maxLines = 1
                 )
@@ -237,7 +236,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
                     text = weatherData.location,
                     style = TextStyle(
                         fontSize = 12.sp,
-                        color = ColorProvider(Color.White)
+                        color = ColorProvider(Color.White,Color.White)
                     ),
                     maxLines = 1
                 )
@@ -281,7 +280,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
                         style = TextStyle(
                             fontWeight = FontWeight.Medium,
                             fontSize = 18.sp,
-                            color = ColorProvider(Color.White)
+                            color = ColorProvider(Color.White,Color.White)
                         )
                     )
 
@@ -291,7 +290,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
                         text = weatherData.time,
                         style = TextStyle(
                             fontSize = 16.sp,
-                            color = ColorProvider(Color.White)
+                            color = ColorProvider(Color.White,Color.White)
                         )
                     )
                 }
@@ -307,25 +306,26 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
                         modifier = GlanceModifier.defaultWeight(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val image = runBlocking(Dispatchers.IO) {
-                            BitmapFactory.decodeStream(
-                                URL(weatherData.currentIconUrl).openConnection()
-                                    .getInputStream()
-                            )
-                        }
 
-                        Image(
-                            ImageProvider(image),
-                            contentDescription = "Current weather",
-                            modifier = GlanceModifier.size(64.dp)
-                        )
+                        if (weatherData.currentIconBitmap!=null)
+                            Image(
+                                ImageProvider(weatherData.currentIconBitmap),
+                                contentDescription = "Current weather",
+                                modifier = GlanceModifier.size(64.dp)
+                            )
+                        else
+                            Image(
+                                ImageProvider(R.drawable.ic_weather_app_icon),
+                                contentDescription = "Current weather",
+                                modifier = GlanceModifier.size(64.dp)
+                            )
 
                         Text(
                             text = weatherData.currentTemp,
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 32.sp,
-                                color = ColorProvider(Color.White)
+                                color = ColorProvider(Color.White,Color.White)
                             )
                         )
 
@@ -335,7 +335,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
                             text = weatherData.currentCondition,
                             style = TextStyle(
                                 fontSize = 16.sp,
-                                color = ColorProvider(Color.White),
+                                color = ColorProvider(Color.White,Color.White),
                                 textAlign = TextAlign.Center,
                             ),
                             maxLines = 2
@@ -370,7 +370,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
                 ) {
                     ForecastDayItem(
                         dayName = weatherData.day1Name,
-                        iconUrl = weatherData.day1IconUrl,
+                        icon = weatherData.day1IconBitmap,
                         modifier = GlanceModifier,
                         horizontal = Alignment.CenterHorizontally
                     )
@@ -379,7 +379,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
 
                     ForecastDayItem(
                         dayName = weatherData.day2Name,
-                        iconUrl = weatherData.day2IconUrl,
+                        icon = weatherData.day2IconBitmap,
                         modifier = GlanceModifier,
                         horizontal = Alignment.CenterHorizontally
                     )
@@ -399,7 +399,7 @@ private fun WeatherDetailItem(label: String, value: String) {
             style = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = ColorProvider(Color.White)
+                color = ColorProvider(Color.White,Color.White)
             )
         )
 
@@ -409,7 +409,7 @@ private fun WeatherDetailItem(label: String, value: String) {
             text = value,
             style = TextStyle(
                 fontSize = 14.sp,
-                color = ColorProvider(Color.White)
+                color = ColorProvider(Color.White,Color.White)
             )
         )
     }
@@ -418,7 +418,7 @@ private fun WeatherDetailItem(label: String, value: String) {
 @Composable
 private fun ForecastDayItem(
     dayName: String,
-    iconUrl: String,
+    icon: Bitmap?,
     modifier: GlanceModifier,
     horizontal: Alignment.Horizontal = Alignment.CenterHorizontally
 ) {
@@ -431,24 +431,24 @@ private fun ForecastDayItem(
             style = TextStyle(
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = ColorProvider(Color.White)
+                color = ColorProvider(Color.White,Color.White)
             )
         )
 
         Spacer(modifier = GlanceModifier.height(4.dp))
 
-        val image = runBlocking(Dispatchers.IO) {
-            BitmapFactory.decodeStream(
-                URL(iconUrl).openConnection()
-                    .getInputStream()
+        if (icon != null)
+            Image(
+                ImageProvider(icon),
+                contentDescription = "Forecast weather",
+                modifier = GlanceModifier.size(48.dp)
             )
-        }
-
-        Image(
-            ImageProvider(image),
-            contentDescription = "Forecast weather",
-            modifier = GlanceModifier.size(48.dp)
-        )
+        else
+            Image(
+                ImageProvider(R.drawable.ic_weather_app_icon),
+                contentDescription = "Forecast weather",
+                modifier = GlanceModifier.size(48.dp)
+            )
     }
 }
 
@@ -471,7 +471,7 @@ private fun LoadingWidget() {
             text = stringResource(R.string.loading_dialog_text),
             style = TextStyle(
                 fontSize = 14.sp,
-                color = ColorProvider(Color.White)
+                color = ColorProvider(Color.White,Color.White)
             )
         )
     }
@@ -482,14 +482,14 @@ fun WeatherWidgetErrorContent(message: String) {
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(Color.DarkGray))
+            .background(ColorProvider(Color.DarkGray,Color.DarkGray))
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = message,
             style = TextStyle(
-                color = ColorProvider(Color.White),
+                color = ColorProvider(Color.White,Color.White),
                 fontSize = 14.sp
             ),
             maxLines = 2

@@ -30,6 +30,7 @@
     <string name="rain">Luvia</string>
     <string name="snow">Nieve</string>
     <string name="sun">Sol</string>
+    <string name="moon">Luna</string>
     <string name="sunrise_sunset">Sale %s\nPone %s</string>
     <string name="visibility">Visibilidad</string>
     <string name="visibility_km">%s KM</string>
@@ -37,6 +38,12 @@
     <string name="city_name">Ciudad</string>
     <string name="add_location">Añadir</string>
     <string name="cant_delete_current_location">No puedes eliminar esta ubicación</string>
+
+    <string name="uv_index_low">Bajo</string>
+    <string name="uv_index_medium">Medio</string>
+    <string name="uv_index_high">Alto</string>
+    <string name="uv_index_very_high">Muy alto</string>
+    <string name="uv_index_extreme">Extremo</string>
 
     <string name="notification_title">%s° | %s</string>
     <string name="notification_short_details">%s. Sensación térmica %s°C</string>

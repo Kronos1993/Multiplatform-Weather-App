@@ -44,6 +44,7 @@ import com.kronos.multiplatform.weatherapp.components.DailyWeatherList
 import com.kronos.multiplatform.weatherapp.components.HourlyItemIndicator
 import com.kronos.multiplatform.weatherapp.components.WeatherIndicatorList
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonFallIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.RainyIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SnowflakeIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SunIndicator
@@ -61,14 +62,21 @@ import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConf
 import com.kronos.multiplatform.weatherapp.domain.model.Indicator
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.humidity
+import weather_app.composeapp.generated.resources.moon
 import weather_app.composeapp.generated.resources.rain
 import weather_app.composeapp.generated.resources.snow
 import weather_app.composeapp.generated.resources.speed_km
 import weather_app.composeapp.generated.resources.sun
 import weather_app.composeapp.generated.resources.uv_index
+import weather_app.composeapp.generated.resources.uv_index_extreme
+import weather_app.composeapp.generated.resources.uv_index_high
+import weather_app.composeapp.generated.resources.uv_index_low
+import weather_app.composeapp.generated.resources.uv_index_medium
+import weather_app.composeapp.generated.resources.uv_index_very_high
 import weather_app.composeapp.generated.resources.visibility
 import weather_app.composeapp.generated.resources.visibility_km
 import weather_app.composeapp.generated.resources.wind
@@ -229,9 +237,11 @@ fun WeatherContentSection(
     val windText = stringResource(Res.string.wind)
     val humidityText = stringResource(Res.string.humidity)
     val uvIndexText = stringResource(Res.string.uv_index)
+    val uvDescription = uvIndexDescription(currentWeather.current.uv)
     val snowText = stringResource(Res.string.snow)
     val rainText = stringResource(Res.string.rain)
     val sunText = stringResource(Res.string.sun)
+    val moonText = stringResource(Res.string.moon)
     val visibilityText = stringResource(Res.string.visibility)
     val speedKmText = stringResource(Res.string.speed_km)
     val visibilityKmText = stringResource(Res.string.visibility_km)
@@ -253,7 +263,7 @@ fun WeatherContentSection(
             Indicator(
                 3,
                 uvIndexText,
-                currentWeather.current.uv.toString(),
+                uvDescription,
                 WeatherAppIcons.SunIndicator
             ),
             if (currentDayForecast?.day?.dailyWillItSnow == true) {
@@ -271,12 +281,21 @@ fun WeatherContentSection(
                     WeatherAppIcons.RainyIndicator
                 )
             },
-            Indicator(
-                6,
-                sunText,
-                "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
-                WeatherAppIcons.SunSunriseIndicator
-            ),
+            if (Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour in 6..18) {
+                Indicator(
+                    6,
+                    sunText,
+                    "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
+                    WeatherAppIcons.SunSunriseIndicator
+                )
+            } else {
+                Indicator(
+                    6,
+                    moonText,
+                    "${currentDayForecast?.astro?.moonrise ?: ""} - ${currentDayForecast?.astro?.moonset ?: ""}",
+                    WeatherAppIcons.MoonFallIndicator
+                )
+            },
             Indicator(
                 7,
                 visibilityText,
@@ -368,7 +387,7 @@ fun WeatherContentSection(
                 ),
                 onMapClick = {},
                 onMapLongClick = {},
-                darkTheme = isDarkTheme
+                darkTheme = isDarkTheme,
             )
         }
 
@@ -493,9 +512,11 @@ fun WeatherContentSectionLandscape(
     val windText = stringResource(Res.string.wind)
     val humidityText = stringResource(Res.string.humidity)
     val uvIndexText = stringResource(Res.string.uv_index)
+    val uvDescription = uvIndexDescription(currentWeather.current.uv)
     val snowText = stringResource(Res.string.snow)
     val rainText = stringResource(Res.string.rain)
     val sunText = stringResource(Res.string.sun)
+    val moonText = stringResource(Res.string.moon)
     val visibilityText = stringResource(Res.string.visibility)
     val speedKmText = stringResource(Res.string.speed_km)
     val visibilityKmText = stringResource(Res.string.visibility_km)
@@ -517,7 +538,7 @@ fun WeatherContentSectionLandscape(
             Indicator(
                 3,
                 uvIndexText,
-                currentWeather.current.uv.toString(),
+                uvDescription,
                 WeatherAppIcons.SunIndicator
             ),
             if (currentDayForecast?.day?.dailyWillItSnow == true) {
@@ -535,12 +556,21 @@ fun WeatherContentSectionLandscape(
                     WeatherAppIcons.RainyIndicator
                 )
             },
-            Indicator(
-                6,
-                sunText,
-                "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
-                WeatherAppIcons.SunSunriseIndicator
-            ),
+            if (Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour in 6..18) {
+                Indicator(
+                    6,
+                    sunText,
+                    "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
+                    WeatherAppIcons.SunSunriseIndicator
+                )
+            } else {
+                Indicator(
+                    6,
+                    moonText,
+                    "${currentDayForecast?.astro?.moonrise ?: ""} - ${currentDayForecast?.astro?.moonset ?: ""}",
+                    WeatherAppIcons.MoonFallIndicator
+                )
+            },
             Indicator(
                 7,
                 visibilityText,
@@ -621,6 +651,31 @@ fun WeatherContentSectionLandscape(
         // Espacio al final
         item {
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun uvIndexDescription(index: Double):String {
+    return when (index) {
+        in 0.0..2.9 -> {
+            stringResource(Res.string.uv_index_low)
+        }
+
+        in 3.0..5.9 -> {
+            stringResource(Res.string.uv_index_medium)
+        }
+
+        in 6.0..7.9 -> {
+            stringResource(Res.string.uv_index_high)
+        }
+
+        in 8.0..10.9 -> {
+            stringResource(Res.string.uv_index_very_high)
+        }
+
+        else -> {
+            stringResource(Res.string.uv_index_extreme)
         }
     }
 }

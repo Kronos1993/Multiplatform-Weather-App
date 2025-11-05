@@ -8,16 +8,14 @@ import androidx.glance.appwidget.provideContent
 import com.kronos.multiplatform.weatherapp.R
 import com.kronos.multiplatform.weatherapp.widget.components.MediumWeatherWidgetContent
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetErrorContent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class MediumWeatherGlanceWidget : BaseWeatherGlanceWidget() {
 
+    override val TAG = this::class.simpleName.orEmpty()
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         try {
-            val weatherData = withContext(Dispatchers.IO) {
-                loadWeatherData(context)
-            }
+            val weatherData = loadWeatherDataFromCache(context)
 
             provideContent {
                 if (weatherData != null) {
@@ -29,7 +27,7 @@ class MediumWeatherGlanceWidget : BaseWeatherGlanceWidget() {
 
         } catch (e: Exception) {
             Log.e("MediumWeatherGlanceWidget", "Error providing glance content", e)
-
+            log("Error providing glance content: ${e.message}",true)
             provideContent {
                 WeatherWidgetErrorContent(context.getString(R.string.widget_error_text))
             }
@@ -39,4 +37,5 @@ class MediumWeatherGlanceWidget : BaseWeatherGlanceWidget() {
     override fun getClassName(): Class<out GlanceAppWidget> {
         return MediumWeatherGlanceWidget::class.java
     }
+
 }

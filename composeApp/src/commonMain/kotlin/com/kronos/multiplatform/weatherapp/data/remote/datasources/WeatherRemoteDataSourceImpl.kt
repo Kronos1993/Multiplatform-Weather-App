@@ -49,7 +49,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -58,7 +58,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -67,7 +67,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -76,7 +76,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -225,7 +225,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -234,7 +234,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -243,7 +243,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -252,7 +252,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -405,7 +405,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -414,7 +414,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -423,7 +423,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -432,7 +432,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )

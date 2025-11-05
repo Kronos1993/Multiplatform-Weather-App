@@ -1,9 +1,14 @@
 package com.kronos.multiplatform.weatherapp.widget
 
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import android.widget.RemoteViews
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.getAppWidgetState
@@ -27,10 +32,13 @@ import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationL
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherParams
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.net.URL
 import java.util.Locale
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -45,7 +53,39 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     protected abstract fun getClassName(): Class<out GlanceAppWidget>
 
-    private val TAG = this::class.simpleName.orEmpty()
+    protected open val TAG = this::class.simpleName.orEmpty()
+
+    /**
+     * Carga los datos del clima desde caché.
+     * Luego los guarda en el estado del widget (GlanceState).
+     */
+    protected suspend fun loadWeatherDataFromCache(context: Context): WeatherWidgetData? {
+        log("Iniciando carga de datos del clima (GlanceWidget) solo de la cache")
+        var weatherData: WeatherWidgetData? = null
+        try {
+            val cachedWeatherResult = loadCachedWeather(context)
+            if (cachedWeatherResult != null) {
+                log("Clima cargado desde preferencias correctamente.")
+                val weatherParams = getWeatherParams(context)
+                log("Actualizando widget.")
+                val data = createWeatherWidgetData(
+                    context,
+                    cachedWeatherResult,
+                    weatherParams.imageQuality
+                )
+                log("Widget actualizado.")
+                saveWeatherToGlance(context, data)
+                log("Actualizando cache.")
+                weatherData = data
+            } else {
+                log("Cargando datos de la cache de glance")
+                weatherData = loadLastGlanceData(context)
+            }
+        } catch (e: Exception) {
+            log("Ha ocurrido un error cargando los datos del clima: ${e.message}", isError = true)
+        }
+        return weatherData
+    }
 
     /**
      * Carga los datos del clima desde caché o API.
@@ -205,7 +245,24 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         val day2 =
             if (futureDays.size > 1) getDayName(context, futureDays[1], currentLanguage) else ""
 
-        return WeatherWidgetData(
+        val currentIconUrl =
+            urlProvider.getImageUrl(forecast.current.condition.icon, imageQuality)
+        val currentBitmap = loadBitmapSafely(currentIconUrl)
+
+        val day1IconUrl =
+            if (futureDays.isNotEmpty())
+                urlProvider.getImageUrl(futureDays[0].day.condition.icon, imageQuality)
+            else
+                ""
+        val day1Bitmap = loadBitmapSafely(day1IconUrl)
+
+        val day2IconUrl =
+            if (futureDays.size > 1)
+                urlProvider.getImageUrl(futureDays[1].day.condition.icon, imageQuality)
+            else ""
+        val day2Bitmap = loadBitmapSafely(day2IconUrl)
+
+        val weatherWidgetData = WeatherWidgetData(
             location = forecast.location.name,
             time = formatLocalTime(forecast.location.localtime, currentLanguage),
             currentTemp = context.getString(R.string.temp_celsius_widget)
@@ -215,20 +272,61 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             windSpeed = context.getString(R.string.speed_km).format(forecast.current.windSpeedKph),
             windDirection = forecast.current.windDir,
             uvIndex = forecast.current.uv.toString(),
-            currentIconUrl = urlProvider.getImageUrl(forecast.current.condition.icon, imageQuality),
+            currentIconUrl = currentIconUrl,
             day1Name = day1,
-            day1IconUrl = if (futureDays.isNotEmpty()) urlProvider.getImageUrl(
-                futureDays[0].day.condition.icon,
-                imageQuality
-            ) else "",
+            day1IconUrl = day1IconUrl,
             day2Name = day2,
-            day2IconUrl = if (futureDays.size > 1) urlProvider.getImageUrl(
-                futureDays[1].day.condition.icon,
-                imageQuality
-            ) else ""
+            day2IconUrl = day2IconUrl,
+            currentIconBitmap = currentBitmap,
+            day1IconBitmap = day1Bitmap,
+            day2IconBitmap = day2Bitmap
         )
+
+        log(
+            """
+                Widget Data:
+                - Location: ${weatherWidgetData.location}
+                - Time: ${weatherWidgetData.time}
+                - Current Temp: ${weatherWidgetData.currentTemp}
+                - Condition: ${weatherWidgetData.currentCondition}
+                - Humidity: ${weatherWidgetData.humidity}%
+                - Wind: ${weatherWidgetData.windSpeed} ${weatherWidgetData.windDirection}
+                - UV Index: ${weatherWidgetData.uvIndex}
+                - Current Icon: ${weatherWidgetData.currentIconUrl}
+                - Day1: ${weatherWidgetData.day1Name} 
+                - Day1 Icon: ${weatherWidgetData.day1IconUrl}
+                - Day2: ${weatherWidgetData.day2Name} 
+                - Day2 Icon: ${weatherWidgetData.day2IconUrl}
+            """.trimIndent()
+        )
+
+        return weatherWidgetData
     }
 
+    private suspend fun loadBitmapSafely(url: String?): Bitmap? = withContext(Dispatchers.IO) {
+        if (url.isNullOrBlank()) return@withContext null
+        try {
+            val connection = URL(url).openConnection()
+            connection.connectTimeout = 4000
+            connection.readTimeout = 4000
+            BitmapFactory.decodeStream(connection.getInputStream())
+        } catch (e: Exception) {
+            Log.e(TAG, "Error al descargar imagen $url: ${e.message}")
+            log("Error al descargar imagen $url: ${e.message}   ", isError = true)
+            null
+        }
+    }
+
+
+    override fun onCompositionError(
+        context: Context,
+        glanceId: GlanceId,
+        appWidgetId: Int,
+        throwable: Throwable
+    ) {
+        val rv = RemoteViews(context.packageName, R.layout.glance_widget_error)
+        AppWidgetManager.getInstance(context).updateAppWidget(appWidgetId, rv)
+    }
     // ============================================================
     //  PERSISTENCIA GLANCE
     // ============================================================
@@ -281,6 +379,15 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         val glanceId = glanceIds.first()
 
         val prefs = getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)
+
+        val currentIconUrl = prefs[stringPreferencesKey("currentIconUrl")] ?: ""
+        val day1IconUrl = prefs[stringPreferencesKey("day1IconUrl")] ?: ""
+        val day2IconUrl = prefs[stringPreferencesKey("day2IconUrl")] ?: ""
+
+        val currentBitmap = loadBitmapSafely(currentIconUrl)
+        val day1Bitmap = loadBitmapSafely(day1IconUrl)
+        val day2Bitmap = loadBitmapSafely(day2IconUrl)
+
         return WeatherWidgetData(
             location = prefs[stringPreferencesKey("location")] ?: "",
             time = prefs[stringPreferencesKey("time")] ?: "",
@@ -290,11 +397,14 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             windSpeed = prefs[stringPreferencesKey("windSpeed")] ?: "",
             windDirection = prefs[stringPreferencesKey("windDirection")] ?: "",
             uvIndex = prefs[stringPreferencesKey("uvIndex")] ?: "",
-            currentIconUrl = prefs[stringPreferencesKey("currentIconUrl")] ?: "",
+            currentIconUrl = currentIconUrl,
             day1Name = prefs[stringPreferencesKey("day1Name")] ?: "",
-            day1IconUrl = prefs[stringPreferencesKey("day1IconUrl")] ?: "",
+            day1IconUrl = day1IconUrl,
             day2Name = prefs[stringPreferencesKey("day2Name")] ?: "",
-            day2IconUrl = prefs[stringPreferencesKey("day2IconUrl")] ?: ""
+            day2IconUrl = day2IconUrl,
+            currentIconBitmap = currentBitmap,
+            day1IconBitmap = day1Bitmap,
+            day2IconBitmap = day2Bitmap
         )
     }
 
@@ -375,7 +485,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     //  LOGGING
     // ============================================================
 
-    private suspend fun log(message: String, isError: Boolean = false) {
+    protected suspend fun log(message: String, isError: Boolean = false) {
         if (isError) {
             Log.e(TAG, message)
             loggerManager.log(LogLevel.ERROR, TAG, message)

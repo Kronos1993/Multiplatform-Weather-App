@@ -10,8 +10,6 @@ import com.kronos.multiplatform.weatherapp.MainActivity
 
 class OpenAppCallback : ActionCallback{
 
-    //private val widgetUpdater: WidgetUpdater by inject()
-
     override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
@@ -23,7 +21,6 @@ class OpenAppCallback : ActionCallback{
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
             context.startActivity(intent)
-            //widgetUpdater.updateAllWeatherWidgets()
         } catch (e: Exception) {
             e.printStackTrace()
         }

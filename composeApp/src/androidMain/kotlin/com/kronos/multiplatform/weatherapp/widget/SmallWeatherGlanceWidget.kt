@@ -12,10 +12,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class SmallWeatherGlanceWidget : BaseWeatherGlanceWidget() {
+
+    override val TAG = this::class.simpleName.orEmpty()
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         try {
             val weatherData = withContext(Dispatchers.IO) {
-                loadWeatherData(context)
+                loadWeatherDataFromCache(context)
             }
 
             provideContent {
@@ -28,7 +31,7 @@ class SmallWeatherGlanceWidget : BaseWeatherGlanceWidget() {
 
         } catch (e: Exception) {
             Log.e("MediumWeatherGlanceWidget", "Error providing glance content", e)
-
+            log("Error providing glance content: ${e.message}",true)
             provideContent {
                 WeatherWidgetErrorContent(context.getString(R.string.widget_error_text))
             }

@@ -30,6 +30,7 @@
     <string name="rain">Rain</string>
     <string name="snow">Snow</string>
     <string name="sun">Sun</string>
+    <string name="moon">Moon</string>
     <string name="sunrise_sunset">Rise %s\nSet %s</string>
     <string name="visibility">Visibility</string>
     <string name="visibility_km">%s KM</string>
@@ -37,6 +38,12 @@
     <string name="city_name">City name</string>
     <string name="add_location">Add</string>
     <string name="cant_delete_current_location">You can\'t delete this location</string>
+
+    <string name="uv_index_low">Low</string>
+    <string name="uv_index_medium">Medium</string>
+    <string name="uv_index_high">High</string>
+    <string name="uv_index_very_high">Very High</string>
+    <string name="uv_index_extreme">Extreme</string>
 
     <string name="notification_title">%s° | %s</string>
     <string name="notification_short_details">%s. Feels like %s°C</string>

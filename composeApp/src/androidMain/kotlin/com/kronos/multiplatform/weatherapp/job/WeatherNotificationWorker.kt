@@ -1,6 +1,8 @@
 package com.kronos.multiplatform.weatherapp.job
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.kronos.multiplatform.weatherapp.R
@@ -16,10 +18,15 @@ import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class WeatherNotificationWorker(
     appContext: Context,
@@ -37,11 +44,15 @@ class WeatherNotificationWorker(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
+            if (!hasValidatedNetworkConnection()) {
+                log("No hay conexión validada, reintentando...", true)
+                return@withContext Result.retry()
+            }
+
             refreshWeather()
             Result.success()
         } catch (e: Exception) {
-            log("Error ejecutando WeatherNotificationWorker: ${e.message}", true)
-            Result.retry()
+            handleWorkerError(e)
         }
     }
 
@@ -51,31 +62,38 @@ class WeatherNotificationWorker(
 
         val weatherParams = getWeatherParams()
 
-        when {
-            currentCity != null && currentCity.lat != null && currentCity.lon != null -> {
-                fetchAndNotifyWeather(
-                    queryLat = currentCity.lat,
-                    queryLon = currentCity.lon,
-                    weatherParams = weatherParams,
-                    locationType = "coordinates"
-                )
-            }
+        val success = withRetry(maxRetries = 3) {
+            when {
+                currentCity != null && currentCity.lat != null && currentCity.lon != null -> {
+                    fetchAndNotifyWeather(
+                        queryLat = currentCity.lat,
+                        queryLon = currentCity.lon,
+                        weatherParams = weatherParams,
+                        locationType = "coordinates"
+                    )
+                }
 
-            currentCity != null -> {
-                fetchAndNotifyWeather(
-                    queryCity = currentCity.cityName,
-                    weatherParams = weatherParams,
-                    locationType = "city"
-                )
-            }
+                currentCity != null -> {
+                    fetchAndNotifyWeather(
+                        queryCity = currentCity.cityName,
+                        weatherParams = weatherParams,
+                        locationType = "city"
+                    )
+                }
 
-            else -> {
-                fetchAndNotifyWeather(
-                    queryCity = applicationContext.getString(R.string.default_city_value),
-                    weatherParams = weatherParams,
-                    locationType = "default city"
-                )
+                else -> {
+                    fetchAndNotifyWeather(
+                        queryCity = applicationContext.getString(R.string.default_city_value),
+                        weatherParams = weatherParams,
+                        locationType = "default city"
+                    )
+                }
             }
+            true
+        }
+
+        if (!success) {
+            throw Exception("Falló después de todos los reintentos")
         }
     }
 
@@ -113,11 +131,74 @@ class WeatherNotificationWorker(
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }
             .onError { error ->
-                log("Weather error from $locationType: ${error.errorMessage}", true)
+                throw Exception("Weather error from $locationType: ${error.errorMessage}")
             }
     }
 
-    private suspend fun createWeatherNotification(forecast: Forecast) {
+    private suspend fun <T> withRetry(
+        maxRetries: Int = 3,
+        initialDelay: Long = 2000,
+        block: suspend () -> T
+    ): T {
+        var currentDelay = initialDelay
+        repeat(maxRetries) { attempt ->
+            try {
+                return block()
+            } catch (e: Exception) {
+                if (attempt == maxRetries - 1) {
+                    throw e
+                }
+
+                log("Intento ${attempt + 1} falló: ${e.message}. Reintentando en ${currentDelay}ms...", true)
+
+                if (isNetworkRelatedError(e)) {
+                    delay(currentDelay)
+                    currentDelay *= 2
+                } else {
+                    throw e
+                }
+            }
+        }
+        throw IllegalStateException("Unreachable")
+    }
+
+    private fun isNetworkRelatedError(e: Exception): Boolean {
+        return e is UnknownHostException ||
+                e is SocketTimeoutException ||
+                e is ConnectException ||
+                e.message?.contains("Unable to resolve host") == true ||
+                e.message?.contains("No address associated with hostname") == true
+    }
+
+    private fun hasValidatedNetworkConnection(): Boolean {
+        val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE)
+                as ConnectivityManager
+
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
+    private suspend fun handleWorkerError(e: Exception): Result {
+        return when {
+            isNetworkRelatedError(e) -> {
+                log("Error de red/DNS en background: ${e.message}", true)
+                Result.retry()
+            }
+            e is CancellationException -> {
+                log("Worker cancelado", true)
+                Result.success()
+            }
+            else -> {
+                log("Error no manejado: ${e.message}", true)
+                Result.failure()
+            }
+        }
+    }
+
+    private fun createWeatherNotification(forecast: Forecast) {
         notifications.createNotification(
             applicationContext.getString(R.string.notification_title)
                 .format(forecast.current.tempC, forecast.location.region),
@@ -138,9 +219,6 @@ class WeatherNotificationWorker(
             NotificationGroup.GENERAL,
             NotificationType.FROM_APP
         )
-
-        // Actualiza widgets después de la notificación
-        widgetUpdater.updateAllWeatherWidgets()
     }
 
     private data class WeatherParams(
