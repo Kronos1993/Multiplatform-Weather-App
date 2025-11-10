@@ -47,7 +47,7 @@
 
     <string name="notification_title">%s° | %s</string>
     <string name="notification_short_details">%s. Sensación térmica %s°C</string>
-    <string name="notification_long_details">%s\nSensación térmica %s°C\nTemp min %s°C - max %s°C\nPosibilidad de lluvia %s%%</string>
+    <string name="notification_long_details">%s\nSensación térmica %s°C\nTemp min %s°C - max %s°C\nPosibilidad de lluvia %s%</string>
     <string name="location_name">%1$s/%2$s</string>
     <string name="today">Hoy</string>
     <string name="tomorrow">Mañana</string>

@@ -369,11 +369,11 @@ fun CurrentWeatherCompactItem(
                 contentScale = ContentScale.Crop
             )
 
-            BodyText(
+            TitleText(
                 currentWeather.current.condition.description,
                 textColor = Color.White,
                 textAlign = TextAlign.Start,
-                size = ComponentSize.MEDIUM,
+                size = ComponentSize.LARGE,
                 fontWeight = FontWeight.Bold
             )
         }

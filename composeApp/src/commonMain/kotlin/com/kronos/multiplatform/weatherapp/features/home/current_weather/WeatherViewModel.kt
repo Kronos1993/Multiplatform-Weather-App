@@ -10,6 +10,7 @@ import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
+import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
@@ -28,8 +29,9 @@ class WeatherViewModel(
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
     private val locationRepository: LocationRepository,
     private var notifications: INotifications,
+    private val loggerManager: LogManager,
+    private val widgetUpdater: IWidgetUpdater,
     val urlProvider: UrlProvider,
-    private val loggerManager: LogManager
 ) : ParentViewModel() {
 
     private val TAG = this::class.simpleName
@@ -220,6 +222,7 @@ class WeatherViewModel(
                         )
                     )
                     createWeatherNotification()
+                    widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
                     log("Weather from coordinates acquired: ${forecast.location.name}", false)
@@ -261,6 +264,7 @@ class WeatherViewModel(
                         )
                     )
                     createWeatherNotification()
+                    widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
                     log("Weather from coordinates acquired: ${forecast.location.name}", false)
@@ -302,6 +306,7 @@ class WeatherViewModel(
                         )
                     )
                     createWeatherNotification()
+                    widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
                     log("Weather from city acquired: ${forecast.location.name}", false)

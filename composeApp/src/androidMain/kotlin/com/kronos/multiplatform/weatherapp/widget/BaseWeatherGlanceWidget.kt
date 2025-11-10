@@ -307,8 +307,8 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         if (url.isNullOrBlank()) return@withContext null
         try {
             val connection = URL(url).openConnection()
-            connection.connectTimeout = 4000
-            connection.readTimeout = 4000
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
             BitmapFactory.decodeStream(connection.getInputStream())
         } catch (e: Exception) {
             Log.e(TAG, "Error al descargar imagen $url: ${e.message}")
@@ -356,7 +356,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         updateAll(context)
     }
 
-    private suspend fun loadLastGlanceData(context: Context): WeatherWidgetData? {
+    private suspend fun loadLastGlanceData(context: Context): WeatherWidgetData {
         val manager = GlanceAppWidgetManager(context)
         val glanceIds = manager.getGlanceIds(getClassName())
         if (glanceIds.isEmpty()) {
