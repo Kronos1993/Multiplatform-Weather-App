@@ -59,6 +59,8 @@ import com.kronos.multiplatform.weatherapp.core.util.isToday
 import com.kronos.multiplatform.weatherapp.core.util.of
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
+import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Indicator
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import kotlinx.datetime.TimeZone
@@ -92,6 +94,8 @@ fun WeatherContentPortrait(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    onHourItemClicked: (Hour) -> Unit,
+    onDailyItemClicked: (DailyForecast) -> Unit,
 ) {
     var isCompact by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
@@ -152,7 +156,9 @@ fun WeatherContentPortrait(
             scrollState = scrollState,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
+            onHourItemClicked = onHourItemClicked,
+            onDailyItemClicked = onDailyItemClicked
         )
     }
 }
@@ -208,7 +214,9 @@ fun WeatherContentSection(
     imageQuality: String,
     currentLang: String,
     scrollState: LazyListState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onHourItemClicked: (Hour) -> Unit,
+    onDailyItemClicked: (DailyForecast) -> Unit,
 ) {
     val currentDayForecast = remember(currentWeather) {
         currentWeather.forecast.forecastDay.find { forecastDay ->
@@ -310,11 +318,6 @@ fun WeatherContentSection(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Item vacío para que el scroll empiece desde el header
-        item {
-            Spacer(modifier = Modifier.height(1.dp))
-        }
-
         // Sección de horas
         if (hours.isNotEmpty()) {
             item {
@@ -327,6 +330,7 @@ fun WeatherContentSection(
                             urlProvider = urlProvider,
                             imageQuality = imageQuality,
                             darkTheme = isDarkTheme,
+                            onItemClick = onHourItemClicked
                         )
                     }
                 }
@@ -360,7 +364,9 @@ fun WeatherContentSection(
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
                         currentLang = currentLang,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        onItemClick = onDailyItemClicked,
+
                     )
                 }
             }
@@ -407,6 +413,8 @@ fun WeatherContentLandscape(
     currentLang: String,
     modifier: Modifier = Modifier,
     deviceScreenConfiguration: DeviceScreenConfiguration,
+    onHourItemClicked: (Hour) -> Unit,
+    onDailyItemClicked: (DailyForecast) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -424,12 +432,14 @@ fun WeatherContentLandscape(
                 DeviceScreenConfiguration.MOBILE_PORTRAIT,
                 DeviceScreenConfiguration.TABLET_PORTRAIT -> {
                     WeatherContentPortrait(
-                        weather = weather!!,
+                        weather = weather,
                         deviceScreenConfiguration = deviceScreenConfiguration,
                         isDarkTheme = isDarkTheme,
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
                         currentLang = currentLang,
+                        onHourItemClicked = onHourItemClicked,
+                        onDailyItemClicked = onDailyItemClicked
                     )
                 }
 
@@ -469,7 +479,9 @@ fun WeatherContentLandscape(
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
                 currentLang = currentLang,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onHourItemClicked = onHourItemClicked,
+                onDailyItemClicked = onDailyItemClicked
             )
         }
     }
@@ -483,7 +495,9 @@ fun WeatherContentSectionLandscape(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onHourItemClicked: (Hour) -> Unit,
+    onDailyItemClicked: (DailyForecast) -> Unit,
 ) {
     val currentDayForecast = remember(currentWeather) {
         currentWeather.forecast.forecastDay.find { forecastDay ->
@@ -596,6 +610,7 @@ fun WeatherContentSectionLandscape(
                             urlProvider = urlProvider,
                             imageQuality = imageQuality,
                             darkTheme = isDarkTheme,
+                            onItemClick = onHourItemClicked
                         )
                     }
                 }
@@ -622,7 +637,8 @@ fun WeatherContentSectionLandscape(
                     urlProvider = urlProvider,
                     imageQuality = imageQuality,
                     currentLang = currentLang,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    onItemClick = onDailyItemClicked
                 )
             }
         }

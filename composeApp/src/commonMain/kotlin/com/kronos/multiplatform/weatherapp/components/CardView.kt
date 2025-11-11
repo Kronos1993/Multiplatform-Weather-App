@@ -79,6 +79,7 @@ fun HourlyItemIndicator(
     imageQuality: String,
     darkTheme: Boolean,
     modifier: Modifier = Modifier,
+    onItemClick: (Hour) -> Unit,
 ) {
     val cardBackgroundColor = if (darkTheme) {
         extendedDark.backgroundCardColor.color
@@ -90,7 +91,8 @@ fun HourlyItemIndicator(
         modifier = modifier
             .padding(4.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        onClick = { onItemClick(item) }
     ) {
         Column(
             modifier = Modifier
@@ -130,7 +132,7 @@ fun HourlyItemIndicator(
                 modifier = Modifier.wrapContentSize(),
                 textColor = Color.White,
                 size = ComponentSize.MEDIUM,
-                fontWeight = FontWeight.Companion.Bold
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -169,7 +171,7 @@ fun WeatherIndicatorItem(
             textColor = Color.White,
             textAlign = TextAlign.Center,
             size = ComponentSize.SMALL,
-            fontWeight = FontWeight.Companion.Bold,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.wrapContentWidth()
         )
     }
@@ -262,7 +264,7 @@ fun CurrentWeatherItem(
     darkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
-    currentLang:String,
+    currentLang: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -297,7 +299,7 @@ fun CurrentWeatherItem(
 
         val date = Instant.of(currentWeather.location.localtime, true)
 
-        val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa",currentLang)
+        val stringDate = formatDateTime(date!!, "EEE MMM d | h:mm aa", currentLang)
 
         BodyText(
             stringDate,
@@ -385,7 +387,7 @@ fun CurrentWeatherCompactItem(
         ) {
             val date = Instant.of(currentWeather.location.localtime, true)
 
-            val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa",currentLang)
+            val stringDate = formatDateTime(date!!, "EEE MMM d | h:mm aa", currentLang)
 
             BodyText(
                 stringDate,
@@ -465,7 +467,7 @@ fun CurrentWeatherLandscapeCompactItem(
             textColor = Color.White,
             textAlign = TextAlign.Center,
             size = ComponentSize.SMALL,
-            fontWeight = FontWeight.Companion.Bold
+            fontWeight = FontWeight.Bold
         )
 
         Row(
@@ -485,7 +487,7 @@ fun CurrentWeatherLandscapeCompactItem(
 
                 val date = Instant.of(currentWeather.location.localtime, true)
 
-                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa", currentLang)
+                val stringDate = formatDateTime(date!!, "EEE MMM d | h:mm aa", currentLang)
 
                 BodyText(
                     stringDate,
@@ -576,7 +578,7 @@ fun CurrentWeatherBigScreenCompactItem(
             textColor = Color.White,
             textAlign = TextAlign.Center,
             size = ComponentSize.MEDIUM,
-            fontWeight = FontWeight.Companion.Bold
+            fontWeight = FontWeight.Bold
         )
 
         Row(
@@ -596,7 +598,7 @@ fun CurrentWeatherBigScreenCompactItem(
 
                 val date = Instant.of(currentWeather.location.localtime, true)
 
-                val stringDate = formatDateTime(date!!,"EEE MMM d | h:mm aa",currentLang)
+                val stringDate = formatDateTime(date!!, "EEE MMM d | h:mm aa", currentLang)
 
                 TitleText(
                     stringDate,
@@ -656,9 +658,10 @@ fun DailyWeatherItemIndicator(
     item: DailyForecast,
     urlProvider: UrlProvider,
     imageQuality: String,
-    currentLang:String,
+    currentLang: String,
     darkTheme: Boolean,
     modifier: Modifier = Modifier,
+    onItemClick: (DailyForecast) -> Unit,
 ) {
     val cardBackgroundColor = if (darkTheme) {
         extendedDark.backgroundCardColor.color
@@ -670,7 +673,10 @@ fun DailyWeatherItemIndicator(
         modifier = modifier
             .padding(4.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        onClick = {
+            onItemClick(item)
+        }
     ) {
         Row(
             modifier = Modifier
@@ -779,6 +785,7 @@ fun DailyWeatherList(
     imageQuality: String,
     currentLang: String,
     modifier: Modifier = Modifier,
+    onItemClick: (DailyForecast) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -793,7 +800,8 @@ fun DailyWeatherList(
                 imageQuality = imageQuality,
                 currentLang = currentLang,
                 darkTheme = darkTheme,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                onItemClick
             )
         }
     }
@@ -947,7 +955,7 @@ fun UserCustomLocationItem(
                         size = ComponentSize.MEDIUM,
                         textAlign = TextAlign.Start,
                         maxLines = 1,
-                        fontWeight = FontWeight.Companion.Bold,
+                        fontWeight = FontWeight.Bold,
                         textOverflow = TextOverflow.Ellipsis
                     )
 

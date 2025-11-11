@@ -187,6 +187,8 @@ fun WeatherScreen(
                                                 urlProvider = viewModel.urlProvider,
                                                 currentLang = currentLang,
                                                 imageQuality = imageQuality,
+                                                onHourItemClicked = {},
+                                                onDailyItemClicked = {}
                                             )
                                         } else {
                                             NoWeatherItem(
@@ -243,7 +245,9 @@ fun WeatherScreen(
                                             imageQuality = imageQuality,
                                             currentLang = currentLang,
                                             modifier = rootModifier,
-                                            deviceScreenConfiguration = deviceScreenConfiguration
+                                            deviceScreenConfiguration = deviceScreenConfiguration,
+                                            onHourItemClicked = {},
+                                            onDailyItemClicked = {}
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -303,6 +307,8 @@ fun WeatherScreen(
                                                 urlProvider = viewModel.urlProvider,
                                                 imageQuality = imageQuality,
                                                 currentLang = currentLang,
+                                                onHourItemClicked = {},
+                                                onDailyItemClicked = {}
                                             )
                                         } else {
                                             NoWeatherItem(
@@ -366,6 +372,8 @@ fun WeatherScreen(
                                                 imageQuality = imageQuality,
                                                 currentLang = currentLang,
                                                 deviceScreenConfiguration = deviceScreenConfiguration,
+                                                onHourItemClicked = {},
+                                                onDailyItemClicked = {}
                                             )
                                         } else {
                                             NoWeatherItem(
