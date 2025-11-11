@@ -127,6 +127,7 @@ class WeatherNotificationWorker(
                     applicationContext.getString(R.string.current_weather_key),
                     forecast
                 )
+                widgetUpdater.updateAllWeatherWidgets()
                 createWeatherNotification(forecast)
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }
