@@ -47,7 +47,7 @@ fun GridList(
                 enableStartToEnd = enableStartToEnd,
                 startToEndIcon = startToEndIcon,
                 onSwipeStartToEnd = onSwipeStartToEnd,
-                enableEndToStart = enableEndToStart,
+                enableEndToStart = !(it.isCurrent || it.isSelected),
                 endToStartIcon = endToStartIcon,
                 onSwipeEndToStart = onSwipeEndToStart,
                 resetSwipe = resetSwipe,
