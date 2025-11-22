@@ -32,6 +32,8 @@
     <string name="sunday">Domingo</string>
 
     <string name="widget_name">Info del clima</string>
+    <string name="widget_with_analog_clock_name">Info del clima y reloj analogico</string>
+    <string name="widget_with_digital_clock_name">Info del clima y reloj digital</string>
     <string name="widget_error_text">Abre la aplicación para obtener datos nuevos</string>
 
 </resources>

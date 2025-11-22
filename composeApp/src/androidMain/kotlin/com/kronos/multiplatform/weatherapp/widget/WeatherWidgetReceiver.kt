@@ -14,3 +14,11 @@ class MediumWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
 class LargeWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = LargeWeatherGlanceWidget()
 }
+
+class AnalogClockWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = SmallWeatherWithAnalogClockGlanceWidget()
+}
+
+class DigitalClockWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = SmallWeatherWithDigitalClockGlanceWidget()
+}

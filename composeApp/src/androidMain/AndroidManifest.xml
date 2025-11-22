@@ -67,6 +67,28 @@
                 android:resource="@xml/widget_provider_info_large" />
         </receiver>
 
+        <receiver
+            android:name=".widget.AnalogClockWeatherWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_provider_info_with_analog_clock" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.DigitalClockWeatherWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_provider_info_with_digital_clock" />
+        </receiver>
+
     </application>
 
 </manifest>

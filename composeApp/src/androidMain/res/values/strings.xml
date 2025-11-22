@@ -34,5 +34,7 @@
     <string name="sunday">Sunday</string>
 
     <string name="widget_name">Weather Info</string>
+    <string name="widget_with_analog_clock_name">Weather Info and Analog Clock</string>
+    <string name="widget_with_digital_clock_name">Weather Info and Digital Clock</string>
     <string name="widget_error_text">Open app to get data</string>
 </resources>
