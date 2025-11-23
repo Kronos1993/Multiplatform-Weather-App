@@ -5,53 +5,112 @@
     android:viewportWidth="100"
     android:viewportHeight="100">
 
+    <!-- Fondo negro redondo -->
+    <path
+        android:fillColor="@color/clock_dial_bg"
+        android:pathData="M50,0 A50,50 0 1,1 49.9,0" />
+
     <!-- Círculo exterior -->
     <path
-        android:fillColor="#FFFFFF"
-        android:strokeColor="#000000"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="3"
         android:pathData="M50,2 A48,48 0 1,1 49.9,2" />
 
-    <!-- Marcas de hora -->
+    <!-- ======================================================= -->
+    <!--                   MARCAS DE MINUTO (60)                 -->
+    <!-- ======================================================= -->
     <group>
-        <path
-            android:strokeColor="#000000"
-            android:strokeWidth="3"
-            android:pathData="M50,6 L50,14" />
-        <group android:rotation="30" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="60" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="90" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="120" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="150" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="180" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="210" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="240" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="270" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="300" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
-        <group android:rotation="330" android:pivotX="50" android:pivotY="50">
-            <path android:strokeColor="#000000" android:strokeWidth="3" android:pathData="M50,6 L50,14" />
-        </group>
+        <!-- Marca base -->
+        <path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/>
+
+        <!-- Las 59 restantes -->
+        <!-- Cada rotación = 6° -->
+        <group android:rotation="6" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="12" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="18" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="24" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="30" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="36" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="42" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="48" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="54" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="60" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+
+        <group android:rotation="66" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="72" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="78" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="84" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="90" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="96" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="102" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="108" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="114" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="120" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+
+        <group android:rotation="126" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="132" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="138" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="144" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="150" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="156" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="162" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="168" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="174" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="180" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+
+        <group android:rotation="186" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="192" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="198" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="204" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="210" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="216" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="222" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="228" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="234" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="240" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+
+        <group android:rotation="246" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="252" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="258" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="264" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="270" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="276" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="282" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="288" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="294" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="300" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+
+        <group android:rotation="306" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="312" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="318" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="324" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="330" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="336" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="342" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="348" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+        <group android:rotation="354" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="1" android:pathData="M50,4 L50,8"/></group>
+    </group>
+
+    <!-- ======================================================= -->
+    <!--                    MARCAS DE HORA (12)                   -->
+    <!-- ======================================================= -->
+    <group>
+        <!-- Marca base -->
+        <path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/>
+
+        <!-- Repeticiones cada 30° -->
+        <group android:rotation="30" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="60" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="90" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="120" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="150" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="180" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="210" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="240" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="270" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="300" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
+        <group android:rotation="330" android:pivotX="50" android:pivotY="50"><path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M50,6 L50,14"/></group>
     </group>
 
 </vector>
-

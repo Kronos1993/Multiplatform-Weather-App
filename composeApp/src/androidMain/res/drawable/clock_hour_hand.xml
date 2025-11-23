@@ -5,13 +5,15 @@
     android:viewportWidth="100"
     android:viewportHeight="100">
 
+    <!-- Mano más pequeña (corta) -->
     <path
-        android:fillColor="#000000"
-        android:pathData="M48,15 L52,15 L52,55 L48,55 z" />
+        android:fillColor="@color/clock_hour_hand"
+        android:pathData="M48,25 L52,25 L52,50 L48,50 z" />
 
     <!-- Centro -->
     <path
-        android:fillColor="#000000"
+        android:fillColor="@color/clock_hour_hand"
         android:pathData="M45,50 A5,5 0 1,1 55,50 A5,5 0 1,1 45,50" />
 
 </vector>
+

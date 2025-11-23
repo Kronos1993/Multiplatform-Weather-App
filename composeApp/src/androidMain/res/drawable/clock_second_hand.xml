@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="80dp"
+    android:height="80dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <path
+        android:fillColor="@color/clock_second_second"
+        android:pathData="M49,5 L51,5 L51,60 L49,60 z" />
+
+    <path
+        android:fillColor="@color/clock_second_second"
+        android:pathData="M47,50 A3,3 0 1,1 53,50 A3,3 0 1,1 47,50" />
+
+</vector>

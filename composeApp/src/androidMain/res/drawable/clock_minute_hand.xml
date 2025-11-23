@@ -5,14 +5,16 @@
     android:viewportWidth="100"
     android:viewportHeight="100">
 
+    <!-- Mano ajustada al mismo grosor (48 a 52) pero con el largo original -->
     <path
-        android:fillColor="#000000"
-        android:pathData="M49,10 L51,10 L51,60 L49,60 z" />
+        android:fillColor="@color/clock_hour_minute"
+        android:pathData="M48,10 L52,10 L52,60 L48,60 z" />
 
-    <!-- Centro -->
+    <!-- Centro blanco -->
     <path
-        android:fillColor="#000000"
+        android:fillColor="@color/clock_hour_minute"
         android:pathData="M45,50 A5,5 0 1,1 55,50 A5,5 0 1,1 45,50" />
 
 </vector>
+
 

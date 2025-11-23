@@ -6,5 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:dial="@drawable/clock_dial"
+    android:hand_second="@drawable/clock_second_hand"
     android:hand_hour="@drawable/clock_hour_hand"
-    android:hand_minute="@drawable/clock_minute_hand"/>
+    android:hand_minute="@drawable/clock_minute_hand" />
