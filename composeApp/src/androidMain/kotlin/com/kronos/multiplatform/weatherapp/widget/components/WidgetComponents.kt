@@ -569,7 +569,6 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
         // Reloj centrado al final
         Box(
             modifier = GlanceModifier
-                .defaultWeight()
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
@@ -651,7 +650,6 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
         // Reloj centrado al final
         Box(
             modifier = GlanceModifier
-                .defaultWeight()
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
