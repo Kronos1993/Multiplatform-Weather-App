@@ -20,6 +20,7 @@ import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.result.Result
+import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
 import com.kronos.multiplatform.weatherapp.core.util.isToday
 import com.kronos.multiplatform.weatherapp.core.util.isTomorrow
@@ -51,6 +52,8 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     private val urlProvider: UrlProvider by inject()
     private val loggerManager: ILogManager by inject()
 
+    private val changeLang: IChangeLang by inject()
+
     protected abstract fun getClassName(): Class<out GlanceAppWidget>
 
     protected open val TAG = this::class.simpleName.orEmpty()
@@ -61,6 +64,11 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
      */
     protected suspend fun loadWeatherDataFromCache(context: Context): WeatherWidgetData? {
         log("Iniciando carga de datos del clima (GlanceWidget) solo de la cache")
+        val currentLang = preferenceRepository.getPreference(
+            context.getString(R.string.default_lang_key),
+            context.getString(R.string.default_language_value)
+        )
+        changeLang.onLangChange(currentLang)
         var weatherData: WeatherWidgetData? = null
         try {
             val cachedWeatherResult = loadCachedWeather(context)

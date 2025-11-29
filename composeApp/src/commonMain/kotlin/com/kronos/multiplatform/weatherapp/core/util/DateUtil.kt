@@ -54,7 +54,8 @@ fun formatDateTime(
             val minute = localDateTime.minute.toString().padStart(2, '0')
             val second = localDateTime.second.toString().padStart(2, '0')
 
-            val amPm = if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
+            val amPm =
+                if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
 
             "$day/$month/$year $hour12:$minute:$second $amPm"
         }
@@ -65,7 +66,8 @@ fun formatDateTime(
             val hour24 = localDateTime.hour
             val hour12 = if (hour24 % 12 == 0) 12 else hour24 % 12
             val minute = localDateTime.minute.toString().padStart(2, '0')
-            val amPm = if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
+            val amPm =
+                if (hour24 < 12) getAmPmText(language, true) else getAmPmText(language, false)
 
             "$day-$month $hour12:$minute $amPm"
         }
@@ -94,9 +96,12 @@ fun formatDateTime(
             val dayOfWeek = getDayOfWeekName(localDateTime.dayOfWeek, language, short = true)
             val month = getMonthName(localDateTime.month, language, short = false)
             val day = localDateTime.dayOfMonth
-            val hour = localDateTime.hour % 12.let { if (it == 0) 12 else it }
+            val hour = (localDateTime.hour % 12).let { if (it == 0) 12 else it }
             val minute = localDateTime.minute.toString().padStart(2, '0')
-            val amPm = if (localDateTime.hour < 12) getAmPmText(language, true) else getAmPmText(language, false)
+            val amPm = if (localDateTime.hour < 12) getAmPmText(language, true) else getAmPmText(
+                language,
+                false
+            )
 
             "$dayOfWeek $month $day | $hour:$minute $amPm"
         }
@@ -144,12 +149,17 @@ private fun getMonthName(month: Month, language: String, short: Boolean = false)
             Month.NOVEMBER -> if (short) "Nov" else "Noviembre"
             Month.DECEMBER -> if (short) "Dic" else "Diciembre"
         }
+
         else -> if (short) month.name.take(3) else month.name
     }
 }
 
 // Función auxiliar para obtener nombre del día de la semana según el idioma
-private fun getDayOfWeekName(dayOfWeek: DayOfWeek, language: String, short: Boolean = false): String {
+private fun getDayOfWeekName(
+    dayOfWeek: DayOfWeek,
+    language: String,
+    short: Boolean = false
+): String {
     return when (language) {
         "es" -> when (dayOfWeek) {
             DayOfWeek.MONDAY -> if (short) "Lun" else "Lunes"
@@ -160,6 +170,7 @@ private fun getDayOfWeekName(dayOfWeek: DayOfWeek, language: String, short: Bool
             DayOfWeek.SATURDAY -> if (short) "Sáb" else "Sábado"
             DayOfWeek.SUNDAY -> if (short) "Dom" else "Domingo"
         }
+
         else -> if (short) dayOfWeek.name.take(3) else dayOfWeek.name
     }
 }

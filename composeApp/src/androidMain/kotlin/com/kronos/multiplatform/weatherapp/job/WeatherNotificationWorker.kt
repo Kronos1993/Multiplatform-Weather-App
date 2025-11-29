@@ -14,6 +14,7 @@ import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
+import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
@@ -41,9 +42,15 @@ class WeatherNotificationWorker(
     private val notifications: INotifications by inject()
     private val loggerManager: ILogManager by inject()
     private val widgetUpdater: IWidgetUpdater by inject()
+    private val changeLang: IChangeLang by inject()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
+            val currentLang = preferenceRepository.getPreference(
+                applicationContext.getString(R.string.default_lang_key),
+                applicationContext.getString(R.string.default_language_value)
+            )
+            changeLang.onLangChange(currentLang)
             if (!hasValidatedNetworkConnection()) {
                 log("No hay conexión validada, reintentando...", true)
                 return@withContext Result.retry()
