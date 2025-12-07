@@ -37,7 +37,7 @@
     <string name="title_add_location">Add Location</string>
     <string name="city_name">City name</string>
     <string name="add_location">Add</string>
-    <string name="cant_delete_current_location">You can\'t delete this location</string>
+    <string name="cant_delete_current_location">You can't delete this location</string>
 
     <string name="uv_index_low">Low</string>
     <string name="uv_index_medium">Medium</string>
@@ -62,8 +62,8 @@
 
     <string name="add_location_button_content_description">Add location</string>
 
-    <string name="denied_notification_permission_message">You can\'t use notifications without permission. You can enable it in Settings</string>
-    <string name="denied_location_permission_message">You can\'t use location without permission. You can enable it in Settings</string>
+    <string name="denied_notification_permission_message">You can't use notifications without permission. You can enable it in Settings</string>
+    <string name="denied_location_permission_message">You can't use location without permission. You can enable it in Settings</string>
 
     <string name="exit_dialog_title">Exit</string>
     <string name="exit_dialog_body">Are you sure you want to exit?</string>

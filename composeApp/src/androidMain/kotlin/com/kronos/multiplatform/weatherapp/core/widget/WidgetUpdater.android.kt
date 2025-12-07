@@ -7,11 +7,15 @@ import android.content.Intent
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import com.kronos.multiplatform.weatherapp.widget.AnalogClockWeatherWidgetReceiver
+import com.kronos.multiplatform.weatherapp.widget.DigitalClockWeatherWidgetReceiver
 import com.kronos.multiplatform.weatherapp.widget.LargeWeatherGlanceWidget
 import com.kronos.multiplatform.weatherapp.widget.LargeWeatherWidgetReceiver
 import com.kronos.multiplatform.weatherapp.widget.MediumWeatherGlanceWidget
 import com.kronos.multiplatform.weatherapp.widget.MediumWeatherWidgetReceiver
 import com.kronos.multiplatform.weatherapp.widget.SmallWeatherGlanceWidget
+import com.kronos.multiplatform.weatherapp.widget.SmallWeatherWithAnalogClockGlanceWidget
+import com.kronos.multiplatform.weatherapp.widget.SmallWeatherWithDigitalClockGlanceWidget
 import com.kronos.multiplatform.weatherapp.widget.WeatherWidgetReceiver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,6 +61,25 @@ actual class WidgetUpdater(private val context: Context) : IWidgetUpdater {
             } catch (e: Exception) {
                 log("Error updating large glance widget: ${e.message}", true)
             }
+
+            try {
+                val digitalClockGlanceWidget = SmallWeatherWithDigitalClockGlanceWidget()
+                updateGlanceWidget(
+                    glanceAppWidgetManager,
+                    digitalClockGlanceWidget,
+                    "Digital clock"
+                )
+            } catch (e: Exception) {
+                log("Error updating large glance widget: ${e.message}", true)
+            }
+
+            try {
+                val analogClockGlanceWidget = SmallWeatherWithAnalogClockGlanceWidget()
+                updateGlanceWidget(glanceAppWidgetManager, analogClockGlanceWidget, "Analog clock")
+            } catch (e: Exception) {
+                log("Error updating large glance widget: ${e.message}", true)
+            }
+
         } catch (e: Exception) {
             log("Error in updateGlanceWidgets: ${e.message}", true)
         }
@@ -130,6 +153,18 @@ actual class WidgetUpdater(private val context: Context) : IWidgetUpdater {
 
             updateWidgetsByClass(appWidgetManager, LargeWeatherWidgetReceiver::class.java, "Large")
 
+            updateWidgetsByClass(
+                appWidgetManager,
+                SmallWeatherWithAnalogClockGlanceWidget::class.java,
+                "Analog Clock"
+            )
+
+            updateWidgetsByClass(
+                appWidgetManager,
+                SmallWeatherWithDigitalClockGlanceWidget::class.java,
+                "Digital Clock"
+            )
+
         } catch (e: Exception) {
             log("Error sending widget broadcast: ${e.message}", true)
         }
@@ -184,6 +219,16 @@ actual class WidgetUpdater(private val context: Context) : IWidgetUpdater {
                     val glanceWidget = LargeWeatherGlanceWidget()
                     updateGlanceWidget(glanceAppWidgetManager, glanceWidget, "Large")
                 }
+
+                SmallWeatherWithAnalogClockGlanceWidget::class.java -> {
+                    val glanceWidget = SmallWeatherWithAnalogClockGlanceWidget()
+                    updateGlanceWidget(glanceAppWidgetManager, glanceWidget, "Analog Clock")
+                }
+
+                SmallWeatherWithDigitalClockGlanceWidget::class.java -> {
+                    val glanceWidget = SmallWeatherWithDigitalClockGlanceWidget()
+                    updateGlanceWidget(glanceAppWidgetManager, glanceWidget, "Digital Clock")
+                }
             }
             log("Specific widget ${widgetClass.simpleName} updated")
         } catch (e: Exception) {
@@ -230,6 +275,14 @@ actual class WidgetUpdater(private val context: Context) : IWidgetUpdater {
 
             info["Large"] = appWidgetManager.getAppWidgetIds(
                 ComponentName(context, LargeWeatherWidgetReceiver::class.java)
+            ).size
+
+            info["AnalogClock"] = appWidgetManager.getAppWidgetIds(
+                ComponentName(context, AnalogClockWeatherWidgetReceiver::class.java)
+            ).size
+
+            info["DigitalClock"] = appWidgetManager.getAppWidgetIds(
+                ComponentName(context, DigitalClockWeatherWidgetReceiver::class.java)
             ).size
 
             info

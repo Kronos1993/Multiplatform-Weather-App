@@ -29,6 +29,7 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.layout.wrapContentWidth
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
@@ -512,7 +513,7 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
     ) {
         // Contenido del clima
         Column(
-            modifier = GlanceModifier.defaultWeight(),
+            modifier = GlanceModifier.fillMaxHeight().defaultWeight(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalAlignment = Alignment.Start
         ) {
@@ -593,7 +594,7 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
     ) {
         // Contenido del clima
         Column(
-            modifier = GlanceModifier.defaultWeight(),
+            modifier = GlanceModifier.fillMaxHeight().defaultWeight(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalAlignment = Alignment.Start
         ) {
@@ -650,7 +651,8 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
         // Reloj centrado al final
         Box(
             modifier = GlanceModifier
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .wrapContentWidth(),
             contentAlignment = Alignment.Center
         ) {
             AndroidRemoteViews(
