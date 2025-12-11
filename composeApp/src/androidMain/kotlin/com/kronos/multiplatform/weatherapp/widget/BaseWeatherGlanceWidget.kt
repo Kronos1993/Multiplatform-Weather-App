@@ -276,6 +276,11 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             currentTemp = context.getString(R.string.temp_celsius_widget)
                 .format(forecast.current.tempC),
             currentCondition = forecast.current.condition.description,
+            tomorrowCondition = if (forecast.forecast.forecastDay.size > 2) {
+                forecast.forecast.forecastDay[1].day.condition.description
+            } else {
+                ""
+            },
             humidity = forecast.current.humidity.toString(),
             windSpeed = context.getString(R.string.speed_km).format(forecast.current.windSpeedKph),
             windDirection = forecast.current.windDir,
@@ -297,6 +302,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                 - Time: ${weatherWidgetData.time}
                 - Current Temp: ${weatherWidgetData.currentTemp}
                 - Condition: ${weatherWidgetData.currentCondition}
+                - Tomorrow Condition: ${weatherWidgetData.tomorrowCondition}
                 - Humidity: ${weatherWidgetData.humidity}%
                 - Wind: ${weatherWidgetData.windSpeed} ${weatherWidgetData.windDirection}
                 - UV Index: ${weatherWidgetData.uvIndex}
@@ -349,6 +355,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                     this[stringPreferencesKey("time")] = data.time
                     this[stringPreferencesKey("currentTemp")] = data.currentTemp
                     this[stringPreferencesKey("currentCondition")] = data.currentCondition
+                    this[stringPreferencesKey("tomorrowCondition")] = data.tomorrowCondition
                     this[stringPreferencesKey("humidity")] = data.humidity
                     this[stringPreferencesKey("windSpeed")] = data.windSpeed
                     this[stringPreferencesKey("windDirection")] = data.windDirection
@@ -373,6 +380,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                 time = "",
                 currentTemp = "--°",
                 currentCondition = context.getString(R.string.widget_error_text),
+                tomorrowCondition = "--",
                 humidity = "--",
                 windSpeed = "--",
                 windDirection = "--",
@@ -401,6 +409,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             time = prefs[stringPreferencesKey("time")] ?: "",
             currentTemp = prefs[stringPreferencesKey("currentTemp")] ?: "",
             currentCondition = prefs[stringPreferencesKey("currentCondition")] ?: "",
+            tomorrowCondition = prefs[stringPreferencesKey("tomorrowCondition")] ?: "",
             humidity = prefs[stringPreferencesKey("humidity")] ?: "",
             windSpeed = prefs[stringPreferencesKey("windSpeed")] ?: "",
             windDirection = prefs[stringPreferencesKey("windDirection")] ?: "",

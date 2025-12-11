@@ -7,6 +7,7 @@ data class WeatherWidgetData(
     val time: String,
     val currentTemp: String,
     val currentCondition: String,
+    val tomorrowCondition: String,
     val humidity: String,
     val windSpeed: String,
     val windDirection: String,

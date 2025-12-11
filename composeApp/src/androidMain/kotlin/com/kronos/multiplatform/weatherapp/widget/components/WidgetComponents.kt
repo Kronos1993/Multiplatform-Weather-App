@@ -141,43 +141,6 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 }
 
 @Composable
-private fun MediumForecastDayItem(
-    dayName: String,
-    icon: Bitmap?,
-    modifier: GlanceModifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = dayName,
-            style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                color = ColorProvider(Color.White, Color.White)
-            )
-        )
-
-        Spacer(modifier = GlanceModifier.height(4.dp))
-
-        if (icon != null)
-            Image(
-                ImageProvider(icon),
-                contentDescription = "Forecast weather",
-                modifier = GlanceModifier.size(32.dp)
-            )
-        else
-            Image(
-                ImageProvider(R.drawable.ic_weather_app_icon),
-                contentDescription = "Forecast weather",
-                modifier = GlanceModifier.size(32.dp)
-            )
-    }
-}
-
-
-@Composable
 fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
     Box(
         modifier = GlanceModifier.fillMaxSize().clickable(
@@ -395,6 +358,205 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
 }
 
 @Composable
+fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
+    Row(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .padding(8.dp)
+            .clickable(actionRunCallback<OpenAppCallback>()),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Contenido del clima
+        if (weatherData == null) {
+            LoadingWidget()
+        } else {
+            Column(
+                modifier = GlanceModifier.fillMaxHeight().defaultWeight(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val icon = weatherData.currentIconBitmap?.let {
+                        ImageProvider(it)
+                    } ?: ImageProvider(R.drawable.ic_weather_app_icon)
+
+                    Image(
+                        provider = icon,
+                        contentDescription = "Weather",
+                        modifier = GlanceModifier.size(36.dp)
+                    )
+
+                    Spacer(GlanceModifier.width(4.dp))
+
+                    Text(
+                        text = weatherData.currentTemp,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            color = ColorProvider(Color.White, Color.White)
+                        )
+                    )
+                }
+
+                Spacer(GlanceModifier.height(2.dp))
+
+                Text(
+                    text = weatherData.currentCondition,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = ColorProvider(Color.White, Color.White)
+                    ),
+                    maxLines = 1
+                )
+
+                Text(
+                    text = weatherData.location,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        color = ColorProvider(Color.White, Color.White)
+                    ),
+                    maxLines = 1
+                )
+            }
+        }
+
+        // Reloj centrado al final
+        Box(
+            modifier = GlanceModifier
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            AndroidRemoteViews(
+                remoteViews = RemoteViews(
+                    LocalContext.current.packageName,
+                    R.layout.widget_rtc_analog_clock
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
+    Row(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .padding(8.dp)
+            .clickable(actionRunCallback<OpenAppCallback>()),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (weatherData == null) {
+            LoadingWidget()
+        } else {
+            // Contenido del clima
+            Column(
+                modifier = GlanceModifier.fillMaxHeight().defaultWeight(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val icon = weatherData.currentIconBitmap?.let {
+                        ImageProvider(it)
+                    } ?: ImageProvider(R.drawable.ic_weather_app_icon)
+
+                    Image(
+                        provider = icon,
+                        contentDescription = "Weather",
+                        modifier = GlanceModifier.size(36.dp)
+                    )
+
+                    Spacer(GlanceModifier.width(4.dp))
+
+                    Text(
+                        text = weatherData.currentTemp,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            color = ColorProvider(Color.White, Color.White)
+                        )
+                    )
+                }
+
+                Spacer(GlanceModifier.height(2.dp))
+
+                Text(
+                    text = weatherData.currentCondition,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = ColorProvider(Color.White, Color.White)
+                    ),
+                    maxLines = 1
+                )
+
+                Text(
+                    text = weatherData.location,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        color = ColorProvider(Color.White, Color.White)
+                    ),
+                    maxLines = 1
+                )
+            }
+        }
+
+        // Reloj centrado al final
+        Box(
+            modifier = GlanceModifier
+                .fillMaxHeight()
+                .wrapContentWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            AndroidRemoteViews(
+                remoteViews = RemoteViews(
+                    LocalContext.current.packageName,
+                    R.layout.widget_rtc_digital_clock
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun MediumForecastDayItem(
+    dayName: String,
+    icon: Bitmap?,
+    modifier: GlanceModifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = dayName,
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = ColorProvider(Color.White, Color.White)
+            )
+        )
+
+        Spacer(modifier = GlanceModifier.height(4.dp))
+
+        if (icon != null)
+            Image(
+                ImageProvider(icon),
+                contentDescription = "Forecast weather",
+                modifier = GlanceModifier.size(32.dp)
+            )
+        else
+            Image(
+                ImageProvider(R.drawable.ic_weather_app_icon),
+                contentDescription = "Forecast weather",
+                modifier = GlanceModifier.size(32.dp)
+            )
+    }
+}
+
+@Composable
 private fun WeatherDetailItem(label: String, value: String) {
     Row(
         horizontalAlignment = Alignment.Start
@@ -499,168 +661,5 @@ fun WeatherWidgetErrorContent(message: String) {
             ),
             maxLines = 2
         )
-    }
-}
-
-@Composable
-fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
-    Row(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .clickable(actionRunCallback<OpenAppCallback>()),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Contenido del clima
-        Column(
-            modifier = GlanceModifier.fillMaxHeight().defaultWeight(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.Start
-        ) {
-            if (weatherData == null) {
-                LoadingWidget()
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val icon = weatherData.currentIconBitmap?.let {
-                        ImageProvider(it)
-                    } ?: ImageProvider(R.drawable.ic_weather_app_icon)
-
-                    Image(
-                        provider = icon,
-                        contentDescription = "Weather",
-                        modifier = GlanceModifier.size(36.dp)
-                    )
-
-                    Spacer(GlanceModifier.width(4.dp))
-
-                    Text(
-                        text = weatherData.currentTemp,
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            color = ColorProvider(Color.White, Color.White)
-                        )
-                    )
-                }
-
-                Spacer(GlanceModifier.height(2.dp))
-
-                Text(
-                    text = weatherData.currentCondition,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = ColorProvider(Color.White, Color.White)
-                    ),
-                    maxLines = 1
-                )
-
-                Text(
-                    text = weatherData.location,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = ColorProvider(Color.White, Color.White)
-                    ),
-                    maxLines = 1
-                )
-            }
-        }
-
-        // Reloj centrado al final
-        Box(
-            modifier = GlanceModifier
-                .fillMaxHeight(),
-            contentAlignment = Alignment.Center
-        ) {
-            AndroidRemoteViews(
-                remoteViews = RemoteViews(
-                    LocalContext.current.packageName,
-                    R.layout.widget_rtc_analog_clock
-                )
-            )
-        }
-    }
-}
-
-@Composable
-fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
-    Row(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .clickable(actionRunCallback<OpenAppCallback>()),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Contenido del clima
-        Column(
-            modifier = GlanceModifier.fillMaxHeight().defaultWeight(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.Start
-        ) {
-            if (weatherData == null) {
-                LoadingWidget()
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val icon = weatherData.currentIconBitmap?.let {
-                        ImageProvider(it)
-                    } ?: ImageProvider(R.drawable.ic_weather_app_icon)
-
-                    Image(
-                        provider = icon,
-                        contentDescription = "Weather",
-                        modifier = GlanceModifier.size(36.dp)
-                    )
-
-                    Spacer(GlanceModifier.width(4.dp))
-
-                    Text(
-                        text = weatherData.currentTemp,
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            color = ColorProvider(Color.White, Color.White)
-                        )
-                    )
-                }
-
-                Spacer(GlanceModifier.height(2.dp))
-
-                Text(
-                    text = weatherData.currentCondition,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = ColorProvider(Color.White, Color.White)
-                    ),
-                    maxLines = 1
-                )
-
-                Text(
-                    text = weatherData.location,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = ColorProvider(Color.White, Color.White)
-                    ),
-                    maxLines = 1
-                )
-            }
-        }
-
-        // Reloj centrado al final
-        Box(
-            modifier = GlanceModifier
-                .fillMaxHeight()
-                .wrapContentWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            AndroidRemoteViews(
-                remoteViews = RemoteViews(
-                    LocalContext.current.packageName,
-                    R.layout.widget_rtc_digital_clock
-                )
-            )
-        }
     }
 }

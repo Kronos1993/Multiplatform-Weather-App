@@ -289,7 +289,7 @@ fun WeatherContentSection(
                     WeatherAppIcons.RainyIndicator
                 )
             },
-            if (Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour in 6..18) {
+            if (currentDayForecast?.astro?.isSunUp == true) {
                 Indicator(
                     6,
                     sunText,
