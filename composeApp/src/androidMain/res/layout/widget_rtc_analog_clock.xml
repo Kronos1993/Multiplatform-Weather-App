@@ -4,33 +4,35 @@
     android:layout_height="wrap_content"
     android:gravity="center">
 
-    <!-- Fecha -->
-    <TextClock
-        android:id="@+id/dateClock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:format12Hour="EEE, d MMM"
-        android:format24Hour="EEE, d MMM"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:includeFontPadding="false"/>
-
     <!-- Reloj analógico -->
     <AnalogClock
         android:id="@+id/analogClock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:layout_below="@+id/dateClock"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:dial="@drawable/clock_dial"
         android:hand_hour="@drawable/clock_hour_hand"
         android:hand_minute="@drawable/clock_minute_hand"
         android:hand_second="@drawable/clock_second_hand" />
+
+    <!-- Fecha -->
+    <TextClock
+        android:id="@+id/dateClock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/analogClock"
+        android:layout_centerHorizontal="true"
+        android:textStyle="bold"
+        android:format12Hour="EEE, d MMM"
+        android:format24Hour="EEE, d MMM"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:includeFontPadding="false"/>
+
 </RelativeLayout>

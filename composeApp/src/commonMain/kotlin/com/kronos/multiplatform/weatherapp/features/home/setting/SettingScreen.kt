@@ -87,6 +87,8 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         viewModel.getPreferenceLang(langPreferenceKey, langPreferenceDefault)
         viewModel.getPreferenceTheme(themePreferenceKey, themePreferenceDefault)
+        viewModel.getPreferenceDays(amountDaysPreferenceKey, amountDaysPreferenceDefault.toInt())
+        viewModel.getPreferenceImageQuality(imageQualityPreferenceKey, imageQualityPreferenceDefault)
     }
 
     // Estados locales para las opciones seleccionadas
@@ -214,7 +216,7 @@ fun SettingsScreen(
                     }
                 )
 
-                SettingRadioOptions(
+                /*SettingRadioOptions(
                     title = stringResource(Res.string.preference_days_title),
                     subtitle = stringResource(Res.string.preference_days_subtitle),
                     textColor = Color.White,
@@ -227,7 +229,7 @@ fun SettingsScreen(
                         viewModel.savePreference(amountDaysPreferenceKey, it.toInt())
                         viewModel.setPreferenceDays(it.toInt())
                     }
-                )
+                )*/
 
                 SettingRadioOptions(
                     title = stringResource(Res.string.preference_image_quality_title),

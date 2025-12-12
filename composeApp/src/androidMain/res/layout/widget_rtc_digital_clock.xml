@@ -10,10 +10,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:textStyle="bold"
         android:format12Hour="EEE, d MMM"
         android:format24Hour="EEE, d MMM"
         android:textColor="#FFFFFF"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:gravity="center"
         android:includeFontPadding="false"/>
 
@@ -22,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/dateClock"
+        android:textStyle="bold"
         android:layout_centerHorizontal="true"
         android:format12Hour="HH:mm aa"
         android:format24Hour="HH:mm"
