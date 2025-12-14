@@ -1,16 +1,16 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.2"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
-androidx-activity = "1.11.0"
+androidx-activity = "1.12.1"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
-androidx-lifecycle = "2.9.5"
+androidx-lifecycle = "2.9.6"
 androidx-testExt = "1.3.0"
-composeHotReload = "1.0.0-rc02"
-composeMultiplatform = "1.9.2"
+composeHotReload = "1.0.0"
+composeMultiplatform = "1.9.3"
 glanceAppwidget = "1.1.1"
 junit = "4.13.2"
 kotlin = "2.2.21"
@@ -23,30 +23,30 @@ kermit = "2.0.8"
 kmpnotifier = "1.6.0"
 navigationCompose = "2.9.1"
 startupRuntime = "1.2.0"
-datastore = "1.1.7"
+datastore = "1.2.0"
 
 moko = "0.20.1"
 coil3 = "3.3.0"
 koin = "4.1.1"
-koin-annotations = "2.3.0"
-adaptive = "1.1.2"
+koin-annotations = "2.3.1"
+adaptive = "1.2.0"
 
 dateTimeVersion = "0.7.1-0.6.x-compat"
 
-ktor = "3.3.1"
+ktor = "3.3.3"
 
 composeMaterial = "1.7.3"
 
 ksp = "2.1.21-2.0.1"
 
-androidx-room = "2.7.2"
-androidx-sqliteBundled = "2.5.2"
+androidx-room = "2.8.4"
+androidx-sqliteBundled = "2.6.2"
 
 #android location sevice
 android-location = "21.3.0"
-map-libre = "0.11.1"
-map-libre-composeMaterial3 = "0.11.1"
-swift-package-manager = "1.0.2"
+map-libre = "0.12.1"
+map-libre-composeMaterial3 = "0.12.1"
+swift-package-manager = "1.2.1"
 
 #android worker
 workRuntimeKtx = "2.11.0"

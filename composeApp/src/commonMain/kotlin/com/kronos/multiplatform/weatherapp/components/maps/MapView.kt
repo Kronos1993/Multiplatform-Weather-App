@@ -15,8 +15,7 @@ import com.kronos.multiplatform.weatherapp.components.maps.markers.GeoJsonMapper
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.components.theme.extendedDark
 import com.kronos.multiplatform.weatherapp.components.theme.extendedLight
-import io.github.dellisd.spatialk.geojson.Feature
-import io.github.dellisd.spatialk.geojson.Position
+import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.painterResource
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
@@ -37,6 +36,10 @@ import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
+import org.maplibre.spatialk.geojson.Feature
+import org.maplibre.spatialk.geojson.Geometry
+import org.maplibre.spatialk.geojson.Position
+import org.maplibre.spatialk.geojson.toJson
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.ic_locations
 import kotlin.math.PI
@@ -98,7 +101,7 @@ fun FixMapView(
             onMapClick = { pos, offset ->
                 val features = camera.projection?.queryRenderedFeatures(offset)
                 if (!features.isNullOrEmpty()) {
-                    println("Clicked on ${features[0].json()} at $pos")
+                    println("Clicked on ${features[0].toJson()} at $pos")
                     onMapClick(pos)
                     ClickResult.Consume
                 } else {
@@ -190,7 +193,8 @@ fun MapView(
                 onMarkerClick(clickedMarker)
                 ClickResult.Consume
             } else if (!features.isNullOrEmpty()) {
-                val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
+                val isTooClose =
+                    isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
                 if (!isTooClose) {
                     println("Click at $pos - Marker created")
                     onMapClick(pos)
@@ -201,7 +205,8 @@ fun MapView(
                     ClickResult.Pass
                 }
             } else {
-                val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
+                val isTooClose =
+                    isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
                 if (!isTooClose) {
                     println("Click at empty space at $pos - Marker created")
                     onMapClick(pos)
@@ -214,7 +219,8 @@ fun MapView(
             }
         },
         onMapLongClick = { pos, offset ->
-            val isTooClose = isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
+            val isTooClose =
+                isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
             if (!isTooClose) {
                 println("Long click at $pos - Marker created")
                 onMapLongClick(pos)
@@ -260,9 +266,12 @@ fun MapView(
 /**
  * Encuentra el marker correspondiente a las features clickeadas
  */
-private fun getMarkerFromFeatures(features: List<Feature>, markers: List<MapMarker>): MapMarker? {
+private fun getMarkerFromFeatures(
+    features: List<Feature<Geometry, JsonObject?>>,
+    markers: List<MapMarker>
+): MapMarker? {
     return features.firstOrNull()?.let { feature ->
-        val featureId = feature.id
+        val featureId = feature.id?.content
         markers.find { it.id == featureId }
     }
 }
