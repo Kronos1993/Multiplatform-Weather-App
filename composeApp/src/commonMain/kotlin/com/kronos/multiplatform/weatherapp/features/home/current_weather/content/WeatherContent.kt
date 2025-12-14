@@ -375,7 +375,7 @@ fun WeatherContentSection(
         item {
             FixMapView(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .height(300.dp),
                 markers = listOf(
                     MapMarker(
