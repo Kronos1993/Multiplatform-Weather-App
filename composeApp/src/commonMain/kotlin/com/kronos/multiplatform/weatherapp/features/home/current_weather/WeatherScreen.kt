@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -136,35 +135,57 @@ fun WeatherScreen(
                     viewModel.refreshWeather(currentLang, apiKey, amountOfDays, imageQuality)
                 }
             ) {
+                val rootModifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .consumeWindowInsets(WindowInsets.navigationBars)
 
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    val rootModifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .consumeWindowInsets(WindowInsets.navigationBars)
+                when (deviceScreenConfiguration) {
+                    DeviceScreenConfiguration.MOBILE_PORTRAIT -> {
+                        Column(
+                            modifier = rootModifier,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            when (screenState) {
+                                WeatherScreenState.Idle -> {
+                                    WeatherIdleState(
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                }
 
-                    when (deviceScreenConfiguration) {
-                        DeviceScreenConfiguration.MOBILE_PORTRAIT -> {
-                            Column(
-                                modifier = rootModifier,
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                when (screenState) {
-                                    WeatherScreenState.Idle -> {
-                                        WeatherIdleState(
-                                            modifier = Modifier.fillMaxSize(),
+                                WeatherScreenState.Loading -> {
+                                    WeatherLoadingState(
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+
+                                WeatherScreenState.NoWeather -> {
+                                    NoWeatherItem(
+                                        modifier = Modifier.fillMaxSize(),
+                                        onRetry = {
+                                            viewModel.retryLastOperation(
+                                                currentLang,
+                                                apiKey,
+                                                amountOfDays,
+                                                imageQuality
+                                            )
+                                        }
+                                    )
+                                }
+
+                                WeatherScreenState.WeatherObtained -> {
+                                    if (weather != null) {
+                                        WeatherContentPortrait(
+                                            weather = weather!!,
+                                            deviceScreenConfiguration = deviceScreenConfiguration,
+                                            isDarkTheme = isDarkTheme,
+                                            urlProvider = viewModel.urlProvider,
+                                            currentLang = currentLang,
+                                            imageQuality = imageQuality,
+                                            onHourItemClicked = {},
+                                            onDailyItemClicked = {}
                                         )
-                                    }
-
-                                    WeatherScreenState.Loading -> {
-                                        WeatherLoadingState(
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    WeatherScreenState.NoWeather -> {
+                                    } else {
                                         NoWeatherItem(
                                             modifier = Modifier.fillMaxSize(),
                                             onRetry = {
@@ -177,54 +198,155 @@ fun WeatherScreen(
                                             }
                                         )
                                     }
-
-                                    WeatherScreenState.WeatherObtained -> {
-                                        if (weather != null) {
-                                            WeatherContentPortrait(
-                                                weather = weather!!,
-                                                deviceScreenConfiguration = deviceScreenConfiguration,
-                                                isDarkTheme = isDarkTheme,
-                                                urlProvider = viewModel.urlProvider,
-                                                currentLang = currentLang,
-                                                imageQuality = imageQuality,
-                                                onHourItemClicked = {},
-                                                onDailyItemClicked = {}
-                                            )
-                                        } else {
-                                            NoWeatherItem(
-                                                modifier = Modifier.fillMaxSize(),
-                                                onRetry = {
-                                                    viewModel.retryLastOperation(
-                                                        currentLang,
-                                                        apiKey,
-                                                        amountOfDays,
-                                                        imageQuality
-                                                    )
-                                                }
-                                            )
-                                        }
-                                    }
                                 }
                             }
                         }
+                    }
 
-                        DeviceScreenConfiguration.MOBILE_LANDSCAPE -> {
+                    DeviceScreenConfiguration.MOBILE_LANDSCAPE -> {
+                        when (screenState) {
+                            WeatherScreenState.Idle -> {
+                                WeatherIdleState(
+                                    modifier = rootModifier,
+                                )
+                            }
+
+                            WeatherScreenState.Loading -> {
+                                WeatherLoadingState(
+                                    modifier = rootModifier
+                                )
+                            }
+
+                            WeatherScreenState.NoWeather -> {
+                                NoWeatherItem(
+                                    modifier = rootModifier,
+                                    onRetry = {
+                                        viewModel.retryLastOperation(
+                                            currentLang,
+                                            apiKey,
+                                            amountOfDays,
+                                            imageQuality
+                                        )
+                                    }
+                                )
+                            }
+
+                            WeatherScreenState.WeatherObtained -> {
+                                if (weather != null) {
+                                    WeatherContentLandscape(
+                                        weather = weather!!,
+                                        isDarkTheme = isDarkTheme,
+                                        urlProvider = viewModel.urlProvider,
+                                        imageQuality = imageQuality,
+                                        currentLang = currentLang,
+                                        modifier = rootModifier,
+                                        deviceScreenConfiguration = deviceScreenConfiguration,
+                                        onHourItemClicked = {},
+                                        onDailyItemClicked = {}
+                                    )
+                                } else {
+                                    NoWeatherItem(
+                                        modifier = rootModifier,
+                                        onRetry = {
+                                            viewModel.retryLastOperation(
+                                                currentLang,
+                                                apiKey,
+                                                amountOfDays,
+                                                imageQuality
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    DeviceScreenConfiguration.TABLET_PORTRAIT -> {
+                        Column(
+                            modifier = rootModifier,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
                             when (screenState) {
                                 WeatherScreenState.Idle -> {
                                     WeatherIdleState(
-                                        modifier = rootModifier,
+                                        modifier = Modifier.fillMaxSize(),
                                     )
                                 }
 
                                 WeatherScreenState.Loading -> {
                                     WeatherLoadingState(
-                                        modifier = rootModifier
+                                        modifier = Modifier.fillMaxSize()
                                     )
                                 }
 
                                 WeatherScreenState.NoWeather -> {
                                     NoWeatherItem(
-                                        modifier = rootModifier,
+                                        modifier = Modifier.fillMaxSize(),
+                                        onRetry = {
+                                            viewModel.retryLastOperation(
+                                                currentLang,
+                                                apiKey,
+                                                amountOfDays,
+                                                imageQuality
+                                            )
+                                        }
+                                    )
+                                }
+
+                                WeatherScreenState.WeatherObtained -> {
+                                    if (weather != null) {
+                                        WeatherContentPortrait(
+                                            weather = weather!!,
+                                            deviceScreenConfiguration = deviceScreenConfiguration,
+                                            isDarkTheme = isDarkTheme,
+                                            urlProvider = viewModel.urlProvider,
+                                            imageQuality = imageQuality,
+                                            currentLang = currentLang,
+                                            onHourItemClicked = {},
+                                            onDailyItemClicked = {}
+                                        )
+                                    } else {
+                                        NoWeatherItem(
+                                            modifier = Modifier.fillMaxSize(),
+                                            onRetry = {
+                                                viewModel.retryLastOperation(
+                                                    currentLang,
+                                                    apiKey,
+                                                    amountOfDays,
+                                                    imageQuality
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    DeviceScreenConfiguration.TABLET_LANDSCAPE,
+                    DeviceScreenConfiguration.DESKTOP -> {
+                        Column(
+                            modifier = rootModifier
+                                .padding(top = 48.dp),
+                            verticalArrangement = Arrangement.spacedBy(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            when (screenState) {
+                                WeatherScreenState.Idle -> {
+                                    WeatherIdleState(
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                }
+
+                                WeatherScreenState.Loading -> {
+                                    WeatherLoadingState(
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+
+                                WeatherScreenState.NoWeather -> {
+                                    NoWeatherItem(
+                                        modifier = Modifier.fillMaxSize(),
                                         onRetry = {
                                             viewModel.retryLastOperation(
                                                 currentLang,
@@ -244,48 +366,12 @@ fun WeatherScreen(
                                             urlProvider = viewModel.urlProvider,
                                             imageQuality = imageQuality,
                                             currentLang = currentLang,
-                                            modifier = rootModifier,
                                             deviceScreenConfiguration = deviceScreenConfiguration,
                                             onHourItemClicked = {},
                                             onDailyItemClicked = {}
                                         )
                                     } else {
                                         NoWeatherItem(
-                                            modifier = rootModifier,
-                                            onRetry = {
-                                                viewModel.retryLastOperation(
-                                                    currentLang,
-                                                    apiKey,
-                                                    amountOfDays,
-                                                    imageQuality
-                                                )
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        DeviceScreenConfiguration.TABLET_PORTRAIT -> {
-                            Column(
-                                modifier = rootModifier,
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                when (screenState) {
-                                    WeatherScreenState.Idle -> {
-                                        WeatherIdleState(
-                                            modifier = Modifier.fillMaxSize(),
-                                        )
-                                    }
-
-                                    WeatherScreenState.Loading -> {
-                                        WeatherLoadingState(
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    WeatherScreenState.NoWeather -> {
-                                        NoWeatherItem(
                                             modifier = Modifier.fillMaxSize(),
                                             onRetry = {
                                                 viewModel.retryLastOperation(
@@ -296,98 +382,6 @@ fun WeatherScreen(
                                                 )
                                             }
                                         )
-                                    }
-
-                                    WeatherScreenState.WeatherObtained -> {
-                                        if (weather != null) {
-                                            WeatherContentPortrait(
-                                                weather = weather!!,
-                                                deviceScreenConfiguration = deviceScreenConfiguration,
-                                                isDarkTheme = isDarkTheme,
-                                                urlProvider = viewModel.urlProvider,
-                                                imageQuality = imageQuality,
-                                                currentLang = currentLang,
-                                                onHourItemClicked = {},
-                                                onDailyItemClicked = {}
-                                            )
-                                        } else {
-                                            NoWeatherItem(
-                                                modifier = Modifier.fillMaxSize(),
-                                                onRetry = {
-                                                    viewModel.retryLastOperation(
-                                                        currentLang,
-                                                        apiKey,
-                                                        amountOfDays,
-                                                        imageQuality
-                                                    )
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        DeviceScreenConfiguration.TABLET_LANDSCAPE,
-                        DeviceScreenConfiguration.DESKTOP -> {
-                            Column(
-                                modifier = rootModifier
-                                    .padding(top = 48.dp),
-                                verticalArrangement = Arrangement.spacedBy(32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                when (screenState) {
-                                    WeatherScreenState.Idle -> {
-                                        WeatherIdleState(
-                                            modifier = Modifier.fillMaxSize(),
-                                        )
-                                    }
-
-                                    WeatherScreenState.Loading -> {
-                                        WeatherLoadingState(
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    WeatherScreenState.NoWeather -> {
-                                        NoWeatherItem(
-                                            modifier = Modifier.fillMaxSize(),
-                                            onRetry = {
-                                                viewModel.retryLastOperation(
-                                                    currentLang,
-                                                    apiKey,
-                                                    amountOfDays,
-                                                    imageQuality
-                                                )
-                                            }
-                                        )
-                                    }
-
-                                    WeatherScreenState.WeatherObtained -> {
-                                        if (weather != null) {
-                                            WeatherContentLandscape(
-                                                weather = weather!!,
-                                                isDarkTheme = isDarkTheme,
-                                                urlProvider = viewModel.urlProvider,
-                                                imageQuality = imageQuality,
-                                                currentLang = currentLang,
-                                                deviceScreenConfiguration = deviceScreenConfiguration,
-                                                onHourItemClicked = {},
-                                                onDailyItemClicked = {}
-                                            )
-                                        } else {
-                                            NoWeatherItem(
-                                                modifier = Modifier.fillMaxSize(),
-                                                onRetry = {
-                                                    viewModel.retryLastOperation(
-                                                        currentLang,
-                                                        apiKey,
-                                                        amountOfDays,
-                                                        imageQuality
-                                                    )
-                                                }
-                                            )
-                                        }
                                     }
                                 }
                             }
