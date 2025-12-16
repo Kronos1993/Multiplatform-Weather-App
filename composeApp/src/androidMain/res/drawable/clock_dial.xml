@@ -13,7 +13,7 @@
     <!-- Círculo exterior -->
     <path
         android:fillColor="@android:color/transparent"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#00000000"
         android:strokeWidth="3"
         android:pathData="M50,2 A48,48 0 1,1 49.9,2" />
 

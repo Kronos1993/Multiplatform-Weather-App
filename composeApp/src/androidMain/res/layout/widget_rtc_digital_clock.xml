@@ -23,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/dateClock"
+        android:layout_marginTop="4dp"
         android:textStyle="bold"
         android:layout_centerHorizontal="true"
         android:format12Hour="HH:mm aa"

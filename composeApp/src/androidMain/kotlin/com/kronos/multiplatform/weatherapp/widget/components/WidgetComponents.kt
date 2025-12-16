@@ -362,7 +362,7 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(horizontal = 8.dp)
             .clickable(actionRunCallback<OpenAppCallback>()),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -399,9 +399,6 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
                         )
                     )
                 }
-
-                Spacer(GlanceModifier.height(2.dp))
-
                 Text(
                     text = weatherData.currentCondition,
                     style = TextStyle(
@@ -443,7 +440,7 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(horizontal = 8.dp)
             .clickable(actionRunCallback<OpenAppCallback>()),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -480,8 +477,6 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
                         )
                     )
                 }
-
-                Spacer(GlanceModifier.height(2.dp))
 
                 Text(
                     text = weatherData.currentCondition,
