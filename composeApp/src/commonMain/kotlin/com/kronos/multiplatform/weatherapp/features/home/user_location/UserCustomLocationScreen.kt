@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.Destinations
+import com.kronos.multiplatform.weatherapp.components.ConfirmDialog
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.components.NoUserCustomLocationItem
 import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
@@ -48,6 +49,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.cant_delete_current_location
+import weather_app.composeapp.generated.resources.delete_dialog_body
+import weather_app.composeapp.generated.resources.delete_dialog_no
+import weather_app.composeapp.generated.resources.delete_dialog_title
+import weather_app.composeapp.generated.resources.delete_dialog_yes
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 
@@ -83,6 +88,8 @@ fun UserCustomLocationScreen(
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    var showConfirmDialog by mutableStateOf(false)
 
     LaunchedEffect(Unit) {
         viewModel.initLocations(currentLang, apiKey, amountOfDays)
@@ -248,13 +255,8 @@ fun UserCustomLocationScreen(
                                             viewModel.handleRemoveCurrentLocation(cantDeleteLocation)
                                             viewModel.postResetSwipe(true)
                                         } else {
-                                            viewModel.removeLocation(
-                                                it,
-                                                currentLang,
-                                                apiKey,
-                                                amountOfDays
-                                            )
-                                            viewModel.postResetSwipe(false)
+                                            viewModel.currentLocation = it
+                                            showConfirmDialog = true
                                         }
                                     },
                                     onItemClick = {
@@ -286,6 +288,24 @@ fun UserCustomLocationScreen(
                 message = Res.string.loading_dialog_text,
                 showDialog = screenState == UserCustomLocationScreenState.Loading
             )
+
+            ConfirmDialog(
+                title = stringResource(Res.string.delete_dialog_title),
+                body = stringResource(Res.string.delete_dialog_body),
+                confirmText = stringResource(Res.string.delete_dialog_yes),
+                cancelText = stringResource(Res.string.delete_dialog_no),
+                showDialog = showConfirmDialog,
+                onCancel = {
+                    viewModel.postResetSwipe(true)
+                    showConfirmDialog = false
+                },
+                onConfirm = {
+                    viewModel.removeLocation()
+                    viewModel.postResetSwipe(false)
+                    showConfirmDialog = false
+                }
+            )
+
         }
     }
 }

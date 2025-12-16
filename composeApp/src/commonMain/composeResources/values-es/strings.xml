@@ -74,4 +74,9 @@
     <string name="add_city">Añadir ciudad</string>
     <string name="close">Cerrar</string>
 
+    <string name="delete_dialog_title">Eliminar ubicación</string>
+    <string name="delete_dialog_body">Estas seguro que deseas eliminar esta ubicación?</string>
+    <string name="delete_dialog_yes">Sí</string>
+    <string name="delete_dialog_no">No</string>
+
 </resources>

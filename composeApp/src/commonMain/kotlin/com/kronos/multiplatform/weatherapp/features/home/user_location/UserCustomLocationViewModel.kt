@@ -1,5 +1,8 @@
 package com.kronos.multiplatform.weatherapp.features.home.user_location
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
@@ -28,6 +31,8 @@ class UserCustomLocationViewModel(
 
     private val _locations = MutableStateFlow<List<UserCustomLocation>>(listOf())
     val locations = _locations.asStateFlow()
+
+    var currentLocation: UserCustomLocation by mutableStateOf(UserCustomLocation())
 
     private val _screenState =
         MutableStateFlow<UserCustomLocationScreenState>(UserCustomLocationScreenState.Idle)
@@ -152,14 +157,16 @@ class UserCustomLocationViewModel(
         }
     }
 
-    fun removeLocation(location: UserCustomLocation, lang: String, apiKey: String, days: Int) {
+    fun removeLocation() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                userCustomLocationLocalRepository.delete(location)
-                log("Custom location: ${location.cityName} removed.", false)
+                userCustomLocationLocalRepository.delete(currentLocation)
+                log("Custom location: ${currentLocation.cityName} removed.", false)
 
-                val updatedLocations = _locations.value.filter { it.id != location.id }
+                val updatedLocations = _locations.value.filter { it.id != currentLocation.id }
                 _locations.value = updatedLocations
+
+                currentLocation = UserCustomLocation()
 
                 _screenState.value = if (updatedLocations.isNotEmpty()) {
                     UserCustomLocationScreenState.LocationsObtained

@@ -73,4 +73,9 @@
     <string name="marker_to_close">Can't create a marker to close to another</string>
     <string name="add_city">Add City</string>
     <string name="close">Close</string>
+
+    <string name="delete_dialog_title">Delete Location</string>
+    <string name="delete_dialog_body">Are you sure you want to delete this location?</string>
+    <string name="delete_dialog_yes">Yes</string>
+    <string name="delete_dialog_no">No</string>
 </resources>
