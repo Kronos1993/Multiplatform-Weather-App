@@ -39,6 +39,7 @@ fun App() {
     val navController = rememberNavController()
     val viewModel = koinViewModel<PreferenceViewModel>()
 
+    val ready by viewModel.isReady.collectAsStateWithLifecycle()
     val themePreferenceKey = stringResource(Res.string.theme_preference_key)
     val themePreferenceDefault = stringResource(Res.string.theme_preference_default_value)
     val langPreferenceKey = stringResource(Res.string.default_lang_key)
@@ -59,31 +60,17 @@ fun App() {
     val apiKeyRemember by remember { mutableStateOf(apiKey) }
 
     LaunchedEffect(Unit) {
-        viewModel.getPreferenceTheme(
-            themePreferenceKey,
-            themePreferenceDefault
-        )
-
-        viewModel.getPreferenceLang(
-            langPreferenceKey,
-            langPreferenceDefault
-        )
-
-        viewModel.getPreferenceDays(
-            daysPreferenceKey,
-            if (daysPreferenceDefault.isEmpty()) {
-                3
-            } else daysPreferenceDefault.toInt()
-        )
-
-        viewModel.getPreferenceDefaultCity(
-            defaultCityPreferenceKey,
-            defaultCityPreferenceDefault
-        )
-
-        viewModel.getPreferenceImageQuality(
-            imageQualityPreferenceKey,
-            imageQualityPreferenceDefault
+        viewModel.loadPreferences(
+            langKey = langPreferenceKey,
+            langDefault = langPreferenceDefault,
+            themeKey = themePreferenceKey,
+            themeDefault = themePreferenceDefault,
+            daysKey = daysPreferenceKey,
+            daysDefault = daysPreferenceDefault.toInt(),
+            imageQualityKey = imageQualityPreferenceKey,
+            imageQualityDefault = imageQualityPreferenceDefault,
+            defaultCityKey = defaultCityPreferenceKey,
+            defaultCityDefault = defaultCityPreferenceDefault
         )
     }
 
@@ -102,29 +89,31 @@ fun App() {
         AppTheme(
             darkTheme = isDarkTheme == stringResource(Res.string.theme_preference_default_value)
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = Destinations.HOME.name
-            ) {
-                composable(route = Destinations.HOME.name) {
-                    HomeScreen(
-                        navController,
-                        isDarkTheme == stringResource(Res.string.theme_preference_default_value),
-                        currentLang,
-                        apiKeyRemember,
-                        imageQuality,
-                        amountDays,
-                        defaultCity,
-                        deviceScreenConfiguration = deviceScreenConfiguration,
-                    )
-                }
-                composable(route = Destinations.ADD_CITY.name) {
-                    AddCityScreen(
-                        navController,
-                        currentLang,
-                        apiKeyRemember,
-                        isDarkTheme == stringResource(Res.string.theme_preference_default_value),
-                    )
+            if (ready) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Destinations.HOME.name
+                ) {
+                    composable(route = Destinations.HOME.name) {
+                        HomeScreen(
+                            navController,
+                            isDarkTheme == stringResource(Res.string.theme_preference_default_value),
+                            currentLang,
+                            apiKeyRemember,
+                            imageQuality,
+                            amountDays,
+                            defaultCity,
+                            deviceScreenConfiguration = deviceScreenConfiguration,
+                        )
+                    }
+                    composable(route = Destinations.ADD_CITY.name) {
+                        AddCityScreen(
+                            navController,
+                            currentLang,
+                            apiKeyRemember,
+                            isDarkTheme == stringResource(Res.string.theme_preference_default_value),
+                        )
+                    }
                 }
             }
         }

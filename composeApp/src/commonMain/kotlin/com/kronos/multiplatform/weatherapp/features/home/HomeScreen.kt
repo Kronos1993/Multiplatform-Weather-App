@@ -243,6 +243,7 @@ fun HomeScreen(
                 navHost,
                 isDarkTheme,
                 deviceScreenConfiguration,
+                currentLang,
                 {
                     viewModel.updateAppLanguage(it)
                 }

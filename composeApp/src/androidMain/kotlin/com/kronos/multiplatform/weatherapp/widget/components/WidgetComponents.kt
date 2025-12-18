@@ -306,7 +306,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
                                 color = ColorProvider(Color.White, Color.White),
                                 textAlign = TextAlign.Center,
                             ),
-                            maxLines = 2
+                            maxLines = 3
                         )
                     }
 

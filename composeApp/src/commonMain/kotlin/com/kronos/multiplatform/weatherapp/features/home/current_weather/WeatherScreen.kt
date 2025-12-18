@@ -69,8 +69,10 @@ fun WeatherScreen(
         stringResource(Res.string.notification_long_details),
     )
 
-    LaunchedEffect(Unit) {
-        viewModel.initLocations(currentLang, apiKey, amountOfDays, defaultCity)
+    LaunchedEffect(currentLang) {
+        if (currentLang.isNotBlank()) {
+            viewModel.initLocations(currentLang, apiKey, amountOfDays, defaultCity)
+        }
     }
 
     // Manejo de errores
