@@ -8,7 +8,7 @@ data class Astro(
     val sunset: String,
     val moonrise: String,
     val moonset: String,
-    val moonPhase: String,
+    val moonPhase: MoonPhase,
     val moonIllumination: String,
     val isMoonUp: Boolean,
     val isSunUp: Boolean,

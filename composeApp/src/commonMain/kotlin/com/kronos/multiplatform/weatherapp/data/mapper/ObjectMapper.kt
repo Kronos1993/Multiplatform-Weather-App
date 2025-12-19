@@ -18,6 +18,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.Day
 import com.kronos.multiplatform.weatherapp.domain.model.ForecastDay
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Location
+import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 
@@ -26,7 +27,7 @@ fun AstroDto.toAstro() = Astro(
     sunset = sunset,
     moonrise = moonrise,
     moonset = moonset,
-    moonPhase = moon_phase,
+    moonPhase = MoonPhase.fromText(moon_phase),
     moonIllumination = moon_illumination,
     isMoonUp = is_moon_up == 1,
     isSunUp = is_sun_up == 1

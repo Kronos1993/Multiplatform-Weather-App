@@ -78,4 +78,14 @@
     <string name="delete_dialog_body">Are you sure you want to delete this location?</string>
     <string name="delete_dialog_yes">Yes</string>
     <string name="delete_dialog_no">No</string>
+
+    <string name="moon_phase_new_moon">New Moon</string>
+    <string name="moon_phase_waxing_crescent">Waxing Crescent</string>
+    <string name="moon_phase_first_quarter">First Quarter</string>
+    <string name="moon_phase_waxing_gibbous">Waxing Gibbous</string>
+    <string name="moon_phase_full_moon">Full Moon</string>
+    <string name="moon_phase_waning_gibbous">Waning Gibbous</string>
+    <string name="moon_phase_last_quarter">Last Quarter</string>
+    <string name="moon_phase_waning_crescent">Waning Crescent</string>
+
 </resources>
