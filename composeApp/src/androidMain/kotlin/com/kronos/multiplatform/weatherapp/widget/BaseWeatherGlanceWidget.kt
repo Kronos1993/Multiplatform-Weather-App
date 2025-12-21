@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
@@ -284,7 +285,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             humidity = forecast.current.humidity.toString(),
             windSpeed = context.getString(R.string.speed_km).format(forecast.current.windSpeedKph),
             windDirection = forecast.current.windDir,
-            uvIndex = forecast.current.uv.toString(),
+            uvIndex = forecast.current.uv,
             currentIconUrl = currentIconUrl,
             day1Name = day1,
             day1IconUrl = day1IconUrl,
@@ -359,7 +360,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                     this[stringPreferencesKey("humidity")] = data.humidity
                     this[stringPreferencesKey("windSpeed")] = data.windSpeed
                     this[stringPreferencesKey("windDirection")] = data.windDirection
-                    this[stringPreferencesKey("uvIndex")] = data.uvIndex
+                    this[doublePreferencesKey("uvIndex")] = data.uvIndex
                     this[stringPreferencesKey("currentIconUrl")] = data.currentIconUrl
                     this[stringPreferencesKey("day1Name")] = data.day1Name
                     this[stringPreferencesKey("day1IconUrl")] = data.day1IconUrl
@@ -384,7 +385,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                 humidity = "--",
                 windSpeed = "--",
                 windDirection = "--",
-                uvIndex = "--",
+                uvIndex = 0.0,
                 currentIconUrl = "",
                 day1Name = "",
                 day1IconUrl = "",
@@ -413,7 +414,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             humidity = prefs[stringPreferencesKey("humidity")] ?: "",
             windSpeed = prefs[stringPreferencesKey("windSpeed")] ?: "",
             windDirection = prefs[stringPreferencesKey("windDirection")] ?: "",
-            uvIndex = prefs[stringPreferencesKey("uvIndex")] ?: "",
+            uvIndex = prefs[doublePreferencesKey("uvIndex")] ?: 0.0,
             currentIconUrl = currentIconUrl,
             day1Name = prefs[stringPreferencesKey("day1Name")] ?: "",
             day1IconUrl = day1IconUrl,

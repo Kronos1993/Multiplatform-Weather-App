@@ -35,8 +35,16 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.kronos.multiplatform.weatherapp.R
+import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.uvIndexDescription
 import com.kronos.multiplatform.weatherapp.widget.OpenAppCallback
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
+import org.jetbrains.compose.resources.stringResource
+import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.uv_index_extreme
+import weather_app.composeapp.generated.resources.uv_index_high
+import weather_app.composeapp.generated.resources.uv_index_low
+import weather_app.composeapp.generated.resources.uv_index_medium
+import weather_app.composeapp.generated.resources.uv_index_very_high
 
 @Composable
 fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {
@@ -326,7 +334,16 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData?, context: Context)
                             "${weatherData.windSpeed} ${weatherData.windDirection}"
                         )
                         Spacer(modifier = GlanceModifier.height(8.dp))
-                        WeatherDetailItem(context.getString(R.string.uv_index), weatherData.uvIndex)
+
+                        WeatherDetailItem(context.getString(R.string.uv_index),
+                            when (weatherData.uvIndex) {
+                                in 0.0..2.9 -> context.getString(R.string.uv_index_low)
+                                in 3.0..5.9 -> context.getString(R.string.uv_index_medium)
+                                in 6.0..7.9 -> context.getString(R.string.uv_index_high)
+                                in 8.0..10.9 ->context.getString(R.string.uv_index_very_high)
+                                else -> context.getString(R.string.uv_index_extreme)
+                            }
+                        )
                     }
                 }
 

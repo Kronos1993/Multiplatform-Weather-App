@@ -15,7 +15,9 @@ class MediumWeatherGlanceWidget : BaseWeatherGlanceWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         try {
-            val weatherData = loadWeatherDataFromCache(context)
+            val weatherData = runCatching {
+                loadWeatherDataFromCache(context)
+            }.getOrNull()
 
             provideContent {
                 if (weatherData != null) {

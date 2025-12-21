@@ -16,9 +16,9 @@ class SmallWeatherWithAnalogClockGlanceWidget : BaseWeatherGlanceWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         try {
-            val weatherData = withContext(Dispatchers.IO) {
+            val weatherData = runCatching {
                 loadWeatherDataFromCache(context)
-            }
+            }.getOrNull()
 
             provideContent{
                 WeatherWithAnalogClockContent(weatherData)

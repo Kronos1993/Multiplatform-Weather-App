@@ -11,7 +11,7 @@ data class WeatherWidgetData(
     val humidity: String,
     val windSpeed: String,
     val windDirection: String,
-    val uvIndex: String,
+    val uvIndex: Double,
     val currentIconUrl: String,
     val day1Name: String,
     val day1IconUrl: String,
