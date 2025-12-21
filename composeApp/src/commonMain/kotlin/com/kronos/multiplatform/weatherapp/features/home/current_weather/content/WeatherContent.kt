@@ -46,7 +46,6 @@ import com.kronos.multiplatform.weatherapp.components.HourlyItemIndicator
 import com.kronos.multiplatform.weatherapp.components.WeatherIndicatorList
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonFallIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhasesIcons
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.RainyIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SnowflakeIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SunIndicator
@@ -54,19 +53,9 @@ import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SunS
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.VisibilityIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WaterDropsIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WindIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.FirstQuarterMoonIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.FullMoonIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.NewMoonIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.ThirdQuarterMoonIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.WaningCrescentMoonIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.WaningGibbousMoonIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.WaxingCescentMoonIndicator
-import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphasesicons.WaxingGibbousMoonIndicator
 import com.kronos.multiplatform.weatherapp.components.maps.FixMapView
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.util.format
-import com.kronos.multiplatform.weatherapp.core.util.isToday
-import com.kronos.multiplatform.weatherapp.core.util.of
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
@@ -74,10 +63,11 @@ import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Indicator
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.first_quarter_moon_indicator
+import weather_app.composeapp.generated.resources.full_moon_indicator
 import weather_app.composeapp.generated.resources.humidity
 import weather_app.composeapp.generated.resources.moon
 import weather_app.composeapp.generated.resources.moon_phase_first_quarter
@@ -88,10 +78,12 @@ import weather_app.composeapp.generated.resources.moon_phase_waning_crescent
 import weather_app.composeapp.generated.resources.moon_phase_waning_gibbous
 import weather_app.composeapp.generated.resources.moon_phase_waxing_crescent
 import weather_app.composeapp.generated.resources.moon_phase_waxing_gibbous
+import weather_app.composeapp.generated.resources.new_moon_indicator
 import weather_app.composeapp.generated.resources.rain
 import weather_app.composeapp.generated.resources.snow
 import weather_app.composeapp.generated.resources.speed_km
 import weather_app.composeapp.generated.resources.sun
+import weather_app.composeapp.generated.resources.third_quarter_moon_indicator
 import weather_app.composeapp.generated.resources.uv_index
 import weather_app.composeapp.generated.resources.uv_index_extreme
 import weather_app.composeapp.generated.resources.uv_index_high
@@ -100,10 +92,91 @@ import weather_app.composeapp.generated.resources.uv_index_medium
 import weather_app.composeapp.generated.resources.uv_index_very_high
 import weather_app.composeapp.generated.resources.visibility
 import weather_app.composeapp.generated.resources.visibility_km
+import weather_app.composeapp.generated.resources.waning_crescent_moon_indicator
+import weather_app.composeapp.generated.resources.waning_gibbous_moon_indicator
+import weather_app.composeapp.generated.resources.waxing_cescent_moon_indicator
+import weather_app.composeapp.generated.resources.waxing_gibbous_moon_indicator
 import weather_app.composeapp.generated.resources.wind
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+
+@OptIn(ExperimentalTime::class)
+@Composable
+private fun getWeatherIndicators(
+    currentWeather: Forecast,
+    currentDayForecast: DailyForecast?
+): List<Indicator> {
+    val windText = stringResource(Res.string.wind)
+    val humidityText = stringResource(Res.string.humidity)
+    val uvIndexText = stringResource(Res.string.uv_index)
+    val uvDescription = uvIndexDescription(currentWeather.current.uv)
+    val snowText = stringResource(Res.string.snow)
+    val rainText = stringResource(Res.string.rain)
+    val sunText = stringResource(Res.string.sun)
+    val moonPhaseIcon =
+        currentDayForecast?.astro?.moonPhase?.icon() ?: WeatherAppIcons.MoonFallIndicator
+    val moonPhaseName =
+        currentDayForecast?.astro?.moonPhase?.name() ?: stringResource(Res.string.moon)
+    val visibilityText = stringResource(Res.string.visibility)
+    val speedKmText = stringResource(Res.string.speed_km)
+    val visibilityKmText = stringResource(Res.string.visibility_km)
+
+    return listOf(
+        Indicator(
+            1,
+            windText,
+            speedKmText.format(currentWeather.current.windSpeedKph),
+            WeatherAppIcons.WindIndicator
+        ),
+        Indicator(
+            2,
+            humidityText,
+            "${currentWeather.current.humidity}%",
+            WeatherAppIcons.WaterDropsIndicator
+        ),
+        Indicator(
+            3,
+            uvIndexText,
+            uvDescription,
+            WeatherAppIcons.SunIndicator
+        ),
+        if (currentDayForecast?.day?.dailyWillItSnow == true) {
+            Indicator(
+                4,
+                snowText,
+                "${currentDayForecast.day.totalsnowCm} cm",
+                WeatherAppIcons.SnowflakeIndicator
+            )
+        } else {
+            Indicator(
+                5,
+                rainText,
+                "${currentWeather.current.precipitationMm} mm",
+                WeatherAppIcons.RainyIndicator
+            )
+        },
+        if (currentWeather.current.isDay) {
+            Indicator(
+                6,
+                sunText,
+                "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
+                WeatherAppIcons.SunSunriseIndicator
+            )
+        } else {
+            Indicator(
+                6,
+                moonPhaseName,
+                "${currentDayForecast?.astro?.moonrise ?: ""} - ${currentDayForecast?.astro?.moonset ?: ""}",
+                moonPhaseIcon
+            )
+        },
+        Indicator(
+            7,
+            visibilityText,
+            visibilityKmText.format(currentDayForecast?.day?.avgvisKm ?: 0),
+            WeatherAppIcons.VisibilityIndicator
+        )
+    ).filter { it.description.isNotBlank() }
+}
 
 @Composable
 fun WeatherContentPortrait(
@@ -115,6 +188,7 @@ fun WeatherContentPortrait(
     currentLang: String,
     onHourItemClicked: (Hour) -> Unit,
     onDailyItemClicked: (DailyForecast) -> Unit,
+    amountOfDays: Int = 3
 ) {
     var isCompact by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
@@ -122,38 +196,32 @@ fun WeatherContentPortrait(
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Solo aplicar comportamiento compact en portrait móvil
                 if (deviceScreenConfiguration != DeviceScreenConfiguration.MOBILE_PORTRAIT) {
                     return Offset.Zero
                 }
 
-                // Scroll hacia ABAJO (valor positivo) -> expandir
                 if (available.y > 30 && isCompact) {
                     isCompact = false
-                    return Offset(0f, available.y) // Consumir parte del scroll
-                }
-                // Scroll hacia ARRIBA (valor negativo) -> contraer
-                else if (available.y < -30 && !isCompact) {
+                    return Offset(0f, available.y)
+                } else if (available.y < -30 && !isCompact) {
                     isCompact = true
-                    return Offset(0f, available.y) // Consumir parte del scroll
+                    return Offset(0f, available.y)
                 }
                 return Offset.Zero
             }
         }
     }
 
-    val rootModifier = Modifier
-        .fillMaxSize()
-        .padding(horizontal = 8.dp)
-        .nestedScroll(nestedScrollConnection)
-        .consumeWindowInsets(WindowInsets.navigationBars)
-
     val shouldUseCompactBehavior =
         deviceScreenConfiguration == DeviceScreenConfiguration.MOBILE_PORTRAIT
     val actualCompactMode = isCompact && shouldUseCompactBehavior
 
     Column(
-        modifier = rootModifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp)
+            .nestedScroll(nestedScrollConnection)
+            .consumeWindowInsets(WindowInsets.navigationBars),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         WeatherHeaderSection(
@@ -177,7 +245,8 @@ fun WeatherContentPortrait(
                 .fillMaxWidth()
                 .weight(1f),
             onHourItemClicked = onHourItemClicked,
-            onDailyItemClicked = onDailyItemClicked
+            onDailyItemClicked = onDailyItemClicked,
+            amountOfDays = amountOfDays
         )
     }
 }
@@ -197,12 +266,14 @@ fun WeatherHeaderSection(
         targetState = isCompactMode,
         modifier = modifier,
         transitionSpec = {
-            fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing)).togetherWith(fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing)))
+            fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing)).togetherWith(
+                fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing))
+            )
         },
         label = "headerTransition"
     ) { compact ->
-        if (compact) {
-            CurrentWeatherCompactItem(
+        when {
+            compact -> CurrentWeatherCompactItem(
                 currentWeather = currentWeather,
                 darkTheme = isDarkTheme,
                 urlProvider = urlProvider,
@@ -210,8 +281,8 @@ fun WeatherHeaderSection(
                 currentLang = currentLang,
                 modifier = Modifier.wrapContentHeight()
             )
-        } else {
-            CurrentWeatherItem(
+
+            else -> CurrentWeatherItem(
                 currentWeather = currentWeather,
                 darkTheme = isDarkTheme,
                 urlProvider = urlProvider,
@@ -235,113 +306,23 @@ fun WeatherContentSection(
     modifier: Modifier = Modifier,
     onHourItemClicked: (Hour) -> Unit,
     onDailyItemClicked: (DailyForecast) -> Unit,
+    amountOfDays: Int = 3
 ) {
-    val currentDayForecast = remember(currentWeather) {
-        currentWeather.forecast.forecastDay.find { forecastDay ->
-            val date =
-                Instant.of(forecastDay.date, false, TimeZone.of(currentWeather.location.tzId))
-            date != null && date.isToday(TimeZone.of(currentWeather.location.tzId))
-        } ?: currentWeather.forecast.forecastDay.firstOrNull()
-    }
+    val timeZone = currentWeather.location.tzId
+    val currentDayForecast = currentWeather.getCurrentDayForecast(timeZone)
 
-    val hours = remember(currentDayForecast) {
-        val currentTime = Clock.System.now()
-        currentDayForecast?.hours?.filter { hour ->
-            val date = Instant.of(hour.time, true, TimeZone.of(currentWeather.location.tzId))
-            date != null && date > currentTime
-        }?.take(12) ?: emptyList()
-    }
+    val hours = currentDayForecast?.getUpcomingHours(timeZone).orEmpty()
 
-    val futureDays = remember(currentWeather) {
-        currentWeather.forecast.forecastDay.filter {
-            val date = Instant.of(it.date, false)
-            date != null && !date.isToday()
-        }.take(5)
-    }
+    val futureDays = currentWeather.getFutureDays(amountOfDays)
 
-    // Obtener strings
-    val windText = stringResource(Res.string.wind)
-    val humidityText = stringResource(Res.string.humidity)
-    val uvIndexText = stringResource(Res.string.uv_index)
-    val uvDescription = uvIndexDescription(currentWeather.current.uv)
-    val snowText = stringResource(Res.string.snow)
-    val rainText = stringResource(Res.string.rain)
-    val sunText = stringResource(Res.string.sun)
-    val moonText = stringResource(Res.string.moon)
-    val moonPhaseIcon =
-        currentDayForecast?.astro?.moonPhase?.icon() ?: WeatherAppIcons.MoonFallIndicator
-    val moonPhaseName = currentDayForecast?.astro?.moonPhase?.name()
-    val visibilityText = stringResource(Res.string.visibility)
-    val speedKmText = stringResource(Res.string.speed_km)
-    val visibilityKmText = stringResource(Res.string.visibility_km)
+    val indicators = getWeatherIndicators(currentWeather, currentDayForecast)
 
-    val indicators = remember(currentWeather, currentDayForecast) {
-        listOf(
-            Indicator(
-                1,
-                windText,
-                speedKmText.format(currentWeather.current.windSpeedKph),
-                WeatherAppIcons.WindIndicator
-            ),
-            Indicator(
-                2,
-                humidityText,
-                "${currentWeather.current.humidity}%",
-                WeatherAppIcons.WaterDropsIndicator
-            ),
-            Indicator(
-                3,
-                uvIndexText,
-                uvDescription,
-                WeatherAppIcons.SunIndicator
-            ),
-            if (currentDayForecast?.day?.dailyWillItSnow == true) {
-                Indicator(
-                    4,
-                    snowText,
-                    "${currentDayForecast.day.totalsnowCm} cm",
-                    WeatherAppIcons.SnowflakeIndicator
-                )
-            } else {
-                Indicator(
-                    5,
-                    rainText,
-                    "${currentWeather.current.precipitationMm} mm",
-                    WeatherAppIcons.RainyIndicator
-                )
-            },
-            if (currentWeather.current.isDay) {
-                Indicator(
-                    6,
-                    sunText,
-                    "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
-                    WeatherAppIcons.SunSunriseIndicator
-                )
-            } else {
-                Indicator(
-                    6,
-                    moonText,
-                    "${moonPhaseName}\n" +
-                            "${currentDayForecast?.astro?.moonrise ?: ""} - ${currentDayForecast?.astro?.moonset ?: ""}",
-                    moonPhaseIcon
-                )
-
-            },
-            Indicator(
-                7,
-                visibilityText,
-                visibilityKmText.format(currentDayForecast?.day?.avgvisKm ?: 0),
-                WeatherAppIcons.VisibilityIndicator
-            )
-        ).filter { it.description.isNotBlank() }
-    }
 
     LazyColumn(
         state = scrollState,
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Sección de horas
         if (hours.isNotEmpty()) {
             item {
                 LazyRow(
@@ -360,7 +341,6 @@ fun WeatherContentSection(
             }
         }
 
-        // Sección de indicadores
         if (indicators.isNotEmpty()) {
             item {
                 Column(
@@ -375,7 +355,6 @@ fun WeatherContentSection(
             }
         }
 
-        // Sección de días futuros
         if (futureDays.isNotEmpty()) {
             item {
                 Column(
@@ -389,8 +368,7 @@ fun WeatherContentSection(
                         currentLang = currentLang,
                         modifier = Modifier.fillMaxWidth(),
                         onItemClick = onDailyItemClicked,
-
-                        )
+                    )
                 }
             }
         }
@@ -420,7 +398,6 @@ fun WeatherContentSection(
             )
         }
 
-        // Espacio al final
         item {
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -438,6 +415,7 @@ fun WeatherContentLandscape(
     deviceScreenConfiguration: DeviceScreenConfiguration,
     onHourItemClicked: (Hour) -> Unit,
     onDailyItemClicked: (DailyForecast) -> Unit,
+    amountOfDays: Int = 3
 ) {
     Row(
         modifier = modifier
@@ -446,27 +424,11 @@ fun WeatherContentLandscape(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column(
-            modifier = Modifier
-                .weight(0.4f),
+            modifier = Modifier.weight(0.4f),
             verticalArrangement = Arrangement.Center
         ) {
-
             when (deviceScreenConfiguration) {
-                DeviceScreenConfiguration.MOBILE_PORTRAIT,
-                DeviceScreenConfiguration.TABLET_PORTRAIT -> {
-                    WeatherContentPortrait(
-                        weather = weather,
-                        deviceScreenConfiguration = deviceScreenConfiguration,
-                        isDarkTheme = isDarkTheme,
-                        urlProvider = urlProvider,
-                        imageQuality = imageQuality,
-                        currentLang = currentLang,
-                        onHourItemClicked = onHourItemClicked,
-                        onDailyItemClicked = onDailyItemClicked
-                    )
-                }
-
-                DeviceScreenConfiguration.MOBILE_LANDSCAPE -> {
+                DeviceScreenConfiguration.MOBILE_LANDSCAPE ->
                     CurrentWeatherLandscapeCompactItem(
                         currentWeather = weather,
                         darkTheme = isDarkTheme,
@@ -475,10 +437,9 @@ fun WeatherContentLandscape(
                         currentLang = currentLang,
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
 
                 DeviceScreenConfiguration.TABLET_LANDSCAPE,
-                DeviceScreenConfiguration.DESKTOP -> {
+                DeviceScreenConfiguration.DESKTOP ->
                     CurrentWeatherBigScreenCompactItem(
                         currentWeather = weather,
                         darkTheme = isDarkTheme,
@@ -487,209 +448,37 @@ fun WeatherContentLandscape(
                         currentLang = currentLang,
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
+
+                else -> WeatherContentPortrait(
+                    weather = weather,
+                    deviceScreenConfiguration = deviceScreenConfiguration,
+                    isDarkTheme = isDarkTheme,
+                    urlProvider = urlProvider,
+                    imageQuality = imageQuality,
+                    currentLang = currentLang,
+                    onHourItemClicked = onHourItemClicked,
+                    onDailyItemClicked = onDailyItemClicked,
+                    amountOfDays = amountOfDays
+                )
             }
         }
 
         Column(
-            modifier = Modifier
-                .weight(0.6f),
+            modifier = Modifier.weight(0.6f),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            WeatherContentSectionLandscape(
+            WeatherContentSection(
                 currentWeather = weather,
                 isDarkTheme = isDarkTheme,
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
                 currentLang = currentLang,
+                scrollState = rememberLazyListState(),
                 modifier = Modifier.fillMaxSize(),
                 onHourItemClicked = onHourItemClicked,
-                onDailyItemClicked = onDailyItemClicked
+                onDailyItemClicked = onDailyItemClicked,
+                amountOfDays = amountOfDays
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalTime::class)
-@Composable
-fun WeatherContentSectionLandscape(
-    currentWeather: Forecast,
-    isDarkTheme: Boolean,
-    urlProvider: UrlProvider,
-    imageQuality: String,
-    currentLang: String,
-    modifier: Modifier = Modifier,
-    onHourItemClicked: (Hour) -> Unit,
-    onDailyItemClicked: (DailyForecast) -> Unit,
-) {
-    val currentDayForecast = remember(currentWeather) {
-        currentWeather.forecast.forecastDay.find { forecastDay ->
-            val date =
-                Instant.of(forecastDay.date, false, TimeZone.of(currentWeather.location.tzId))
-            date != null && date.isToday(TimeZone.of(currentWeather.location.tzId))
-        } ?: currentWeather.forecast.forecastDay.firstOrNull()
-    }
-
-    val hours = remember(currentDayForecast) {
-        val currentTime = Clock.System.now()
-        currentDayForecast?.hours?.filter { hour ->
-            val date = Instant.of(hour.time, true, TimeZone.of(currentWeather.location.tzId))
-            date != null && date > currentTime
-        }?.take(12) ?: emptyList()
-    }
-
-    val futureDays = remember(currentWeather) {
-        currentWeather.forecast.forecastDay.filter {
-            val date = Instant.of(it.date, false)
-            date != null && !date.isToday()
-        }.take(5)
-    }
-
-    // Obtener strings
-    val windText = stringResource(Res.string.wind)
-    val humidityText = stringResource(Res.string.humidity)
-    val uvIndexText = stringResource(Res.string.uv_index)
-    val uvDescription = uvIndexDescription(currentWeather.current.uv)
-    val snowText = stringResource(Res.string.snow)
-    val rainText = stringResource(Res.string.rain)
-    val sunText = stringResource(Res.string.sun)
-    val moonText = stringResource(Res.string.moon)
-    val visibilityText = stringResource(Res.string.visibility)
-    val speedKmText = stringResource(Res.string.speed_km)
-    val visibilityKmText = stringResource(Res.string.visibility_km)
-
-    val indicators = remember(currentWeather, currentDayForecast) {
-        listOf(
-            Indicator(
-                1,
-                windText,
-                speedKmText.format(currentWeather.current.windSpeedKph),
-                WeatherAppIcons.WindIndicator
-            ),
-            Indicator(
-                2,
-                humidityText,
-                "${currentWeather.current.humidity}%",
-                WeatherAppIcons.WaterDropsIndicator
-            ),
-            Indicator(
-                3,
-                uvIndexText,
-                uvDescription,
-                WeatherAppIcons.SunIndicator
-            ),
-            if (currentDayForecast?.day?.dailyWillItSnow == true) {
-                Indicator(
-                    4,
-                    snowText,
-                    "${currentDayForecast.day.totalsnowCm} cm",
-                    WeatherAppIcons.SnowflakeIndicator
-                )
-            } else {
-                Indicator(
-                    5,
-                    rainText,
-                    "${currentWeather.current.precipitationMm} mm",
-                    WeatherAppIcons.RainyIndicator
-                )
-            },
-            if (Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour in 6..18) {
-                Indicator(
-                    6,
-                    sunText,
-                    "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
-                    WeatherAppIcons.SunSunriseIndicator
-                )
-            } else {
-                Indicator(
-                    6,
-                    moonText,
-                    "${currentDayForecast?.astro?.moonrise ?: ""} - ${currentDayForecast?.astro?.moonset ?: ""}",
-                    WeatherAppIcons.MoonFallIndicator
-                )
-            },
-            Indicator(
-                7,
-                visibilityText,
-                visibilityKmText.format(currentDayForecast?.day?.avgvisKm ?: 0),
-                WeatherAppIcons.VisibilityIndicator
-            )
-        ).filter { it.description.isNotBlank() }
-    }
-
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        // Sección de horas
-        if (hours.isNotEmpty()) {
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    items(hours, key = { it.time }) { hour ->
-                        HourlyItemIndicator(
-                            item = hour,
-                            urlProvider = urlProvider,
-                            imageQuality = imageQuality,
-                            darkTheme = isDarkTheme,
-                            onItemClick = onHourItemClicked
-                        )
-                    }
-                }
-            }
-        }
-
-        // Sección de indicadores
-        if (indicators.isNotEmpty()) {
-            item {
-                WeatherIndicatorList(
-                    indicators = indicators,
-                    darkTheme = isDarkTheme,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-
-        // Sección de días futuros
-        if (futureDays.isNotEmpty()) {
-            item {
-                DailyWeatherList(
-                    days = futureDays,
-                    darkTheme = isDarkTheme,
-                    urlProvider = urlProvider,
-                    imageQuality = imageQuality,
-                    currentLang = currentLang,
-                    modifier = Modifier.fillMaxWidth(),
-                    onItemClick = onDailyItemClicked
-                )
-            }
-        }
-
-        item {
-            FixMapView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .height(300.dp),
-                markers = listOf(
-                    MapMarker(
-                        id = "1",
-                        latitude = currentWeather.location.lat,
-                        longitude = currentWeather.location.lon,
-                        title = currentWeather.location.name,
-                        description = currentWeather.location.region,
-                        customProperties = mapOf()
-                    )
-                ),
-                onMapClick = {},
-                onMapLongClick = {},
-                darkTheme = isDarkTheme
-            )
-        }
-
-        // Espacio al final
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -697,38 +486,24 @@ fun WeatherContentSectionLandscape(
 @Composable
 fun uvIndexDescription(index: Double): String {
     return when (index) {
-        in 0.0..2.9 -> {
-            stringResource(Res.string.uv_index_low)
-        }
-
-        in 3.0..5.9 -> {
-            stringResource(Res.string.uv_index_medium)
-        }
-
-        in 6.0..7.9 -> {
-            stringResource(Res.string.uv_index_high)
-        }
-
-        in 8.0..10.9 -> {
-            stringResource(Res.string.uv_index_very_high)
-        }
-
-        else -> {
-            stringResource(Res.string.uv_index_extreme)
-        }
+        in 0.0..2.9 -> stringResource(Res.string.uv_index_low)
+        in 3.0..5.9 -> stringResource(Res.string.uv_index_medium)
+        in 6.0..7.9 -> stringResource(Res.string.uv_index_high)
+        in 8.0..10.9 -> stringResource(Res.string.uv_index_very_high)
+        else -> stringResource(Res.string.uv_index_extreme)
     }
 }
 
 @Composable
 fun MoonPhase.icon(): ImageVector = when (this) {
-    MoonPhase.NEW_MOON -> MoonPhasesIcons.NewMoonIndicator
-    MoonPhase.WAXING_CRESCENT -> MoonPhasesIcons.WaxingCescentMoonIndicator
-    MoonPhase.FIRST_QUARTER -> MoonPhasesIcons.FirstQuarterMoonIndicator
-    MoonPhase.WAXING_GIBBOUS -> MoonPhasesIcons.WaxingGibbousMoonIndicator
-    MoonPhase.FULL_MOON -> MoonPhasesIcons.FullMoonIndicator
-    MoonPhase.WANING_GIBBOUS -> MoonPhasesIcons.WaningGibbousMoonIndicator
-    MoonPhase.LAST_QUARTER -> MoonPhasesIcons.ThirdQuarterMoonIndicator
-    MoonPhase.WANING_CRESCENT -> MoonPhasesIcons.WaningCrescentMoonIndicator
+    MoonPhase.NEW_MOON -> vectorResource(Res.drawable.new_moon_indicator)
+    MoonPhase.WAXING_CRESCENT -> vectorResource(Res.drawable.waxing_cescent_moon_indicator)
+    MoonPhase.FIRST_QUARTER -> vectorResource(Res.drawable.first_quarter_moon_indicator)
+    MoonPhase.WAXING_GIBBOUS -> vectorResource(Res.drawable.waxing_gibbous_moon_indicator)
+    MoonPhase.FULL_MOON -> vectorResource(Res.drawable.full_moon_indicator)
+    MoonPhase.WANING_GIBBOUS -> vectorResource(Res.drawable.waning_gibbous_moon_indicator)
+    MoonPhase.LAST_QUARTER -> vectorResource(Res.drawable.third_quarter_moon_indicator)
+    MoonPhase.WANING_CRESCENT -> vectorResource(Res.drawable.waning_crescent_moon_indicator)
 }
 
 @Composable

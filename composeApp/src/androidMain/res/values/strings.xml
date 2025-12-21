@@ -37,4 +37,10 @@
     <string name="widget_with_analog_clock_name">Weather Info and Analog Clock</string>
     <string name="widget_with_digital_clock_name">Weather Info and Digital Clock</string>
     <string name="widget_error_text">Open app to get data</string>
+
+    <string name="uv_index_low">Low</string>
+    <string name="uv_index_medium">Medium</string>
+    <string name="uv_index_high">High</string>
+    <string name="uv_index_very_high">Very High</string>
+    <string name="uv_index_extreme">Extreme</string>
 </resources>

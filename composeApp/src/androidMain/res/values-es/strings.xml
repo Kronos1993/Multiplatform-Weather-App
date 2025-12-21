@@ -36,4 +36,10 @@
     <string name="widget_with_digital_clock_name">Info del clima y reloj digital</string>
     <string name="widget_error_text">Abre la aplicación para obtener datos nuevos</string>
 
+    <string name="uv_index_low">Bajo</string>
+    <string name="uv_index_medium">Medio</string>
+    <string name="uv_index_high">Alto</string>
+    <string name="uv_index_very_high">Muy alto</string>
+    <string name="uv_index_extreme">Extremo</string>
+
 </resources>
