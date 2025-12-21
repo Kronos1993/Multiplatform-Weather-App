@@ -8,8 +8,6 @@ import androidx.glance.appwidget.provideContent
 import com.kronos.multiplatform.weatherapp.R
 import com.kronos.multiplatform.weatherapp.widget.components.LargeWeatherWidgetContent
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetErrorContent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class LargeWeatherGlanceWidget : BaseWeatherGlanceWidget() {
 

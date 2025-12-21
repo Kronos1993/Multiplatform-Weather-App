@@ -35,16 +35,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.kronos.multiplatform.weatherapp.R
-import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.uvIndexDescription
 import com.kronos.multiplatform.weatherapp.widget.OpenAppCallback
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
-import org.jetbrains.compose.resources.stringResource
-import weather_app.composeapp.generated.resources.Res
-import weather_app.composeapp.generated.resources.uv_index_extreme
-import weather_app.composeapp.generated.resources.uv_index_high
-import weather_app.composeapp.generated.resources.uv_index_low
-import weather_app.composeapp.generated.resources.uv_index_medium
-import weather_app.composeapp.generated.resources.uv_index_very_high
 
 @Composable
 fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData?) {

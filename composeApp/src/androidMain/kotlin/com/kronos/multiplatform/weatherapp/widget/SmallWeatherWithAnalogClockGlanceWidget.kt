@@ -7,8 +7,6 @@ import androidx.glance.appwidget.provideContent
 import com.kronos.multiplatform.weatherapp.R
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetErrorContent
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWithAnalogClockContent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class SmallWeatherWithAnalogClockGlanceWidget : BaseWeatherGlanceWidget() {
 
