@@ -1,9 +1,13 @@
 package com.kronos.multiplatform.weatherapp.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,12 +25,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,9 +55,9 @@ import com.kronos.multiplatform.weatherapp.core.util.toDayOfWeekText
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
-import com.kronos.multiplatform.weatherapp.domain.model.Indicator
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
+import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.Indicator
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
@@ -132,7 +138,7 @@ fun HourlyItemIndicator(
                 modifier = Modifier.wrapContentSize(),
                 textColor = Color.White,
                 size = ComponentSize.MEDIUM,
-                fontWeight = FontWeight.Bold
+                fontWeight = Bold
             )
         }
     }
@@ -171,7 +177,48 @@ fun WeatherIndicatorItem(
             textColor = Color.White,
             textAlign = TextAlign.Center,
             size = ComponentSize.SMALL,
-            fontWeight = FontWeight.Bold,
+            fontWeight = Bold,
+            modifier = Modifier.wrapContentWidth()
+        )
+    }
+}
+
+@Composable
+fun WindCompassIndicator(
+    item: Indicator.Wind,
+    modifier: Modifier = Modifier,
+    darkTheme: Boolean
+) {
+    val animatedRotation by animateFloatAsState(
+        targetValue = item.windDegree,
+        animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+        label = "wind-rotation"
+    )
+    Column(
+        modifier = modifier
+            .wrapContentWidth()
+            .padding(horizontal = 5.dp, vertical = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CompassView(
+            modifier = Modifier.size(48.dp),
+            rotation = animatedRotation,
+            darkTheme = darkTheme
+        )
+        LabelText(
+            item.header,
+            textColor = Color.White,
+            textAlign = TextAlign.Center,
+            size = ComponentSize.MEDIUM,
+            modifier = Modifier.wrapContentWidth()
+        )
+        LabelText(
+            item.description,
+            textColor = Color.White,
+            textAlign = TextAlign.Center,
+            fontWeight = Bold,
+            size = ComponentSize.EXTRA_SMALL,
             modifier = Modifier.wrapContentWidth()
         )
     }
@@ -189,11 +236,6 @@ fun WeatherIndicatorList(
         extendedLight.backgroundCardColor.color
     }
 
-    val displayIndicators = indicators.take(6)
-
-    val firstRow = displayIndicators.take(3)
-    val secondRow = displayIndicators.drop(3).take(3)
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -201,56 +243,25 @@ fun WeatherIndicatorList(
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
         elevation = CardDefaults.cardElevation(0.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.Transparent)
-                .padding(8.dp),
+        FlowRow(
+            modifier = Modifier.padding(4.dp),
+            maxItemsInEachRow = 3,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Primera fila
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                firstRow.forEach { indicator ->
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        WeatherIndicatorItem(
-                            item = indicator,
-                            darkTheme = darkTheme,
-                            modifier = Modifier.wrapContentWidth()
-                        )
-                    }
-                }
-
-                repeat(3 - firstRow.size) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-
-            // Segunda fila
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                secondRow.forEach { indicator ->
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        WeatherIndicatorItem(
-                            item = indicator,
-                            darkTheme = darkTheme,
-                            modifier = Modifier.wrapContentWidth()
-                        )
-                    }
-                }
-
-                repeat(3 - secondRow.size) {
-                    Spacer(modifier = Modifier.weight(1f))
+            indicators.forEach {
+                if (it is Indicator.Wind) {
+                    WindCompassIndicator(
+                        it,
+                        darkTheme = darkTheme,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    WeatherIndicatorItem(
+                        item = it,
+                        darkTheme = darkTheme,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }
@@ -376,7 +387,7 @@ fun CurrentWeatherCompactItem(
                 textColor = Color.White,
                 textAlign = TextAlign.Start,
                 size = ComponentSize.LARGE,
-                fontWeight = FontWeight.Bold
+                fontWeight = Bold
             )
         }
 
@@ -467,7 +478,7 @@ fun CurrentWeatherLandscapeCompactItem(
             textColor = Color.White,
             textAlign = TextAlign.Center,
             size = ComponentSize.SMALL,
-            fontWeight = FontWeight.Bold
+            fontWeight = Bold
         )
 
         Row(
@@ -578,7 +589,7 @@ fun CurrentWeatherBigScreenCompactItem(
             textColor = Color.White,
             textAlign = TextAlign.Center,
             size = ComponentSize.MEDIUM,
-            fontWeight = FontWeight.Bold
+            fontWeight = Bold
         )
 
         Row(
@@ -955,7 +966,7 @@ fun UserCustomLocationItem(
                         size = ComponentSize.MEDIUM,
                         textAlign = TextAlign.Start,
                         maxLines = 1,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = Bold,
                         textOverflow = TextOverflow.Ellipsis
                     )
 

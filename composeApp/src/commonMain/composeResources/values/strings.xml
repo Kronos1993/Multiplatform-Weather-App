@@ -34,6 +34,8 @@
     <string name="sunrise_sunset">Rise %s\nSet %s</string>
     <string name="visibility">Visibility</string>
     <string name="visibility_km">%s KM</string>
+    <string name="clouds">Clouds</string>
+    <string name="atmospheric_pression">Atmospheric Pression</string>
     <string name="title_add_location">Add Location</string>
     <string name="city_name">City name</string>
     <string name="add_location">Add</string>

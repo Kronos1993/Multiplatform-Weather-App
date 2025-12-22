@@ -1,5 +1,10 @@
 package com.kronos.multiplatform.weatherapp.components.icons.weatherappicons
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.EvenOdd
 import androidx.compose.ui.graphics.SolidColor
@@ -11,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.WaterDropsIndicator: ImageVector
     get() {
@@ -59,3 +65,11 @@ public val WeatherAppIcons.WaterDropsIndicator: ImageVector
     }
 
 private var _waterDropsIndicator: ImageVector? = null
+
+@Preview
+@Composable
+private fun Preview(): Unit {
+    Box(modifier = Modifier.padding(12.dp)) {
+        Image(imageVector = WeatherAppIcons.WaterDropsIndicator, contentDescription = "")
+    }
+}

@@ -45,7 +45,10 @@ import com.kronos.multiplatform.weatherapp.components.DailyWeatherList
 import com.kronos.multiplatform.weatherapp.components.HourlyItemIndicator
 import com.kronos.multiplatform.weatherapp.components.WeatherIndicatorList
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.CloudsIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonFallIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhases
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.PressionIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.RainyIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SnowflakeIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SunIndicator
@@ -53,6 +56,14 @@ import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.SunS
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.VisibilityIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WaterDropsIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.WindIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.FirstQuarterMoonIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.FullMoonIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.NewMoonIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.ThirdQuarterMoonIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.WaningCrescentMoonIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.WaningGibbousMoonIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.WaxingCescentMoonIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.WaxingGibbousMoonIndicator
 import com.kronos.multiplatform.weatherapp.components.maps.FixMapView
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.util.format
@@ -60,14 +71,12 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
-import com.kronos.multiplatform.weatherapp.domain.model.Indicator
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import weather_app.composeapp.generated.resources.Res
-import weather_app.composeapp.generated.resources.first_quarter_moon_indicator
-import weather_app.composeapp.generated.resources.full_moon_indicator
+import weather_app.composeapp.generated.resources.atmospheric_pression
+import weather_app.composeapp.generated.resources.clouds
 import weather_app.composeapp.generated.resources.humidity
 import weather_app.composeapp.generated.resources.moon
 import weather_app.composeapp.generated.resources.moon_phase_first_quarter
@@ -78,12 +87,10 @@ import weather_app.composeapp.generated.resources.moon_phase_waning_crescent
 import weather_app.composeapp.generated.resources.moon_phase_waning_gibbous
 import weather_app.composeapp.generated.resources.moon_phase_waxing_crescent
 import weather_app.composeapp.generated.resources.moon_phase_waxing_gibbous
-import weather_app.composeapp.generated.resources.new_moon_indicator
 import weather_app.composeapp.generated.resources.rain
 import weather_app.composeapp.generated.resources.snow
 import weather_app.composeapp.generated.resources.speed_km
 import weather_app.composeapp.generated.resources.sun
-import weather_app.composeapp.generated.resources.third_quarter_moon_indicator
 import weather_app.composeapp.generated.resources.uv_index
 import weather_app.composeapp.generated.resources.uv_index_extreme
 import weather_app.composeapp.generated.resources.uv_index_high
@@ -92,10 +99,6 @@ import weather_app.composeapp.generated.resources.uv_index_medium
 import weather_app.composeapp.generated.resources.uv_index_very_high
 import weather_app.composeapp.generated.resources.visibility
 import weather_app.composeapp.generated.resources.visibility_km
-import weather_app.composeapp.generated.resources.waning_crescent_moon_indicator
-import weather_app.composeapp.generated.resources.waning_gibbous_moon_indicator
-import weather_app.composeapp.generated.resources.waxing_cescent_moon_indicator
-import weather_app.composeapp.generated.resources.waxing_gibbous_moon_indicator
 import weather_app.composeapp.generated.resources.wind
 import kotlin.time.ExperimentalTime
 
@@ -106,6 +109,7 @@ private fun getWeatherIndicators(
     currentDayForecast: DailyForecast?
 ): List<Indicator> {
     val windText = stringResource(Res.string.wind)
+    val speedKmText = stringResource(Res.string.speed_km)
     val humidityText = stringResource(Res.string.humidity)
     val uvIndexText = stringResource(Res.string.uv_index)
     val uvDescription = uvIndexDescription(currentWeather.current.uv)
@@ -117,37 +121,39 @@ private fun getWeatherIndicators(
     val moonPhaseName =
         currentDayForecast?.astro?.moonPhase?.name() ?: stringResource(Res.string.moon)
     val visibilityText = stringResource(Res.string.visibility)
-    val speedKmText = stringResource(Res.string.speed_km)
     val visibilityKmText = stringResource(Res.string.visibility_km)
+    val cloudText = stringResource(Res.string.clouds)
+    val atmosphericPressionText = stringResource(Res.string.atmospheric_pression)
 
     return listOf(
-        Indicator(
+        Indicator.Wind(
             1,
             windText,
             speedKmText.format(currentWeather.current.windSpeedKph),
-            WeatherAppIcons.WindIndicator
+            WeatherAppIcons.WindIndicator,
+            windDegree = currentWeather.current.windDegree.toFloat(),
         ),
-        Indicator(
+        Indicator.Default(
             2,
             humidityText,
             "${currentWeather.current.humidity}%",
             WeatherAppIcons.WaterDropsIndicator
         ),
-        Indicator(
+        Indicator.Default(
             3,
             uvIndexText,
             uvDescription,
             WeatherAppIcons.SunIndicator
         ),
         if (currentDayForecast?.day?.dailyWillItSnow == true) {
-            Indicator(
+            Indicator.Default(
                 4,
                 snowText,
                 "${currentDayForecast.day.totalsnowCm} cm",
                 WeatherAppIcons.SnowflakeIndicator
             )
         } else {
-            Indicator(
+            Indicator.Default(
                 5,
                 rainText,
                 "${currentWeather.current.precipitationMm} mm",
@@ -155,25 +161,37 @@ private fun getWeatherIndicators(
             )
         },
         if (currentWeather.current.isDay) {
-            Indicator(
+            Indicator.Default(
                 6,
                 sunText,
                 "${currentDayForecast?.astro?.sunrise ?: ""} - ${currentDayForecast?.astro?.sunset ?: ""}",
                 WeatherAppIcons.SunSunriseIndicator
             )
         } else {
-            Indicator(
+            Indicator.Default(
                 6,
                 moonPhaseName,
                 "${currentDayForecast?.astro?.moonset ?: ""} - ${currentDayForecast?.astro?.moonrise ?: ""}",
                 moonPhaseIcon
             )
         },
-        Indicator(
+        Indicator.Default(
             7,
             visibilityText,
-            visibilityKmText.format(currentDayForecast?.day?.avgvisKm ?: 0),
+            visibilityKmText.format(currentWeather.current.visionKM),
             WeatherAppIcons.VisibilityIndicator
+        ),
+        Indicator.Default(
+            8,
+            cloudText,
+            "${currentWeather.current.cloud}%",
+            WeatherAppIcons.CloudsIndicator
+        ),
+        Indicator.Default(
+            9,
+            atmosphericPressionText,
+            "${currentWeather.current.pressureMb} mbar",
+            WeatherAppIcons.PressionIndicator
         )
     ).filter { it.description.isNotBlank() }
 }
@@ -496,14 +514,14 @@ fun uvIndexDescription(index: Double): String {
 
 @Composable
 fun MoonPhase.icon(): ImageVector = when (this) {
-    MoonPhase.NEW_MOON -> vectorResource(Res.drawable.new_moon_indicator)
-    MoonPhase.WAXING_CRESCENT -> vectorResource(Res.drawable.waxing_cescent_moon_indicator)
-    MoonPhase.FIRST_QUARTER -> vectorResource(Res.drawable.first_quarter_moon_indicator)
-    MoonPhase.WAXING_GIBBOUS -> vectorResource(Res.drawable.waxing_gibbous_moon_indicator)
-    MoonPhase.FULL_MOON -> vectorResource(Res.drawable.full_moon_indicator)
-    MoonPhase.WANING_GIBBOUS -> vectorResource(Res.drawable.waning_gibbous_moon_indicator)
-    MoonPhase.LAST_QUARTER -> vectorResource(Res.drawable.third_quarter_moon_indicator)
-    MoonPhase.WANING_CRESCENT -> vectorResource(Res.drawable.waning_crescent_moon_indicator)
+    MoonPhase.NEW_MOON -> WeatherAppIcons.MoonPhases.NewMoonIndicator
+    MoonPhase.WAXING_CRESCENT -> WeatherAppIcons.MoonPhases.WaxingCescentMoonIndicator
+    MoonPhase.FIRST_QUARTER -> WeatherAppIcons.MoonPhases.FirstQuarterMoonIndicator
+    MoonPhase.WAXING_GIBBOUS -> WeatherAppIcons.MoonPhases.WaxingGibbousMoonIndicator
+    MoonPhase.FULL_MOON -> WeatherAppIcons.MoonPhases.FullMoonIndicator
+    MoonPhase.WANING_GIBBOUS -> WeatherAppIcons.MoonPhases.WaningGibbousMoonIndicator
+    MoonPhase.LAST_QUARTER -> WeatherAppIcons.MoonPhases.ThirdQuarterMoonIndicator
+    MoonPhase.WANING_CRESCENT -> WeatherAppIcons.MoonPhases.WaningCrescentMoonIndicator
 }
 
 @Composable
