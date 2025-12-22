@@ -172,7 +172,7 @@ fun AddCityScreen(
                         size = ComponentSize.LARGE,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(16.dp)
+                            .padding(end = 16.dp, bottom = 60.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.surface,
                                 shape = CircleShape
