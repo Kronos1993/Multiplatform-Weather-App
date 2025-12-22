@@ -252,6 +252,7 @@ class AddCityViewModel(
     }
 
     fun dismissCityInfo() {
+        isCurrentLocation = false
         _screenState.value = AddCityScreenState.Idle
     }
 
