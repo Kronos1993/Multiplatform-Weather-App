@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -37,9 +38,13 @@ import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.add_city
 import weather_app.composeapp.generated.resources.close
+import weather_app.composeapp.generated.resources.current_weather_key
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.marker_to_close
+import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_title
 
 @Composable
 fun AddCityScreen(
@@ -59,6 +64,13 @@ fun AddCityScreen(
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    viewModel.initString(
+        stringResource(Res.string.current_weather_key),
+        stringResource(Res.string.notification_title),
+        stringResource(Res.string.notification_short_details),
+        stringResource(Res.string.notification_long_details),
+    )
 
     LaunchedEffect(error) {
         error?.let { errorMessage ->
@@ -147,6 +159,19 @@ fun AddCityScreen(
                         size = ComponentSize.LARGE,
                         modifier = Modifier
                             .align(Alignment.TopStart)
+                            .padding(16.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = CircleShape
+                            )
+                    )
+
+                    IconButton(
+                        onClick = { viewModel.getGpsLocation(currentLang,apiKey) },
+                        icon = Icons.Outlined.MyLocation,
+                        size = ComponentSize.LARGE,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
                             .padding(16.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.surface,

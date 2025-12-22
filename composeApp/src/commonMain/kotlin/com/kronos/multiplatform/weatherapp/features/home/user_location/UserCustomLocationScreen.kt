@@ -49,12 +49,16 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.cant_delete_current_location
+import weather_app.composeapp.generated.resources.current_weather_key
 import weather_app.composeapp.generated.resources.delete_dialog_body
 import weather_app.composeapp.generated.resources.delete_dialog_no
 import weather_app.composeapp.generated.resources.delete_dialog_title
 import weather_app.composeapp.generated.resources.delete_dialog_yes
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
+import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_title
 
 @Composable
 fun UserCustomLocationScreen(
@@ -72,6 +76,13 @@ fun UserCustomLocationScreen(
     val error by viewModel.error.collectAsStateWithLifecycle()
     val resetSwipe by viewModel.resetSwipe.collectAsStateWithLifecycle()
     val listState = rememberLazyGridState()
+
+    viewModel.initString(
+        stringResource(Res.string.current_weather_key),
+        stringResource(Res.string.notification_title),
+        stringResource(Res.string.notification_short_details),
+        stringResource(Res.string.notification_long_details),
+    )
 
     var showFab by remember { mutableStateOf(true) }
     var fabExpanded by remember { mutableStateOf(false) }
@@ -260,7 +271,7 @@ fun UserCustomLocationScreen(
                                         }
                                     },
                                     onItemClick = {
-                                        viewModel.setLocationSelected(it)
+                                        viewModel.setLocationSelected(it,currentLang, apiKey, amountOfDays)
                                     },
                                     onItemLongClick = {},
                                     resetSwipe = resetSwipe,

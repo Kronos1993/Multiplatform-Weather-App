@@ -1,15 +1,24 @@
 package com.kronos.multiplatform.weatherapp.features.add_city
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
+import com.kronos.multiplatform.weatherapp.core.notification.INotifications
+import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
+import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
+import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
+import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
+import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +32,9 @@ class AddCityViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
     private val urlProvider: UrlProvider,
+    private val locationRepository: LocationRepository,
+    private var notifications: INotifications,
+    private val widgetUpdater: IWidgetUpdater,
     val loggerManager: LogManager
 ) : ParentViewModel() {
 
@@ -34,6 +46,9 @@ class AddCityViewModel(
     private val _forecast = MutableStateFlow<Forecast?>(null)
     val forecast: StateFlow<Forecast?> = _forecast.asStateFlow()
 
+    var isCurrentLocation by mutableStateOf(false )
+
+
     private val _markerSelected = MutableStateFlow<MapMarker?>(null)
     val markerSelected: StateFlow<MapMarker?> = _markerSelected.asStateFlow()
 
@@ -43,8 +58,26 @@ class AddCityViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private var weatherPrefKey = ""
+    private var notificationTitle = ""
+    private var notificationShortDetails = ""
+    private var notificationLongDetails = ""
+
     init {
         log("ViewModel initialized.",false)
+    }
+
+    fun initString(
+        weatherPrefKey: String,
+        notificationTitle: String,
+        notificationShortDetails: String,
+        notificationLongDetails: String
+    ) {
+
+        this.weatherPrefKey = weatherPrefKey
+        this.notificationTitle = notificationTitle
+        this.notificationShortDetails = notificationShortDetails
+        this.notificationLongDetails = notificationLongDetails
     }
 
     fun setMarkerSelected(markerSelected: MapMarker?) {
@@ -74,45 +107,126 @@ class AddCityViewModel(
         }
     }
 
-    fun addLocation() {
+    fun getGpsLocation(
+        lang: String,
+        apiKey: String,
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val currentForecast = _forecast.value
-            if (currentForecast?.location != null) {
+            try {
                 _screenState.value = AddCityScreenState.Loading
-                log("Adding location: ${currentForecast.location.name}",false)
+                // Verificar si el GPS está activado
+                if (!locationRepository.isLocationEnabled()) {
+                    val msg = "Enable location"
+                    _error.value = msg
+                    _screenState.value = AddCityScreenState.NoCity
+                }
 
-                try {
-                    userCustomLocationLocalRepository.listAll().forEach { location ->
-                        userCustomLocationLocalRepository.saveLocation(
-                            location.copy(isSelected = false)
-                        )
-                    }
+                // Obtener ubicación actual
+                val currentLocation = locationRepository.getCurrentLocation()
 
-                    val newLocation = UserCustomLocation(
-                        cityName = currentForecast.location.name,
-                        lat = currentForecast.location.lat,
-                        lon = currentForecast.location.lon,
-                        isSelected = true,
-                        isCurrent = false,
-                        tempC = currentForecast.current.tempC,
-                        icon = urlProvider.getImageUrl(currentForecast.current.condition.icon, "")
-                    )
-
-                    userCustomLocationLocalRepository.saveLocation(newLocation)
-                    _screenState.value = AddCityScreenState.CityAdded
-                    log("Location added successfully: ${newLocation.cityName}",false)
-
-                } catch (e: Exception) {
-                    val msg = "Error adding location: ${e.message}"
+                if (currentLocation != null) {
+                    // Usar ubicación GPS obtenida
+                    weatherRemoteRepository.getWeatherDataForecast(currentLocation.latitude, currentLocation.longitude, lang, apiKey, 1)
+                        .onSuccess { forecast ->
+                            log("Weather data received for ${forecast.location.name} (${forecast.location.lat}, ${forecast.location.lon})",false)
+                            _forecast.value = forecast
+                            isCurrentLocation = true
+                            _screenState.value = AddCityScreenState.CityObtained
+                        }
+                        .onError { error ->
+                            val msg = "Error getting weather: ${error.errorMessage}"
+                            _error.value = msg
+                            _screenState.value = AddCityScreenState.NoCity
+                            log(msg, isError = true)
+                        }
+                } else {
+                    // Fallback si no se pudo obtener ubicación GPS
+                    val msg = "GPS error"
                     _error.value = msg
                     _screenState.value = AddCityScreenState.NoCity
                     log(msg, isError = true)
                 }
-            } else {
-                log("No forecast available to add location.", isError = true)
+            } catch (e: Exception) {
+                log("Error adding location: ${e.message}", isError = true)
+                _screenState.value = AddCityScreenState.NoCity
             }
         }
     }
+
+    fun addLocation() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val forecast = _forecast.value ?: run {
+                log("No forecast available to add location.", isError = true)
+                return@launch
+            }
+
+            _screenState.value = AddCityScreenState.Loading
+
+            try {
+                val allLocations = userCustomLocationLocalRepository.listAll()
+                val existingCurrent = allLocations.firstOrNull { it.isCurrent }
+
+                // Desmarcar todas las ubicaciones
+                allLocations.forEach {
+                    userCustomLocationLocalRepository.saveLocation(
+                        it.copy(isSelected = false)
+                    )
+                }
+
+                val newLocation = UserCustomLocation(
+                    cityName = forecast.location.name,
+                    lat = forecast.location.lat,
+                    lon = forecast.location.lon,
+                    isSelected = true,
+                    isCurrent = isCurrentLocation,
+                    tempC = forecast.current.tempC,
+                    icon = urlProvider.getImageUrl(
+                        forecast.current.condition.icon,
+                        ""
+                    )
+                )
+
+                val locationToSave = when {
+                    // Caso: GPS y ya existe un current → actualizar
+                    isCurrentLocation && existingCurrent != null -> {
+                        existingCurrent.copy(
+                            cityName = newLocation.cityName,
+                            lat = newLocation.lat,
+                            lon = newLocation.lon,
+                            isSelected = true,
+                            tempC = newLocation.tempC,
+                            icon = newLocation.icon
+                        )
+                    }
+
+                    // Caso: GPS nuevo o ciudad normal → insertar
+                    else -> newLocation
+                }
+
+                userCustomLocationLocalRepository.saveLocation(locationToSave)
+
+                weatherRemoteRepository.setLastWeatherForecast(
+                    weatherPrefKey,
+                    forecast
+                )
+
+                createWeatherNotification()
+                widgetUpdater.updateAllWeatherWidgets()
+
+                _screenState.value = AddCityScreenState.CityAdded
+                log("Location saved successfully: ${locationToSave.cityName}", false)
+
+            } catch (e: Exception) {
+                val msg = "Error adding location: ${e.message}"
+                _error.value = msg
+                _screenState.value = AddCityScreenState.NoCity
+                log(msg, isError = true)
+            } finally {
+                isCurrentLocation = false
+            }
+        }
+    }
+
 
     fun getLocationMarkers() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -163,6 +277,31 @@ class AddCityViewModel(
                 println("INFO: $item")
                 loggerManager.log(LogLevel.INFO, TAG.orEmpty(), item)
             }
+        }
+    }
+
+    private fun createWeatherNotification() {
+        if (_forecast.value != null) {
+            notifications.createNotification(
+                notificationTitle.format(
+                    _forecast.value!!.current.tempC,
+                    _forecast.value!!.location.region.orEmpty()
+                ),
+                notificationShortDetails.format(
+                    _forecast.value!!.current.condition.description,
+                    _forecast.value!!.current.feelslikeC
+                ),
+                notificationLongDetails.format(
+                    _forecast.value!!.current.condition.description,
+                    _forecast.value!!.current.feelslikeC,
+                    _forecast.value!!.forecast.forecastDay[0].day.mintempC.toString(),
+                    _forecast.value!!.forecast.forecastDay[0].day.maxtempC.toString(),
+                    _forecast.value!!.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+                ),
+                "https:${_forecast.value!!.current.condition.icon}",
+                NotificationGroup.GENERAL,
+                NotificationType.FROM_APP
+            )
         }
     }
 }

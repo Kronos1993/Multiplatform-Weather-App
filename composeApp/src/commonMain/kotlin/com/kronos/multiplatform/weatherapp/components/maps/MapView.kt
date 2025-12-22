@@ -154,7 +154,7 @@ fun MapView(
     onMapLongClick: (Position) -> Unit,
     onMapToCloseTap: () -> Unit,
     modifier: Modifier = Modifier,
-    minDistanceBetweenMarkers: Double = 100.0
+    minDistanceBetweenMarkers: Double = 100.0,
 ) {
 
     val camera = rememberCameraState()

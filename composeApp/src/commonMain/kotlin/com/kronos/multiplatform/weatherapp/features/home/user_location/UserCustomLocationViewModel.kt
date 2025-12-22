@@ -6,11 +6,17 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
+import com.kronos.multiplatform.weatherapp.core.notification.INotifications
+import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
+import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
+import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
+import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
+import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +29,8 @@ import kotlinx.coroutines.launch
 class UserCustomLocationViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
+    private var notifications: INotifications,
+    private val widgetUpdater: IWidgetUpdater,
     val urlProvider: UrlProvider,
     private val loggerManager: LogManager
 ) : ParentViewModel() {
@@ -43,6 +51,24 @@ class UserCustomLocationViewModel(
 
     private var _resetSwipe = MutableStateFlow(false)
     var resetSwipe: StateFlow<Boolean> = _resetSwipe.asStateFlow()
+
+    private var weatherPrefKey = ""
+    private var notificationTitle = ""
+    private var notificationShortDetails = ""
+    private var notificationLongDetails = ""
+
+    fun initString(
+        weatherPrefKey: String,
+        notificationTitle: String,
+        notificationShortDetails: String,
+        notificationLongDetails: String
+    ) {
+
+        this.weatherPrefKey = weatherPrefKey
+        this.notificationTitle = notificationTitle
+        this.notificationShortDetails = notificationShortDetails
+        this.notificationLongDetails = notificationLongDetails
+    }
 
     fun postResetSwipe(resetSwipe: Boolean) {
         _resetSwipe.value = resetSwipe
@@ -108,6 +134,10 @@ class UserCustomLocationViewModel(
                         location.tempC = forecast.current.tempC
                         location.cityName = "${forecast.location.name}/${forecast.location.region}"
                         log("Location from coordinates acquired: ${forecast.location.name}", false)
+                        if (location.isSelected){
+                            createWeatherNotification(forecast)
+                            widgetUpdater.updateAllWeatherWidgets()
+                        }
                     }
                     .onError { error ->
                         log("Location error for ${location.cityName}: $error", isError = true)
@@ -121,6 +151,9 @@ class UserCustomLocationViewModel(
 
     fun setLocationSelected(
         userLocation: UserCustomLocation,
+        lang: String,
+        apiKey: String,
+        days: Int
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = UserCustomLocationScreenState.Loading
@@ -146,6 +179,20 @@ class UserCustomLocationViewModel(
                 }
 
                 _locations.value = updatedLocations
+                weatherRemoteRepository.getWeatherDataForecast(
+                    userLocation.lat!!,
+                    userLocation.lon!!,
+                    lang,
+                    apiKey,
+                    days
+                ).onSuccess {
+                    weatherRemoteRepository.setLastWeatherForecast(
+                        weatherPrefKey,
+                        it
+                    )
+                    createWeatherNotification(it)
+                    widgetUpdater.updateAllWeatherWidgets()
+                }
                 _screenState.value = UserCustomLocationScreenState.LocationsObtained
 
                 log("Custom location: ${userLocation.cityName} selected.", false)
@@ -211,10 +258,10 @@ class UserCustomLocationViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             if (isError) {
                 println("ERROR: $item")
-                loggerManager.log(LogLevel.ERROR,TAG.orEmpty(),item)
+                loggerManager.log(LogLevel.ERROR, TAG.orEmpty(), item)
             } else {
                 println("INFO: $item")
-                loggerManager.log(LogLevel.INFO,TAG.orEmpty(),item)
+                loggerManager.log(LogLevel.INFO, TAG.orEmpty(), item)
             }
         }
     }
@@ -236,6 +283,29 @@ class UserCustomLocationViewModel(
 
     fun handleRemoveCurrentLocation(message: String) {
         _error.value = message
+    }
+
+    private fun createWeatherNotification(forecast: Forecast) {
+        notifications.createNotification(
+            notificationTitle.format(
+                forecast.current.tempC,
+                forecast.location.region.orEmpty()
+            ),
+            notificationShortDetails.format(
+                forecast.current.condition.description,
+                forecast.current.feelslikeC
+            ),
+            notificationLongDetails.format(
+                forecast.current.condition.description,
+                forecast.current.feelslikeC,
+                forecast.forecast.forecastDay[0].day.mintempC.toString(),
+                forecast.forecast.forecastDay[0].day.maxtempC.toString(),
+                forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+            ),
+            "https:${forecast.current.condition.icon}",
+            NotificationGroup.GENERAL,
+            NotificationType.FROM_APP
+        )
     }
 }
 

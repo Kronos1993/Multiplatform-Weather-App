@@ -165,7 +165,7 @@ private fun getWeatherIndicators(
             Indicator(
                 6,
                 moonPhaseName,
-                "${currentDayForecast?.astro?.moonrise ?: ""} - ${currentDayForecast?.astro?.moonset ?: ""}",
+                "${currentDayForecast?.astro?.moonset ?: ""} - ${currentDayForecast?.astro?.moonrise ?: ""}",
                 moonPhaseIcon
             )
         },
