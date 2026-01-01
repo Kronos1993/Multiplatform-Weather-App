@@ -15,6 +15,7 @@ import com.kronos.multiplatform.weatherapp.components.maps.markers.GeoJsonMapper
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.components.theme.extendedDark
 import com.kronos.multiplatform.weatherapp.components.theme.extendedLight
+import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.painterResource
 import org.maplibre.compose.camera.CameraPosition
@@ -155,17 +156,30 @@ fun MapView(
     onMapToCloseTap: () -> Unit,
     modifier: Modifier = Modifier,
     minDistanceBetweenMarkers: Double = 100.0,
+    currentLocation: LocationModel? = null
 ) {
 
     val camera = rememberCameraState()
     val styleState = rememberStyleState()
     val marker = painterResource(Res.drawable.ic_locations)
 
-    LaunchedEffect(Unit) {
-        camera.animateTo(
-            finalPosition = camera.position.copy(),
-            duration = 3.seconds,
-        )
+    LaunchedEffect(currentLocation) {
+        if (currentLocation == null){
+            camera.animateTo(
+                finalPosition = camera.position.copy(),
+                duration = 3.seconds,
+            )
+        }else{
+            val position = CameraPosition(
+                target = Position(currentLocation.longitude, currentLocation.latitude),
+                zoom = 17.0
+            )
+            camera.animateTo(
+                finalPosition = position.copy(),
+                duration = 3.seconds,
+            )
+        }
+
     }
 
     MaplibreMap(

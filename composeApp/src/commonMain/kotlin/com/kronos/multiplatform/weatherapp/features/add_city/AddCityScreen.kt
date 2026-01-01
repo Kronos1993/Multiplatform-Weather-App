@@ -59,6 +59,7 @@ fun AddCityScreen(
     val markerSelected by viewModel.markerSelected.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
+    val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
 
     val errorMessage = stringResource(Res.string.marker_to_close)
 
@@ -150,7 +151,8 @@ fun AddCityScreen(
                         onMapToCloseTap = {
                             viewModel.setError(errorMessage)
                         },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        currentLocation = currentLocation
                     )
 
                     IconButton(

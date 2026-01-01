@@ -15,6 +15,7 @@ import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
+import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
@@ -42,6 +43,9 @@ class AddCityViewModel(
 
     private val _markers = MutableStateFlow<List<MapMarker>>(listOf())
     val markers: StateFlow<List<MapMarker>> = _markers.asStateFlow()
+
+    private val _currentLocation = MutableStateFlow<LocationModel?>(null)
+    val currentLocation = _currentLocation.asStateFlow()
 
     private val _forecast = MutableStateFlow<Forecast?>(null)
     val forecast: StateFlow<Forecast?> = _forecast.asStateFlow()
@@ -122,11 +126,11 @@ class AddCityViewModel(
                 }
 
                 // Obtener ubicación actual
-                val currentLocation = locationRepository.getCurrentLocation()
+                _currentLocation.value = locationRepository.getCurrentLocation()
 
-                if (currentLocation != null) {
+                if (_currentLocation.value != null) {
                     // Usar ubicación GPS obtenida
-                    weatherRemoteRepository.getWeatherDataForecast(currentLocation.latitude, currentLocation.longitude, lang, apiKey, 1)
+                    weatherRemoteRepository.getWeatherDataForecast(_currentLocation.value!!.latitude, _currentLocation.value!!.longitude, lang, apiKey, 1)
                         .onSuccess { forecast ->
                             log("Weather data received for ${forecast.location.name} (${forecast.location.lat}, ${forecast.location.lon})",false)
                             _forecast.value = forecast
@@ -160,6 +164,13 @@ class AddCityViewModel(
                 return@launch
             }
 
+            val currentLocation = _currentLocation.value ?: run {
+                LocationModel(
+                    latitude = forecast.location.lat,
+                    longitude = forecast.location.lon
+                )
+            }
+
             _screenState.value = AddCityScreenState.Loading
 
             try {
@@ -175,8 +186,8 @@ class AddCityViewModel(
 
                 val newLocation = UserCustomLocation(
                     cityName = forecast.location.name,
-                    lat = forecast.location.lat,
-                    lon = forecast.location.lon,
+                    lat = currentLocation.latitude,
+                    lon = currentLocation.longitude,
                     isSelected = true,
                     isCurrent = isCurrentLocation,
                     tempC = forecast.current.tempC,
@@ -223,6 +234,7 @@ class AddCityViewModel(
                 log(msg, isError = true)
             } finally {
                 isCurrentLocation = false
+                _currentLocation.value = null
             }
         }
     }
@@ -253,6 +265,7 @@ class AddCityViewModel(
 
     fun dismissCityInfo() {
         isCurrentLocation = false
+        _currentLocation.value = null
         _screenState.value = AddCityScreenState.Idle
     }
 

@@ -210,8 +210,8 @@ class WeatherViewModel(
                     weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey, forecast)
                     saveCurrentLocation(
                         LocationModel(
-                            latitude = forecast.location.lat,
-                            longitude = forecast.location.lon,
+                            latitude = lat,
+                            longitude = lon,
                             cityName = forecast.location.name,
                             temp = forecast.current.tempC,
                             icon = urlProvider.getImageUrl(
@@ -252,8 +252,8 @@ class WeatherViewModel(
                     weatherRemoteRepository.setLastWeatherForecast(weatherPrefKey, forecast)
                     saveCurrentLocation(
                         LocationModel(
-                            latitude = forecast.location.lat,
-                            longitude = forecast.location.lon,
+                            latitude = location.latitude,
+                            longitude = location.longitude,
                             cityName = forecast.location.name,
                             temp = forecast.current.tempC,
                             icon = urlProvider.getImageUrl(
