@@ -139,7 +139,6 @@ fun WeatherScreen(
             ) {
                 val rootModifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .consumeWindowInsets(WindowInsets.navigationBars)
 
                 when (deviceScreenConfiguration) {

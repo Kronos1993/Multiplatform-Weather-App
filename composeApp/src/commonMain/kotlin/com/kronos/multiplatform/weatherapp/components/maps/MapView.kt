@@ -172,7 +172,7 @@ fun MapView(
         }else{
             val position = CameraPosition(
                 target = Position(currentLocation.longitude, currentLocation.latitude),
-                zoom = 17.0
+                zoom = 15.0
             )
             camera.animateTo(
                 finalPosition = position.copy(),

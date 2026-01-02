@@ -171,7 +171,7 @@ private fun getWeatherIndicators(
             Indicator.Default(
                 6,
                 moonPhaseName,
-                "${currentDayForecast?.astro?.moonset ?: ""} - ${currentDayForecast?.astro?.moonrise ?: ""}",
+                "${currentDayForecast?.astro?.moonrise ?: ""} - ${currentDayForecast?.astro?.moonset ?: ""}",
                 moonPhaseIcon
             )
         },
@@ -417,7 +417,7 @@ fun WeatherContentSection(
         }
 
         item {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }
