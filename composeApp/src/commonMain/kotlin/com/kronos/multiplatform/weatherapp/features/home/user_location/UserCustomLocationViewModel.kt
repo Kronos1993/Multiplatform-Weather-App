@@ -90,7 +90,10 @@ class UserCustomLocationViewModel(
                     days
                 )
 
-                _locations.value = updatedLocations
+                _locations.value = updatedLocations.sortedWith(
+                    compareByDescending<UserCustomLocation> { it.isCurrent }
+                        .thenByDescending { it.isSelected }
+                )
                 _screenState.value = if (updatedLocations.isNotEmpty()) {
                     UserCustomLocationScreenState.LocationsObtained
                 } else {
@@ -134,7 +137,7 @@ class UserCustomLocationViewModel(
                         location.tempC = forecast.current.tempC
                         location.cityName = "${forecast.location.name}/${forecast.location.region}"
                         log("Location from coordinates acquired: ${forecast.location.name}", false)
-                        if (location.isSelected){
+                        if (location.isSelected) {
                             createWeatherNotification(forecast)
                             widgetUpdater.updateAllWeatherWidgets()
                         }

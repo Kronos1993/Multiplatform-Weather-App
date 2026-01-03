@@ -37,6 +37,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.current_weather_key
+import weather_app.composeapp.generated.resources.gps_cant_get_location_error_message
+import weather_app.composeapp.generated.resources.gps_disable_message
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.notification_long_details
@@ -67,11 +69,13 @@ fun WeatherScreen(
         stringResource(Res.string.notification_title),
         stringResource(Res.string.notification_short_details),
         stringResource(Res.string.notification_long_details),
+        stringResource(Res.string.gps_disable_message),
+        stringResource(Res.string.gps_cant_get_location_error_message),
     )
 
     LaunchedEffect(currentLang) {
         if (currentLang.isNotBlank()) {
-            viewModel.initLocations(currentLang, apiKey, amountOfDays, defaultCity)
+            viewModel.initLocations(currentLang, apiKey, amountOfDays, imageQuality, defaultCity)
         }
     }
 
@@ -134,7 +138,13 @@ fun WeatherScreen(
                 innerPadding = paddingValues,
                 isRefreshing = screenState == WeatherScreenState.Loading,
                 onRefresh = {
-                    viewModel.refreshWeather(currentLang, apiKey, amountOfDays, imageQuality)
+                    viewModel.refreshWeather(
+                        currentLang,
+                        apiKey,
+                        amountOfDays,
+                        imageQuality,
+                        defaultCity
+                    )
                 }
             ) {
                 val rootModifier = Modifier
@@ -168,7 +178,8 @@ fun WeatherScreen(
                                                 currentLang,
                                                 apiKey,
                                                 amountOfDays,
-                                                imageQuality
+                                                imageQuality,
+                                                defaultCity
                                             )
                                         }
                                     )
@@ -194,7 +205,8 @@ fun WeatherScreen(
                                                     currentLang,
                                                     apiKey,
                                                     amountOfDays,
-                                                    imageQuality
+                                                    imageQuality,
+                                                    defaultCity
                                                 )
                                             }
                                         )
@@ -226,7 +238,8 @@ fun WeatherScreen(
                                             currentLang,
                                             apiKey,
                                             amountOfDays,
-                                            imageQuality
+                                            imageQuality,
+                                            defaultCity
                                         )
                                     }
                                 )
@@ -253,7 +266,8 @@ fun WeatherScreen(
                                                 currentLang,
                                                 apiKey,
                                                 amountOfDays,
-                                                imageQuality
+                                                imageQuality,
+                                                defaultCity
                                             )
                                         }
                                     )
@@ -288,7 +302,8 @@ fun WeatherScreen(
                                                 currentLang,
                                                 apiKey,
                                                 amountOfDays,
-                                                imageQuality
+                                                imageQuality,
+                                                defaultCity
                                             )
                                         }
                                     )
@@ -314,7 +329,8 @@ fun WeatherScreen(
                                                     currentLang,
                                                     apiKey,
                                                     amountOfDays,
-                                                    imageQuality
+                                                    imageQuality,
+                                                    defaultCity
                                                 )
                                             }
                                         )
@@ -353,7 +369,8 @@ fun WeatherScreen(
                                                 currentLang,
                                                 apiKey,
                                                 amountOfDays,
-                                                imageQuality
+                                                imageQuality,
+                                                defaultCity
                                             )
                                         }
                                     )
@@ -379,7 +396,8 @@ fun WeatherScreen(
                                                     currentLang,
                                                     apiKey,
                                                     amountOfDays,
-                                                    imageQuality
+                                                    imageQuality,
+                                                    defaultCity
                                                 )
                                             }
                                         )

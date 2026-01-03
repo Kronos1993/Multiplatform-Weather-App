@@ -32,6 +32,7 @@ import com.kronos.multiplatform.weatherapp.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.components.maps.MapView
 import com.kronos.multiplatform.weatherapp.components.ShowCityInfoDialog
 import com.kronos.multiplatform.weatherapp.components.ShowSelectedCityInfoDialog
+import com.kronos.multiplatform.weatherapp.components.button.FabButton
 import com.kronos.multiplatform.weatherapp.components.button.IconButton
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -168,17 +169,13 @@ fun AddCityScreen(
                             )
                     )
 
-                    IconButton(
+                    FabButton(
                         onClick = { viewModel.getGpsLocation(currentLang,apiKey) },
                         icon = Icons.Outlined.MyLocation,
-                        size = ComponentSize.LARGE,
+                        size = ComponentSize.MEDIUM,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(end = 16.dp, bottom = 60.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = CircleShape
-                            )
                     )
                 }
             }

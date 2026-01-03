@@ -61,6 +61,8 @@
     <string name="saturday">Sábado</string>
     <string name="sunday">Domingo</string>
     <string name="gps">GPS</string>
+    <string name="gps_disable_message">El servicio de ubicación esta desactivado</string>
+    <string name="gps_cant_get_location_error_message">No se pudo obtener la ubicación</string>
 
     <string name="add_location_button_content_description">Añadir ubicación</string>
 
