@@ -23,4 +23,12 @@ sealed class Indicator(
         override val image: ImageVector,
         val windDegree: Float,
     ) : Indicator(id, header, description, image)
+
+    data class UVIndex(
+        override val id: Int,
+        override val header: String,
+        override val description: String,
+        override val image: ImageVector,
+        val level: Double,
+    ) : Indicator(id, header, description, image)
 }

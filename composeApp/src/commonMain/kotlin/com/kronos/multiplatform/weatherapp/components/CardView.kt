@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -225,6 +224,41 @@ fun WindCompassIndicator(
 }
 
 @Composable
+fun UvIndexProgressIndicator(
+    item: Indicator.UVIndex,
+    modifier: Modifier = Modifier,
+    darkTheme: Boolean
+) {
+    Column(
+        modifier = modifier
+            .wrapContentWidth()
+            .padding(horizontal = 5.dp, vertical = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        AnimatedSemiCircularProgress(
+            item.level.toFloat(),
+            modifier = Modifier.size(48.dp),
+        )
+        LabelText(
+            item.header,
+            textColor = Color.White,
+            textAlign = TextAlign.Center,
+            size = ComponentSize.MEDIUM,
+            modifier = Modifier.wrapContentWidth()
+        )
+        LabelText(
+            item.description,
+            textColor = Color.White,
+            textAlign = TextAlign.Center,
+            fontWeight = Bold,
+            size = ComponentSize.EXTRA_SMALL,
+            modifier = Modifier.wrapContentWidth()
+        )
+    }
+}
+
+@Composable
 fun WeatherIndicatorList(
     indicators: List<Indicator>,
     darkTheme: Boolean,
@@ -250,18 +284,28 @@ fun WeatherIndicatorList(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             indicators.forEach {
-                if (it is Indicator.Wind) {
-                    WindCompassIndicator(
-                        it,
-                        darkTheme = darkTheme,
-                        modifier = Modifier.weight(1f)
-                    )
-                } else {
-                    WeatherIndicatorItem(
-                        item = it,
-                        darkTheme = darkTheme,
-                        modifier = Modifier.weight(1f)
-                    )
+                when (it) {
+                    is Indicator.UVIndex -> {
+                        UvIndexProgressIndicator(
+                            it,
+                            darkTheme = darkTheme,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    is Indicator.Wind -> {
+                        WindCompassIndicator(
+                            it,
+                            darkTheme = darkTheme,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    is Indicator.Default -> {
+                        WeatherIndicatorItem(
+                            item = it,
+                            darkTheme = darkTheme,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }

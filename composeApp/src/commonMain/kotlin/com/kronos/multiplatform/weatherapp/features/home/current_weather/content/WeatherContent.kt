@@ -139,11 +139,12 @@ private fun getWeatherIndicators(
             "${currentWeather.current.humidity}%",
             WeatherAppIcons.WaterDropsIndicator
         ),
-        Indicator.Default(
+        Indicator.UVIndex(
             3,
             uvIndexText,
             uvDescription,
-            WeatherAppIcons.SunIndicator
+            WeatherAppIcons.SunIndicator,
+            currentWeather.current.uv
         ),
         if (currentDayForecast?.day?.dailyWillItSnow == true) {
             Indicator.Default(

@@ -1,8 +1,8 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
 import androidx.lifecycle.viewModelScope
+import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
-import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
@@ -29,7 +29,7 @@ class WeatherViewModel(
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
     private val locationRepository: LocationRepository,
     private var notifications: INotifications,
-    private val loggerManager: LogManager,
+    private val loggerManager: ILogManager,
     private val widgetUpdater: IWidgetUpdater,
     val urlProvider: UrlProvider,
 ) : ParentViewModel() {
