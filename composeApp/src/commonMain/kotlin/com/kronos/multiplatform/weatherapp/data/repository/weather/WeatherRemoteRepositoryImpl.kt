@@ -49,4 +49,15 @@ class WeatherRemoteRepositoryImpl(
         )
     }
 
+    override suspend fun getLastWeatherForecast(prefKey: String): Result<Forecast, Error> {
+        return weatherRemoteDataSource.getLastWeatherForecast(prefKey)
+    }
+
+    override suspend fun setLastWeatherForecast(
+        prefKey: String,
+        forecast: Forecast
+    ): Result<Boolean, Error> {
+        return weatherRemoteDataSource.setLastWeatherForecast(prefKey, forecast)
+    }
+
 }

@@ -1,56 +1,27 @@
 package com.kronos.multiplatform.weatherapp
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Dashboard
-import androidx.compose.material.icons.outlined.MedicalServices
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.kronos.multiplatform.weatherapp.components.theme.AppTheme
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.features.add_city.AddCityScreen
 import com.kronos.multiplatform.weatherapp.features.home.HomeScreen
-import io.ktor.util.collections.getValue
-import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.api_key
-import weather_app.composeapp.generated.resources.compose_multiplatform
 import weather_app.composeapp.generated.resources.default_city_key
 import weather_app.composeapp.generated.resources.default_city_value
 import weather_app.composeapp.generated.resources.default_days_key
@@ -68,6 +39,7 @@ fun App() {
     val navController = rememberNavController()
     val viewModel = koinViewModel<PreferenceViewModel>()
 
+    val ready by viewModel.isReady.collectAsStateWithLifecycle()
     val themePreferenceKey = stringResource(Res.string.theme_preference_key)
     val themePreferenceDefault = stringResource(Res.string.theme_preference_default_value)
     val langPreferenceKey = stringResource(Res.string.default_lang_key)
@@ -80,33 +52,6 @@ fun App() {
     val imageQualityPreferenceDefault = stringResource(Res.string.default_image_quality_value)
     val apiKey = stringResource(Res.string.api_key)
 
-    LaunchedEffect(Unit) {
-        viewModel.getPreferenceTheme(
-            themePreferenceKey,
-            themePreferenceDefault
-        )
-
-        viewModel.getPreferenceLang(
-            langPreferenceKey,
-            langPreferenceDefault
-        )
-
-        viewModel.getPreferenceDays(
-            daysPreferenceKey,
-            daysPreferenceDefault.toInt()
-        )
-
-        viewModel.getPreferenceDefaultCity(
-            defaultCityPreferenceKey,
-            defaultCityPreferenceDefault
-        )
-
-        viewModel.getPreferenceImageQuality(
-            imageQualityPreferenceKey,
-            imageQualityPreferenceDefault
-        )
-    }
-
     val isDarkTheme by viewModel.preferenceThemeFlow.collectAsStateWithLifecycle()
     val currentLang by viewModel.preferenceLangFlow.collectAsStateWithLifecycle()
     val amountDays by viewModel.preferenceDays.collectAsStateWithLifecycle()
@@ -114,10 +59,24 @@ fun App() {
     val defaultCity by viewModel.preferenceDefaultCity.collectAsStateWithLifecycle()
     val apiKeyRemember by remember { mutableStateOf(apiKey) }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadPreferences(
+            langKey = langPreferenceKey,
+            langDefault = langPreferenceDefault,
+            themeKey = themePreferenceKey,
+            themeDefault = themePreferenceDefault,
+            daysKey = daysPreferenceKey,
+            daysDefault = daysPreferenceDefault.toInt(),
+            imageQualityKey = imageQualityPreferenceKey,
+            imageQualityDefault = imageQualityPreferenceDefault,
+            defaultCityKey = defaultCityPreferenceKey,
+            defaultCityDefault = defaultCityPreferenceDefault
+        )
+    }
 
-    /*LaunchedEffect(currentLang) {
-        viewModel.changeLanguage(currentLang) // Cambia el idioma desde el ViewModel
-    }*/
+    LaunchedEffect(currentLang) {
+        viewModel.changeLanguage(currentLang)
+    }
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceScreenConfiguration =
@@ -127,45 +86,36 @@ fun App() {
 
     Scaffold(
     ) {
-        AppTheme (
+        AppTheme(
             darkTheme = isDarkTheme == stringResource(Res.string.theme_preference_default_value)
         ) {
-            NavHost(navController = navController, startDestination = Destinations.HOME.name) {
-                composable(route = Destinations.HOME.name) {
-                    HomeScreen(
-                        navController,
-                        isDarkTheme == stringResource(Res.string.theme_preference_default_value),
-                        currentLang,
-                        apiKeyRemember,
-                        imageQuality,
-                        amountDays,
-                        defaultCity,
-                        deviceScreenConfiguration = deviceScreenConfiguration,
-                    )
+            if (ready) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Destinations.HOME.name
+                ) {
+                    composable(route = Destinations.HOME.name) {
+                        HomeScreen(
+                            navController,
+                            isDarkTheme == stringResource(Res.string.theme_preference_default_value),
+                            currentLang,
+                            apiKeyRemember,
+                            imageQuality,
+                            amountDays,
+                            defaultCity,
+                            deviceScreenConfiguration = deviceScreenConfiguration,
+                        )
+                    }
+                    composable(route = Destinations.ADD_CITY.name) {
+                        AddCityScreen(
+                            navController,
+                            currentLang,
+                            apiKeyRemember,
+                            isDarkTheme == stringResource(Res.string.theme_preference_default_value),
+                        )
+                    }
                 }
             }
-
-            /*ConfirmDialog(
-                title = Res.string.log_out_dialog_title,
-                body = Res.string.log_out_dialog_body,
-                showDialog = showLogout,
-                confirmText = Res.string.button_text_ok,
-                onConfirm = {
-                    scope.launch {
-                        viewModelLogout.logOut()
-                        viewModelLogout.showLogOut(false)
-                        navController.navigate(Destinations.LOGIN.name) {
-                            popUpTo(0)
-                        }
-                    }
-                },
-                cancelText = Res.string.button_text_cancel,
-                onCancel = {
-                    scope.launch {
-                        viewModelLogout.showLogOut(false)
-                    }
-                }
-            )*/
         }
     }
 }

@@ -3,8 +3,14 @@ package com.kronos.multiplatform.weatherapp.features.home
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,20 +27,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.kronos.multiplatform.weatherapp.Destinations
+import com.kronos.multiplatform.weatherapp.components.ConfirmDialog
 import com.kronos.multiplatform.weatherapp.components.ScrollableTabView
 import com.kronos.multiplatform.weatherapp.components.TabItem
-import com.kronos.multiplatform.weatherapp.core.util.BackPressHandlerEffect
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.features.home.about.AboutScreen
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.WeatherScreen
+import com.kronos.multiplatform.weatherapp.features.home.setting.SettingsScreen
+import com.kronos.multiplatform.weatherapp.features.home.user_location.UserCustomLocationScreen
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.denied_location_permission_message
 import weather_app.composeapp.generated.resources.denied_notification_permission_message
+import weather_app.composeapp.generated.resources.exit_dialog_body
+import weather_app.composeapp.generated.resources.exit_dialog_no
+import weather_app.composeapp.generated.resources.exit_dialog_title
+import weather_app.composeapp.generated.resources.exit_dialog_yes
+import weather_app.composeapp.generated.resources.title_about
+import weather_app.composeapp.generated.resources.title_location
+import weather_app.composeapp.generated.resources.title_settings
 import weather_app.composeapp.generated.resources.title_weather
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +65,8 @@ fun HomeScreen(
     defaultCity: String,
     deviceScreenConfiguration: DeviceScreenConfiguration,
 ) {
+    val viewModel = koinViewModel<HomeViewModel>()
+
     val factory = rememberPermissionsControllerFactory()
     val controller = remember(factory) {
         factory.createPermissionsController()
@@ -172,17 +190,19 @@ fun HomeScreen(
         }
     }
 
-    BackPressHandlerEffect(
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    /*BackPressHandlerEffect(
         enabled = navHost.currentBackStackEntry?.destination?.route == Destinations.HOME.name
     ) {
-        // todo show exit dialog
-    }
+        showExitDialog = true
+    }*/
 
     val tabs = listOf(
         TabItem(
             stringResource(Res.string.title_weather),
-            Icons.Filled.CalendarMonth,
-            Icons.Outlined.CalendarMonth,
+            Icons.Filled.Cloud,
+            Icons.Outlined.Cloud,
             1
         ) {
             WeatherScreen(
@@ -195,11 +215,54 @@ fun HomeScreen(
                 isDarkTheme
             )
         },
+
+        TabItem(
+            stringResource(Res.string.title_location),
+            Icons.Filled.LocationOn,
+            Icons.Outlined.LocationOn,
+            2
+        ) {
+            UserCustomLocationScreen(
+                navHost,
+                deviceScreenConfiguration,
+                currentLang,
+                apiKey,
+                imageQuality,
+                amountOfDays,
+                isDarkTheme
+            )
+        },
+
+        TabItem(
+            stringResource(Res.string.title_settings),
+            Icons.Filled.Settings,
+            Icons.Outlined.Settings,
+            3
+        ) {
+            SettingsScreen(
+                navHost,
+                isDarkTheme,
+                deviceScreenConfiguration,
+                currentLang,
+                {
+                    viewModel.updateAppLanguage(it)
+                }
+            )
+        },
+
+        TabItem(
+            stringResource(Res.string.title_about),
+            Icons.Filled.Info,
+            Icons.Outlined.Info,
+            4
+        ) {
+            AboutScreen(navHost,isDarkTheme,deviceScreenConfiguration)
+        },
     )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.secondaryContainer
+        color = MaterialTheme.colorScheme.onPrimary,
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize().systemBarsPadding(),
@@ -218,6 +281,20 @@ fun HomeScreen(
                 paddingValues = paddingValues
             )
         }
+
+        ConfirmDialog(
+            title = stringResource(Res.string.exit_dialog_title),
+            body = stringResource(Res.string.exit_dialog_body),
+            confirmText = stringResource(Res.string.exit_dialog_yes),
+            onConfirm = {
+
+                viewModel.closeApp()
+                showExitDialog = false
+            },
+            cancelText = stringResource(Res.string.exit_dialog_no),
+            onCancel = { showExitDialog = false },
+            showDialog = showExitDialog
+        )
     }
 }
 

@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -145,6 +147,86 @@ fun SettingRadioOption(
             }
             HorizontalDivider()
         }
+    }
+}
+
+@Composable
+fun SettingRadioOptions(
+    title: String,
+    subtitle: String,
+    textColor: Color = Color.Unspecified,
+    icon: ImageVector? = null,
+    iconDesc: String? = null,
+    iconTint: Color = Color.Unspecified,
+    options: List<Pair<String, String>>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit
+) {
+    Surface(
+        color = Color.Transparent,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+    ) {
+        Column(Modifier.padding(4.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        tint = iconTint,
+                        contentDescription = iconDesc,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                }
+                TitleText(
+                    text = title,
+                    modifier = Modifier,
+                    textColor = textColor
+                )
+            }
+            BodyText(
+                text = subtitle,
+                modifier = Modifier,
+                size = ComponentSize.LARGE,
+                textColor = textColor
+            )
+            options.forEach { option ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onOptionSelected(option.second)
+                        }
+                        .padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween, // Align items with space between
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BodyText(
+                        text = option.first,
+                        modifier = Modifier,
+                        size = ComponentSize.LARGE,
+                        textColor = textColor
+                    )
+                    RadioButton(
+                        selected = selectedOption == option.second,
+                        onClick = { onOptionSelected(option.second) },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colorScheme.inversePrimary,
+                            unselectedColor = MaterialTheme.colorScheme.inversePrimary
+                        )
+                    )
+                }
+            }
+            HorizontalDivider()
+        }
+
     }
 }
 

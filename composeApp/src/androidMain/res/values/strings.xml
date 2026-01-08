@@ -1,3 +1,46 @@
 <resources>
-    <string name="app_name">Weather-App</string>
+    <string name="app_name" translatable="false">Weather-App</string>
+
+    <string name="notification_title">%s° | %s</string>
+    <string name="notification_short_details">%s. Feels like %s°C</string>
+    <string name="notification_long_details">%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%%</string>
+
+    <string name="temp_celsius">%s°C</string>
+    <string name="temp_celsius_widget">%s°</string>
+    <string name="temp_fahrenheit">%s°F</string>
+    <string name="feels_like_temp_celsius">Feels like %s°C</string>
+    <string name="feels_like_temp_fahrenheit">Feels like %s°F</string>
+    <string name="speed_km">%s KM/H</string>
+    <string name="speed_miles">%s M/H</string>
+    <string name="loading_dialog_text">Loading</string>
+    <string name="wind">Wind</string>
+    <string name="wind_direction">Wind Direction</string>
+    <string name="humidity">Humidity</string>
+    <string name="uv_index">UV Index</string>
+    <string name="rain">Rain</string>
+    <string name="snow">Snow</string>
+    <string name="sun">Sun</string>
+    <string name="sunrise_sunset">Rise %s\nSet %s</string>
+    <string name="visibility">Visibility</string>
+    <string name="visibility_km">%s KM</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="today">Today</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+
+    <string name="widget_name">Weather Info</string>
+    <string name="widget_with_analog_clock_name">Weather Info and Analog Clock</string>
+    <string name="widget_with_digital_clock_name">Weather Info and Digital Clock</string>
+    <string name="widget_error_text">Open app to get data</string>
+
+    <string name="uv_index_low">Low</string>
+    <string name="uv_index_medium">Medium</string>
+    <string name="uv_index_high">High</string>
+    <string name="uv_index_very_high">Very High</string>
+    <string name="uv_index_extreme">Extreme</string>
 </resources>

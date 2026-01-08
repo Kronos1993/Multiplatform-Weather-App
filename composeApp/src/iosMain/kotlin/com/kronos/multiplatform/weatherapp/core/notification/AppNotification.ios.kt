@@ -2,7 +2,6 @@ package com.kronos.multiplatform.weatherapp.core.notification
 
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
-import platform.UserNotifications.UNNotificationSound
 import platform.UserNotifications.UNTimeIntervalNotificationTrigger
 import platform.UserNotifications.UNUserNotificationCenter
 
@@ -10,18 +9,20 @@ actual class AppNotification : INotifications {
 
     override fun createNotification(
         title: String,
+        shortDescription: String,
         description: String,
+        notificationImageUrl: String,
         group: NotificationGroup,
-        notificationsId: NotificationType
+        notificationsId: NotificationType,
     ) {
         val content = UNMutableNotificationContent().apply {
             setTitle(title)
+            setSubtitle(shortDescription)
             setBody(description)
-            setSound(UNNotificationSound.defaultSound())
         }
 
         val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
-            1.0, // Muestra la notificación después de 1 segundo
+            1.0,
             repeats = false
         )
 
@@ -32,15 +33,14 @@ actual class AppNotification : INotifications {
         )
 
         UNUserNotificationCenter.currentNotificationCenter().addNotificationRequest(
-            request = request,
-            withCompletionHandler = { error ->
-                if (error != null) {
-                    println("🚨 Error al enviar notificación: ${error.localizedDescription}")
-                } else {
-                    println("✅ Notificación programada exitosamente")
-                }
+            request = request
+        ) { error ->
+            if (error != null) {
+                println("🚨 Error al enviar notificación: ${error.localizedDescription}")
+            } else {
+                println("✅ Notificación programada exitosamente")
             }
-        )
+        }
     }
 
 

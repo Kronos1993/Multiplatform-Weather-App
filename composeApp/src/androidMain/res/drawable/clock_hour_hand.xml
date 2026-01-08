@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="65dp"
+    android:height="65dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Mano más pequeña (corta) -->
+    <path
+        android:fillColor="@color/clock_hour_hand"
+        android:pathData="M48,25 L52,25 L52,50 L48,50 z" />
+
+    <!-- Centro -->
+    <path
+        android:fillColor="@color/clock_hour_hand"
+        android:pathData="M45,50 A5,5 0 1,1 55,50 A5,5 0 1,1 45,50" />
+
+</vector>
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="65dp"
+    android:height="65dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Mano ajustada al mismo grosor (48 a 52) pero con el largo original -->
+    <path
+        android:fillColor="@color/clock_hour_minute"
+        android:pathData="M48,10 L52,10 L52,60 L48,60 z" />
+
+    <!-- Centro blanco -->
+    <path
+        android:fillColor="@color/clock_hour_minute"
+        android:pathData="M45,50 A5,5 0 1,1 55,50 A5,5 0 1,1 45,50" />
+
+</vector>
+
+

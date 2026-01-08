@@ -1,16 +1,20 @@
 package com.kronos.multiplatform.weatherapp.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -27,90 +31,130 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SwipeActionContainer(
     item: T,
     modifier: Modifier,
     enableStartToEnd: Boolean,
-    startToEndIcon: DrawableResource? = null,
+    startToEndIcon: ImageVector? = null,
     onSwipeStartToEnd: (T) -> Unit,
     enableEndToStart: Boolean,
-    endToStartIcon: DrawableResource? = null,
+    endToStartIcon: ImageVector? = null,
     onSwipeEndToStart: (T) -> Unit,
-    animationDuration: Int = 500,
     resetSwipe: Boolean = false,
     content: @Composable (T) -> Unit
 ) {
-    var isRemoved by remember {
-        mutableStateOf(false)
-    }
+    var swipeDirection by remember { mutableStateOf<SwipeToDismissBoxValue?>(null) }
+    var shouldAnimateExit by remember { mutableStateOf(false) }
+    var isSwiped by remember { mutableStateOf(false) }
+
+    // Estado para controlar el rebote
+    val animatedOffset = remember { Animatable(0f) }
 
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart && enableEndToStart) {
-                isRemoved = true
-                true
-            } else if (value == SwipeToDismissBoxValue.StartToEnd && enableStartToEnd) {
-                isRemoved = true
-                true
-            } else {
-                isRemoved = false
-                false
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    if (enableEndToStart) {
+                        swipeDirection = SwipeToDismissBoxValue.EndToStart
+                        isSwiped = true
+                        false
+                    } else {
+                        false
+                    }
+                }
+
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    if (enableStartToEnd) {
+                        swipeDirection = SwipeToDismissBoxValue.StartToEnd
+                        isSwiped = true
+                        false
+                    } else {
+                        false
+                    }
+                }
+
+                else -> false
             }
         },
-        positionalThreshold = { it * .85f }
+        positionalThreshold = { totalDistance -> totalDistance * 0.85f }
     )
 
-    if (state.currentValue != SwipeToDismissBoxValue.Settled && resetSwipe) {
-        LaunchedEffect(Unit) {
+    // Efecto para resetear el swipe
+    LaunchedEffect(resetSwipe) {
+        if (resetSwipe) {
             state.reset()
+            swipeDirection = null
+            isSwiped = false
+            shouldAnimateExit = false
         }
     }
 
-    LaunchedEffect(key1 = isRemoved) {
-        if (isRemoved && state.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-            delay(animationDuration.toLong())
-            onSwipeEndToStart(item)
-        } else if (isRemoved && state.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
-            delay(animationDuration.toLong())
-            onSwipeStartToEnd(item)
-        }
-    }
+    // Efecto para animar el rebote cuando se hace swipe
+    LaunchedEffect(isSwiped) {
+        if (!isSwiped) return@LaunchedEffect
 
-    AnimatedVisibility(
-        visible = !isRemoved,
-        exit = shrinkVertically(
-            animationSpec = tween(durationMillis = animationDuration),
-            shrinkTowards = Alignment.Top
-        ) + fadeOut()
-    ) {
-        SwipeToDismissBox(
-            state = state,
-            modifier = modifier,
-            backgroundContent = {
-                SwipeBackground(
-                    swipeDismissState = state,
-                    startToEndIcon = startToEndIcon,
-                    endToStartIcon = endToStartIcon
-                )
-            },
-            content = { content(item) },
-            enableDismissFromStartToEnd = enableStartToEnd,
-            enableDismissFromEndToStart = enableEndToStart,
+        when (swipeDirection) {
+            SwipeToDismissBoxValue.EndToStart -> onSwipeEndToStart(item)
+            SwipeToDismissBoxValue.StartToEnd -> onSwipeStartToEnd(item)
+            else -> {}
+        }
+
+        animatedOffset.animateTo(
+            targetValue = 20f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessLow
+            )
         )
+        animatedOffset.animateTo(
+            targetValue = 0f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
+        state.reset()
+        isSwiped = false
     }
+
+
+    // Modificador para el rebote
+    val bounceModifier = if (isSwiped) {
+        Modifier.offset {
+            IntOffset(animatedOffset.value.toInt(), 0)
+        }
+    } else {
+        Modifier
+    }
+
+    SwipeToDismissBox(
+        state = state,
+        modifier = modifier.then(bounceModifier),
+        backgroundContent = {
+            SwipeBackground(
+                swipeDismissState = state,
+                startToEndIcon = startToEndIcon,
+                endToStartIcon = endToStartIcon
+            )
+        },
+        content = { content(item) },
+        enableDismissFromStartToEnd = enableStartToEnd,
+        enableDismissFromEndToStart = enableEndToStart,
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeBackground(
     swipeDismissState: SwipeToDismissBoxState,
-    startToEndIcon: DrawableResource? = null,
-    endToStartIcon: DrawableResource? = null,
+    startToEndIcon: ImageVector? = null,
+    endToStartIcon: ImageVector? = null,
 ) {
     val progress = swipeDismissState.dismissDirection
 
@@ -127,16 +171,11 @@ fun SwipeBackground(
     // Mostrar el ícono dependiendo de la dirección del swipe
     val icon = when (progress) {
         SwipeToDismissBoxValue.StartToEnd -> {
-            if (startToEndIcon != null)
-                painterResource(startToEndIcon)
-            else null // Icono de eliminar si el swipe es hacia la derecha
+            startToEndIcon ?: Icons.Filled.Archive
         }
 
         SwipeToDismissBoxValue.EndToStart -> {
-            if (endToStartIcon != null)
-                painterResource(endToStartIcon)
-            else null // Icono de eliminar si el swipe es hacia la izquierda
-
+            endToStartIcon ?: Icons.Filled.Delete
         }
 
         else -> null
@@ -153,7 +192,7 @@ fun SwipeBackground(
     ) {
         if (icon != null) {
             Icon(
-                painter = icon,
+                imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp)
             )

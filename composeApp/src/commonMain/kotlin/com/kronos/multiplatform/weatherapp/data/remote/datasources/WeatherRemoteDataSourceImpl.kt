@@ -1,5 +1,6 @@
 package com.kronos.multiplatform.weatherapp.data.remote.datasources
 
+import com.kronos.multiplatform.weatherapp.core.preferences.datasource.PreferenceDataSource
 import com.kronos.multiplatform.weatherapp.core.result.Error
 import com.kronos.multiplatform.weatherapp.core.result.Result
 import com.kronos.multiplatform.weatherapp.data.mapper.toCurrentForecast
@@ -28,6 +29,7 @@ class WeatherRemoteDataSourceImpl(
     private val urlProvider: UrlProvider,
     private val httpClient: KtorClientFactory,
     private val httpEngine: KtorEngineFactory,
+    private val preferenceDataSource: PreferenceDataSource
 ) : WeatherRemoteDataSource {
 
 
@@ -40,14 +42,14 @@ class WeatherRemoteDataSourceImpl(
                     .get(urlProvider.getPrivateApiUrl() + WeatherApi.GET_CURRENT_WEATHER) {
                         parameter("q", q)
                         parameter("lang", lang)
-                        parameter("apiKey", apiKey)
+                        parameter("key", apiKey)
                     }
             } catch (e: UnresolvedAddressException) {
                 e.printStackTrace()
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -56,7 +58,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -65,7 +67,16 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
+                        0
+                    )
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return Result.Error(
+                    FullNetworkError(
+                        NetworkError.NO_INTERNET,
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -82,20 +93,8 @@ class WeatherRemoteDataSourceImpl(
                             allowSpecialFloatingPointValues = true
                         }
                         val list =
-                            json.decodeFromString<Response<CurrentForecastResponseDto, ResponseError>>(
-                                result
-                            )
-                        if (list.response != null) {
-                            Result.Success(list.response!!.toCurrentForecast())
-                        } else {
-                            Result.Error(
-                                FullNetworkError(
-                                    NetworkError.SERIALIZATION,
-                                    if (list.error.isNotEmpty()) list.error.first().message else NetworkError.SERIALIZATION.name,
-                                    if (list.error.isNotEmpty()) list.error.first().code else 409
-                                )
-                            )
-                        }
+                            json.decodeFromString<CurrentForecastResponseDto>(result)
+                        Result.Success(list.toCurrentForecast())
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Result.Error(
@@ -218,7 +217,7 @@ class WeatherRemoteDataSourceImpl(
                     .get(urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST) {
                         parameter("q", q)
                         parameter("lang", lang)
-                        parameter("apiKey", apiKey)
+                        parameter("key", apiKey)
                         parameter("days", days)
                     }
             } catch (e: UnresolvedAddressException) {
@@ -226,7 +225,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -235,7 +234,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -244,7 +243,16 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
+                        0
+                    )
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return Result.Error(
+                    FullNetworkError(
+                        NetworkError.NO_INTERNET,
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -261,20 +269,8 @@ class WeatherRemoteDataSourceImpl(
                             allowSpecialFloatingPointValues = true
                         }
                         val list =
-                            json.decodeFromString<Response<ForecastResponseDto, ResponseError>>(
-                                result
-                            )
-                        if (list.response != null) {
-                            Result.Success(list.response!!.toForecast())
-                        } else {
-                            Result.Error(
-                                FullNetworkError(
-                                    NetworkError.SERIALIZATION,
-                                    if (list.error.isNotEmpty()) list.error.first().message else NetworkError.SERIALIZATION.name,
-                                    if (list.error.isNotEmpty()) list.error.first().code else 409
-                                )
-                            )
-                        }
+                            json.decodeFromString<ForecastResponseDto>(result)
+                        Result.Success(list.toForecast())
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Result.Error(
@@ -409,7 +405,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -418,7 +414,7 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -427,7 +423,16 @@ class WeatherRemoteDataSourceImpl(
                 return Result.Error(
                     FullNetworkError(
                         NetworkError.NO_INTERNET,
-                        "No internet connection",
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
+                        0
+                    )
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return Result.Error(
+                    FullNetworkError(
+                        NetworkError.NO_INTERNET,
+                        "No internet connection: ${e.message} - ${urlProvider.getPrivateApiUrl() + WeatherApi.GET_WEATHER_FORECAST}",
                         0
                     )
                 )
@@ -561,5 +566,49 @@ class WeatherRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun getLastWeatherForecast(
+        prefKey: String,
+    ): Result<Forecast, Error> {
+        val json = preferenceDataSource.getPreference(prefKey, "")
+
+        if (json.isEmpty()) {
+            return Result.Error(
+                FullNetworkError(
+                    NetworkError.UNKNOWN,
+                    "UNKNOWN",
+                    0
+                )
+            )
+        }
+        val jsonConfig = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            coerceInputValues = true
+            explicitNulls = false
+            useAlternativeNames = false
+        }
+        val weatherData = jsonConfig.decodeFromString<Forecast>(json)
+        return Result.Success(weatherData)
+    }
+
+    override suspend fun setLastWeatherForecast(
+        prefKey: String,
+        forecast: Forecast,
+    ): Result<Boolean, Error> {
+        val jsonConfig = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            coerceInputValues = true
+            explicitNulls = false
+            useAlternativeNames = false
+        }
+        val json = jsonConfig.encodeToString(forecast)
+        preferenceDataSource.setPreference(prefKey, json)
+
+        val data = preferenceDataSource.getPreference(prefKey, "")
+
+        return Result.Success(data.isNotEmpty())
+
+    }
 
 }

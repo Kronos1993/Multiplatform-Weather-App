@@ -1,0 +1,20 @@
+<resources>
+    <string name="preference_lang_title">Idioma de la aplicación</string>
+    <string name="preference_lang_subtitle">Selecciona el idioma de la aplicación</string>
+    <string name="preference_lang_entries">Inglés,Español</string>
+
+    <string name="preference_theme_title">Tema de la aplicación</string>
+    <string name="preference_theme_subtitle">Selecciona el tema de la aplicación</string>
+    <string name="preference_app_theme_entries">Oscuro,Claro</string>
+
+    <string name="preference_city_title">Ciudad predeterminada</string>
+    <string name="preference_city_subtitle">Selecciona la ciudad predeterminada</string>
+
+    <string name="preference_days_title">Cantidad de días</string>
+    <string name="preference_days_subtitle">Selecciona la cantidad de días a obtener</string>
+    <string name="preference_days_entries">3,7,15</string>
+
+    <string name="preference_image_quality_title">Calidad de imagen</string>
+    <string name="preference_image_quality_subtitle">Selecciona la calidad de imagen</string>
+    <string name="preference_image_quality_entries">Baja,Media,Alta</string>
+</resources>

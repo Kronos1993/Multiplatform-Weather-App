@@ -4,6 +4,8 @@ import com.kronos.multiplatform.weatherapp.core.DevicePlatform
 import com.kronos.multiplatform.weatherapp.core.Platform
 import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandlerImpl
+import com.kronos.multiplatform.weatherapp.core.logguer.DummyLogger
+import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.notification.AppNotification
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.preferences.AppPreference
@@ -18,6 +20,8 @@ import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.util.ICloseApp
 import com.kronos.multiplatform.weatherapp.core.util.IExpectedIntents
 import com.kronos.multiplatform.weatherapp.core.util.IHapticFeedback
+import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
+import com.kronos.multiplatform.weatherapp.core.widget.WidgetUpdater
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -32,4 +36,6 @@ actual val platformModule = module{
     singleOf(::ExceptionHandlerImpl).bind<ExceptionHandler>()
     singleOf(::ChangeLang).bind<IChangeLang>()
     singleOf(::CloseAppImpl).bind<ICloseApp>()
+    singleOf(::WidgetUpdater).bind<IWidgetUpdater>()
+    singleOf(::DummyLogger).bind<ILogManager>()
 }

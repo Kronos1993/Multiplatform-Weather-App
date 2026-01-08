@@ -33,9 +33,9 @@ actual class LocationDataSourceImpl(
                                 val geocoder = Geocoder(context, Locale.getDefault())
                                 val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
                                 val city = addresses?.firstOrNull()?.locality
-                                cont.resume(LocationModel(location.latitude, location.longitude, city))
+                                cont.resume(LocationModel(location.latitude, location.longitude, city, current = true))
                             } catch (e: Exception) {
-                                cont.resume(LocationModel(location.latitude, location.longitude, null))
+                                cont.resume(LocationModel(location.latitude, location.longitude, null, current = false))
                             }
                         }
                     } else {

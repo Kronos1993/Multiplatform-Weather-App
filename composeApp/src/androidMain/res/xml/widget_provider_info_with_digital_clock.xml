@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="196dp"
+    android:minHeight="48dp"
+    android:maxResizeHeight="48dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1000"
+    android:previewImage="@drawable/widget_preview_digital_clock"
+    android:resizeMode="horizontal|vertical"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:widgetCategory="home_screen"
+    android:description="@string/widget_with_digital_clock_name"/>

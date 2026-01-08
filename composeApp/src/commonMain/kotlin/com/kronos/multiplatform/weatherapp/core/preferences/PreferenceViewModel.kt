@@ -1,23 +1,20 @@
 package com.kronos.multiplatform.weatherapp.core.preferences
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PreferenceViewModel(
     val preferenceRepository: PreferenceRepository,
     private val changeLang: IChangeLang
 ) : ParentViewModel() {
-
-    var _preference by mutableStateOf<Any?>(null)
 
     private var _preferenceLangFlow = MutableStateFlow("en")
     val preferenceLangFlow: StateFlow<String> = _preferenceLangFlow.asStateFlow()
@@ -37,8 +34,58 @@ class PreferenceViewModel(
     private var _preferenceCurrentCityFlow = MutableStateFlow("")
     val preferenceCurrentCityFlow: StateFlow<String> = _preferenceCurrentCityFlow.asStateFlow()
 
+    private val _prefsLoaded = MutableStateFlow(false)
+    val isReady: StateFlow<Boolean> = _prefsLoaded
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
+
+    fun loadPreferences(
+        langKey: String,
+        langDefault: String,
+        themeKey: String,
+        themeDefault: String,
+        daysKey: String,
+        daysDefault: Int,
+        imageQualityKey: String,
+        imageQualityDefault: String,
+        defaultCityKey: String,
+        defaultCityDefault: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val lang = preferenceRepository.getPreference(
+                    langKey,
+                    changeLang.getSystemLang().ifBlank { langDefault }
+                )
+                _preferenceLangFlow.value = lang
+                changeLang.onLangChange(lang)
+
+                _preferenceThemeFlow.value =
+                    preferenceRepository.getPreference(themeKey, themeDefault)
+
+                _preferenceDays.value =
+                    preferenceRepository.getPreference(daysKey, daysDefault)
+
+                _preferenceImageQuality.value =
+                    preferenceRepository.getPreference(imageQualityKey, imageQualityDefault)
+
+                _preferenceDefaultCity.value =
+                    preferenceRepository.getPreference(defaultCityKey, defaultCityDefault)
+
+                _prefsLoaded.value = true
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                message = hashMapOf("error" to e.message.orEmpty())
+            }
+        }
+    }
+
     fun savePreference(key: String, value: Any) {
-        viewModelScope.launch{
+        viewModelScope.launch {
             try {
                 when (value) {
                     is String -> preferenceRepository.setPreference(key, value)
@@ -46,7 +93,7 @@ class PreferenceViewModel(
                     is Boolean -> preferenceRepository.setPreference(key, value)
                     is Double -> preferenceRepository.setPreference(key, value)
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
                 val err = HashMap<String, String>()
                 err["error"] = e.message.orEmpty()
@@ -58,6 +105,7 @@ class PreferenceViewModel(
     fun getPreferenceLang(key: String, defaultValue: String) {
         viewModelScope.launch {
             _preferenceLangFlow.value = preferenceRepository.getPreference(key, defaultValue)
+            changeLang.onLangChange(_preferenceLangFlow.value)
         }
     }
 
@@ -118,5 +166,8 @@ class PreferenceViewModel(
     fun changeLanguage(lang: String) {
         changeLang.onLangChange(lang)
     }
+
+    fun getSystemLanguage() =
+        changeLang.getSystemLang()
 
 }

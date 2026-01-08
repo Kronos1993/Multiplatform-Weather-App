@@ -2,17 +2,16 @@
 <resources>
 
     <string name="default_lang_key" translatable="false">default_lang</string>
-    <string name="lang_preference_default_value">en</string>
-
-    <string name="theme_preference_key">theme</string>
-    <string name="theme_preference_default_value">dark</string>
+    <string name="lang_preference_default_value" translatable="false">en</string>
 
     <string name="default_city_key" translatable="false">default_city</string>
-    <string name="city_preference_default_value">Panama</string>
+    <string name="city_preference_default_value" translatable="false">Panama</string>
 
     <string name="default_days_key" translatable="false">default_days</string>
-    <string name="day_preference_default_value">3</string>
+    <string name="day_preference_default_value" translatable="false">3</string>
 
     <string name="default_image_quality_key" translatable="false">default_image_quality</string>
-    <string name="image_quality_preference_default_value">low</string>
+    <string name="image_quality_preference_default_value" translatable="false">low</string>
+
+    <string name="current_weather_key" translatable="false">current_weather</string>
 </resources>
