@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WeatherAppRoot() {
-    var permissionChecked by remember { mutableStateOf(false) }
+    var permissionChecked by remember { mutableStateOf(true) }//poner false para pedir almacenamiento
 
     if (!permissionChecked) {
         StoragePermissionHandler(

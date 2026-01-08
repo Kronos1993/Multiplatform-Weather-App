@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
+import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
-import com.kronos.multiplatform.weatherapp.core.logguer.LogManager
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
@@ -36,7 +36,7 @@ class AddCityViewModel(
     private val locationRepository: LocationRepository,
     private var notifications: INotifications,
     private val widgetUpdater: IWidgetUpdater,
-    val loggerManager: LogManager
+    val loggerManager: ILogManager
 ) : ParentViewModel() {
 
     private val TAG = this::class.simpleName
