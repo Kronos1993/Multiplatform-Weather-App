@@ -22,36 +22,28 @@ public val MoonPhasesGroup.WaxingGibbousMoonIndicator: ImageVector
         if (_waxingGibbousMoonIndicator != null) {
             return _waxingGibbousMoonIndicator!!
         }
-        _waxingGibbousMoonIndicator = Builder(
-            name = "WaxingGibbousMoonIndicator", defaultWidth = 800.0.dp,
-            defaultHeight = 800.0.dp, viewportWidth = 32.0f, viewportHeight =
-                32.0f
-        ).apply {
-            path(
-                fill = SolidColor(Color(0xFFFFC10A)), stroke = null, strokeLineWidth = 0.0f,
-                strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                pathFillType = NonZero
-            ) {
+        _waxingGibbousMoonIndicator = Builder(name = "WaxingGibbousMoonIndicator", defaultWidth =
+                32.0.dp, defaultHeight = 32.0.dp, viewportWidth = 32.0f, viewportHeight =
+                32.0f).apply {
+            path(fill = SolidColor(Color(0xFFFFC10A)), stroke = null, strokeLineWidth = 0.0f,
+                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
+                    pathFillType = NonZero) {
                 moveTo(16.0f, 14.0f)
                 moveToRelative(-10.0f, 0.0f)
                 arcToRelative(10.0f, 10.0f, 0.0f, true, true, 20.0f, 0.0f)
                 arcToRelative(10.0f, 10.0f, 0.0f, true, true, -20.0f, 0.0f)
             }
-            path(
-                fill = SolidColor(Color(0xFFD9D9D9)), stroke = null, strokeLineWidth = 0.0f,
-                strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                pathFillType = NonZero
-            ) {
+            path(fill = SolidColor(Color(0xFFD9D9D9)), stroke = null, strokeLineWidth = 0.0f,
+                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
+                    pathFillType = NonZero) {
                 moveTo(16.0f, 4.0f)
                 arcTo(10.0f, 10.0f, 0.0f, true, false, 16.0f, 24.0f)
                 arcTo(6.0f, 10.0f, 0.0f, true, true, 16.0f, 4.0f)
                 close()
             }
-            path(
-                fill = SolidColor(Color(0xFF2197F3)), stroke = null, strokeLineWidth = 0.0f,
-                strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                pathFillType = NonZero
-            ) {
+            path(fill = SolidColor(Color(0xFF2197F3)), stroke = null, strokeLineWidth = 0.0f,
+                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
+                    pathFillType = NonZero) {
                 moveTo(31.0f, 24.0f)
                 curveToRelative(0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.0f)
                 curveToRelative(-1.5f, 0.0f, -2.2f, 0.4f, -3.0f, 0.9f)
@@ -82,7 +74,7 @@ public val MoonPhasesGroup.WaxingGibbousMoonIndicator: ImageVector
                 close()
             }
         }
-            .build()
+        .build()
         return _waxingGibbousMoonIndicator!!
     }
 

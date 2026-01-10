@@ -36,6 +36,7 @@
     <string name="visibility_km">%s KM</string>
     <string name="clouds">Clouds</string>
     <string name="atmospheric_pression">Atmospheric Pression</string>
+    <string name="air_quality">Air Quality</string>
     <string name="title_add_location">Add Location</string>
     <string name="city_name">City name</string>
     <string name="add_location">Add</string>
@@ -46,6 +47,14 @@
     <string name="uv_index_high">High</string>
     <string name="uv_index_very_high">Very High</string>
     <string name="uv_index_extreme">Extreme</string>
+
+    <string name="air_quality_good">Good</string>
+    <string name="air_quality_moderate">Moderate</string>
+    <string name="air_quality_danger_sensitive_group">Unhealthy for sensitive group</string>
+    <string name="air_quality_unhealthy">Unhealthy</string>
+    <string name="air_quality_very_unhealthy">Very Unhealthy</string>
+    <string name="air_quality_hazardous">Hazardous</string>
+
 
     <string name="notification_title">%s° | %s</string>
     <string name="notification_short_details">%s. Feels like %s°C</string>
@@ -91,5 +100,15 @@
     <string name="moon_phase_waning_gibbous">Waning Gibbous</string>
     <string name="moon_phase_last_quarter">Last Quarter</string>
     <string name="moon_phase_waning_crescent">Waning Crescent</string>
+
+    <string name="unknow">Unknow</string>
+
+    <string name="alert_severity">Severity:</string>
+    <string name="alert_urgency">Urgency:</string>
+    <string name="alert_certainty">Certainty:</string>
+    <string name="alert_areas">Affected areas:</string>
+    <string name="alert_description">Description:</string>
+    <string name="alert_instructions">Instructions:</string>
+    <string name="alert_validity">Valid: from %s until %s</string>
 
 </resources>

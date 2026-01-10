@@ -27,4 +27,5 @@ class CurrentWeatherDto(
     val uv: Double,
     val gust_mph: Double,
     val gust_kph: Double,
+    val air_quality: AirQualityDto = AirQualityDto()
 )

@@ -36,6 +36,7 @@
     <string name="visibility_km">%s KM</string>
     <string name="clouds">Nubosidad</string>
     <string name="atmospheric_pression">Presión atmosférica</string>
+    <string name="air_quality">Calidad del aire</string>
     <string name="title_add_location">Añadir ubicación</string>
     <string name="city_name">Ciudad</string>
     <string name="add_location">Añadir</string>
@@ -46,6 +47,13 @@
     <string name="uv_index_high">Alto</string>
     <string name="uv_index_very_high">Muy alto</string>
     <string name="uv_index_extreme">Extremo</string>
+
+    <string name="air_quality_good">Buena</string>
+    <string name="air_quality_moderate">Moderada</string>
+    <string name="air_quality_danger_sensitive_group">Peligro para grupo sensible</string>
+    <string name="air_quality_unhealthy">Mala</string>
+    <string name="air_quality_very_unhealthy">Muy Mala</string>
+    <string name="air_quality_hazardous">Peligrosa</string>
 
     <string name="notification_title">%s° | %s</string>
     <string name="notification_short_details">%s. Sensación térmica %s°C</string>
@@ -91,5 +99,16 @@
     <string name="moon_phase_waning_gibbous">Gibosa menguante</string>
     <string name="moon_phase_last_quarter">Cuarto menguante</string>
     <string name="moon_phase_waning_crescent">Luna menguante</string>
+
+    <string name="unknow">Desconocido</string>
+
+
+    <string name="alert_severity">Severidad:</string>
+    <string name="alert_urgency">Urgencia:</string>
+    <string name="alert_certainty">Certeza:</string>
+    <string name="alert_areas">Áreas afectadas:</string>
+    <string name="alert_description">Descripción:</string>
+    <string name="alert_instructions">Recomendaciones:</string>
+    <string name="alert_validity">Válido: desde %s hasta %s</string>
 
 </resources>

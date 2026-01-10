@@ -43,6 +43,8 @@ class WeatherRemoteDataSourceImpl(
                         parameter("q", q)
                         parameter("lang", lang)
                         parameter("key", apiKey)
+                        parameter("aqi", "yes")
+                        parameter("alerts", "yes")
                     }
             } catch (e: UnresolvedAddressException) {
                 e.printStackTrace()
@@ -219,6 +221,8 @@ class WeatherRemoteDataSourceImpl(
                         parameter("lang", lang)
                         parameter("key", apiKey)
                         parameter("days", days)
+                        parameter("aqi", "yes")
+                        parameter("alerts", "yes")
                     }
             } catch (e: UnresolvedAddressException) {
                 e.printStackTrace()
@@ -399,6 +403,8 @@ class WeatherRemoteDataSourceImpl(
                         parameter("lang", lang)
                         parameter("key", apiKey)
                         parameter("days", days)
+                        parameter("aqi", "yes")
+                        parameter("alerts", "yes")
                     }
             } catch (e: UnresolvedAddressException) {
                 e.printStackTrace()

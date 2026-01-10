@@ -6,6 +6,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.CurrentWeather
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.ForecastDay
 import com.kronos.multiplatform.weatherapp.domain.model.Location
+import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.Serializable
 import kotlin.time.ExperimentalTime
@@ -16,6 +17,7 @@ data class Forecast(
     val location: Location = Location(),
     val current: CurrentWeather = CurrentWeather(),
     val forecast: ForecastDay = ForecastDay(),
+    val alerts: List<WeatherAlert> = listOf()
 ){
     @OptIn(ExperimentalTime::class)
     fun getCurrentDayForecast(

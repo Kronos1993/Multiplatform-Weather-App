@@ -3,6 +3,7 @@ package com.kronos.multiplatform.weatherapp.components.icons
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.AllIcons
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.CloudsIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.CompassIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonFallIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhases
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.NoWeatherIndicator
@@ -27,9 +28,9 @@ public val WeatherAppIcons.AllIcons: ____KtList<ImageVector>
     if (__AllIcons != null) {
       return __AllIcons!!
     }
-    __AllIcons= MoonPhases.AllIcons + listOf(CloudsIndicator, MoonFallIndicator, NoWeatherIndicator,
-        PressionIndicator, RainyIndicator, SnowflakeIndicator, SnowflakeWeatherIndicator,
-        SunIndicator, SunSunriseIndicator, TempIndicator, VisibilityIndicator, WaterDropsIndicator,
-        WindIndicator)
+    __AllIcons= MoonPhases.AllIcons + listOf(CloudsIndicator, CompassIndicator, MoonFallIndicator,
+        NoWeatherIndicator, PressionIndicator, RainyIndicator, SnowflakeIndicator,
+        SnowflakeWeatherIndicator, SunIndicator, SunSunriseIndicator, TempIndicator,
+        VisibilityIndicator, WaterDropsIndicator, WindIndicator)
     return __AllIcons!!
   }
