@@ -117,7 +117,7 @@ class WeatherViewModel(
                             // Intentar usar GPS o fallback
                             getGpsLocation(null, lang, apiKey, days, imageQuality,defaultCity)
                         } else {
-                            getWeather(defaultCity, lang, apiKey, days, imageQuality)
+                            _screenState.value = WeatherScreenState.NoWeather
                         }
                     }
                 }
@@ -181,7 +181,7 @@ class WeatherViewModel(
             }
         } else {
             // Ciudad por defecto
-            getWeather(defaultCity, lang, apiKey, days, imageQuality)
+            _screenState.value = WeatherScreenState.NoWeather
         }
     }
 
@@ -202,7 +202,7 @@ class WeatherViewModel(
                 getWeather(userLocation.cityName, lang, apiKey, days, imageQuality)
             }
         } else {
-            getWeather(defaultCity, lang, apiKey, days, imageQuality)
+            _screenState.value = WeatherScreenState.NoWeather
         }
     }
 
