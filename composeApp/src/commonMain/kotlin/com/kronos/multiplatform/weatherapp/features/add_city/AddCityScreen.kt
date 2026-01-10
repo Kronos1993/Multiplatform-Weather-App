@@ -29,11 +29,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.components.ComponentSize
 import com.kronos.multiplatform.weatherapp.components.LoadingDialog
-import com.kronos.multiplatform.weatherapp.components.maps.MapView
-import com.kronos.multiplatform.weatherapp.components.ShowCityInfoDialog
-import com.kronos.multiplatform.weatherapp.components.ShowSelectedCityInfoDialog
 import com.kronos.multiplatform.weatherapp.components.button.FabButton
 import com.kronos.multiplatform.weatherapp.components.button.IconButton
+import com.kronos.multiplatform.weatherapp.components.maps.MapView
+import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowCityInfoDialog
+import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowSelectedCityInfoDialog
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import weather_app.composeapp.generated.resources.Res

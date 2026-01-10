@@ -3,6 +3,7 @@ package com.kronos.multiplatform.weatherapp.components
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -21,11 +23,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,6 +59,7 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
+import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.Indicator
 import kotlinx.datetime.DayOfWeek
@@ -142,6 +147,117 @@ fun HourlyItemIndicator(
         }
     }
 }
+
+@OptIn(ExperimentalTime::class)
+@Composable
+fun AlertIndicator(
+    alert: WeatherAlert,
+    darkTheme: Boolean,
+    modifier: Modifier = Modifier,
+    onItemClick: (WeatherAlert) -> Unit,
+) {
+    val cardBackgroundColor =
+        if (darkTheme) extendedDark.backgroundCardColor.color
+        else extendedLight.backgroundCardColor.color
+
+    Card(
+        modifier = modifier
+            .padding(6.dp)
+            .widthIn(max = 250.dp),
+        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = { onItemClick(alert) }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            BodyText(
+                text = alert.headline.orEmpty(),
+                textColor = Color.White,
+                size = ComponentSize.MEDIUM,
+                fontWeight = Bold,
+                maxLines = 2,
+                textOverflow = TextOverflow.Ellipsis
+            )
+
+            BodyText(
+                text = alert.event.orEmpty(),
+                textColor = Color.White,
+                size = ComponentSize.MEDIUM
+            )
+
+            val maxVisibleAreas = 3
+
+            val visibleAreas = remember(alert.areas) {
+                alert.areas
+                    .orEmpty()
+                    .split(";")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .take(maxVisibleAreas)
+            }
+
+            val hasMoreAreas = remember(alert.areas) {
+                alert.areas
+                    .orEmpty()
+                    .split(";")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .size > maxVisibleAreas
+            }
+
+            if (visibleAreas.isNotEmpty()) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    maxItemsInEachRow = 2,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    visibleAreas.forEach { area ->
+                        AssistChip(
+                            onClick = { },
+                            border = BorderStroke(
+                                width = 1.dp,
+                                color = Color.White
+                            ),
+                            label = {
+                                LabelText(
+                                    text = area,
+                                    textColor = Color.White,
+                                    size = ComponentSize.EXTRA_SMALL,
+                                    fontWeight = Bold
+                                )
+                            }
+                        )
+                    }
+
+                    if (hasMoreAreas) {
+                        AssistChip(
+                            onClick = { },
+                            border = BorderStroke(
+                                width = 1.dp,
+                                color = Color.White
+                            ),
+                            label = {
+                                LabelText(
+                                    text = "…",
+                                    textColor = Color.White,
+                                    size = ComponentSize.EXTRA_SMALL,
+                                    fontWeight = Bold
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+
+        }
+    }
+}
+
 
 @Composable
 fun WeatherIndicatorItem(
@@ -292,6 +408,7 @@ fun WeatherIndicatorList(
                             modifier = Modifier.weight(1f)
                         )
                     }
+
                     is Indicator.Wind -> {
                         WindCompassIndicator(
                             it,
@@ -299,6 +416,7 @@ fun WeatherIndicatorList(
                             modifier = Modifier.weight(1f)
                         )
                     }
+
                     is Indicator.Default -> {
                         WeatherIndicatorItem(
                             item = it,

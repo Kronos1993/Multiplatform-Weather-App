@@ -31,6 +31,7 @@ import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowAlertInfoDialog
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentLandscape
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentPortrait
 import org.jetbrains.compose.resources.stringResource
@@ -59,6 +60,8 @@ fun WeatherScreen(
     val weather by viewModel.weather.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
+    val selectedAlert by viewModel.selectedAlert.collectAsStateWithLifecycle()
+    val showAlertInfo by viewModel.showAlertInfo.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -195,7 +198,10 @@ fun WeatherScreen(
                                             currentLang = currentLang,
                                             imageQuality = imageQuality,
                                             onHourItemClicked = {},
-                                            onDailyItemClicked = {}
+                                            onDailyItemClicked = {},
+                                            onAlertItemClicked = {
+                                                viewModel.showAlertInfo(it)
+                                            }
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -256,7 +262,10 @@ fun WeatherScreen(
                                         modifier = rootModifier,
                                         deviceScreenConfiguration = deviceScreenConfiguration,
                                         onHourItemClicked = {},
-                                        onDailyItemClicked = {}
+                                        onDailyItemClicked = {},
+                                        onAlertItemClicked = {
+                                            viewModel.showAlertInfo(it)
+                                        }
                                     )
                                 } else {
                                     NoWeatherItem(
@@ -319,7 +328,10 @@ fun WeatherScreen(
                                             imageQuality = imageQuality,
                                             currentLang = currentLang,
                                             onHourItemClicked = {},
-                                            onDailyItemClicked = {}
+                                            onDailyItemClicked = {},
+                                            onAlertItemClicked = {
+                                                viewModel.showAlertInfo(it)
+                                            }
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -386,7 +398,10 @@ fun WeatherScreen(
                                             currentLang = currentLang,
                                             deviceScreenConfiguration = deviceScreenConfiguration,
                                             onHourItemClicked = {},
-                                            onDailyItemClicked = {}
+                                            onDailyItemClicked = {},
+                                            onAlertItemClicked = {
+                                                viewModel.showAlertInfo(it)
+                                            }
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -413,6 +428,13 @@ fun WeatherScreen(
                 title = Res.string.loading_dialog_title,
                 message = Res.string.loading_dialog_text,
                 showDialog = screenState == WeatherScreenState.Loading
+            )
+
+            ShowAlertInfoDialog(
+                alert = selectedAlert,
+                showDialog = showAlertInfo,
+                isDarkTheme = isDarkTheme,
+                onClose = { viewModel.showAlertInfo(null) }
             )
         }
     }

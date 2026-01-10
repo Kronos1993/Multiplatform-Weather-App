@@ -1,5 +1,6 @@
 package com.kronos.multiplatform.weatherapp.data.mapper
 
+import com.kronos.multiplatform.weatherapp.data.remote.dto.AirQualityDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.AstroDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.ConditionDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.CurrentWeatherDto
@@ -8,8 +9,10 @@ import com.kronos.multiplatform.weatherapp.data.remote.dto.DayDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.ForecastDayDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.HourDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.LocationDto
+import com.kronos.multiplatform.weatherapp.data.remote.dto.WeatherAlertDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.current.CurrentForecastResponseDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.forecast.ForecastResponseDto
+import com.kronos.multiplatform.weatherapp.domain.model.AirQuality
 import com.kronos.multiplatform.weatherapp.domain.model.Astro
 import com.kronos.multiplatform.weatherapp.domain.model.Condition
 import com.kronos.multiplatform.weatherapp.domain.model.CurrentWeather
@@ -19,6 +22,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.ForecastDay
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Location
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
+import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 
@@ -58,7 +62,8 @@ fun CurrentWeatherDto.toCurrentWeather() = CurrentWeather(
     visionMiles = vis_miles,
     uv = uv,
     gustMph = gust_mph,
-    gustKph = gust_kph
+    gustKph = gust_kph,
+    airQuality = air_quality.toAirQuality()
 )
 
 fun DailyForecastDto.toDailyForecast() = DailyForecast(
@@ -146,10 +151,39 @@ fun ForecastDayDto.toForecastDay()= ForecastDay(
 fun ForecastResponseDto.toForecast() = Forecast(
     location = location.toLocation(),
     current = current.toCurrentWeather(),
-    forecast = forecast.toForecastDay()
+    forecast = forecast.toForecastDay(),
+    alerts = alerts.alertList.map { it.toWeatherAlert() }
 )
 
 fun CurrentForecastResponseDto.toCurrentForecast() = CurrentForecast(
     location = location.toLocation(),
     current = current.toCurrentWeather()
+)
+
+fun AirQualityDto.toAirQuality() = AirQuality(
+    co = co,
+    no2 = no2,
+    o3 = o3,
+    so2 = so2,
+    pm2_5 = pm2_5,
+    pm10 = pm10,
+    usEpaIndex = usEpaIndex,
+    gbDefraIndex = gbDefraIndex
+)
+
+fun WeatherAlertDto.toWeatherAlert() = WeatherAlert(
+    identifier = identifier,
+    headline = headline,
+    msgtype = msgtype,
+    severity = severity,
+    urgency = urgency,
+    areas = areas,
+    category = category,
+    certainty = certainty,
+    event = event,
+    note = note,
+    effective = effective,
+    expires = expires,
+    description = description,
+    instruction = instruction
 )

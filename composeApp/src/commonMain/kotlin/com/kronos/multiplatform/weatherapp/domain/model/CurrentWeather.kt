@@ -23,4 +23,5 @@ class CurrentWeather(
     val uv: Double = -1.0,
     val gustMph: Double = 0.0,
     val gustKph: Double = 0.0,
+    val airQuality:AirQuality = AirQuality()
 )

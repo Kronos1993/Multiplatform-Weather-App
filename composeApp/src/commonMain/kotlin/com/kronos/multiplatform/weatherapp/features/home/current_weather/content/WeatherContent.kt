@@ -7,8 +7,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -18,34 +20,58 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import com.kronos.multiplatform.weatherapp.components.AlertIndicator
+import com.kronos.multiplatform.weatherapp.components.BodyText
+import com.kronos.multiplatform.weatherapp.components.ComponentSize
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherBigScreenCompactItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherCompactItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherItem
 import com.kronos.multiplatform.weatherapp.components.CurrentWeatherLandscapeCompactItem
 import com.kronos.multiplatform.weatherapp.components.DailyWeatherList
+import com.kronos.multiplatform.weatherapp.components.HeaderText
 import com.kronos.multiplatform.weatherapp.components.HourlyItemIndicator
+import com.kronos.multiplatform.weatherapp.components.LabelText
+import com.kronos.multiplatform.weatherapp.components.TitleText
 import com.kronos.multiplatform.weatherapp.components.WeatherIndicatorList
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.CloudsIndicator
+import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.CompassIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonFallIndicator
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhases
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.PressionIndicator
@@ -67,15 +93,30 @@ import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moon
 import com.kronos.multiplatform.weatherapp.components.maps.FixMapView
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.util.format
+import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
+import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.air_quality
+import weather_app.composeapp.generated.resources.air_quality_danger_sensitive_group
+import weather_app.composeapp.generated.resources.air_quality_good
+import weather_app.composeapp.generated.resources.air_quality_hazardous
+import weather_app.composeapp.generated.resources.air_quality_moderate
+import weather_app.composeapp.generated.resources.air_quality_unhealthy
+import weather_app.composeapp.generated.resources.air_quality_very_unhealthy
+import weather_app.composeapp.generated.resources.alert_certainty
+import weather_app.composeapp.generated.resources.alert_instructions
+import weather_app.composeapp.generated.resources.alert_severity
+import weather_app.composeapp.generated.resources.alert_urgency
+import weather_app.composeapp.generated.resources.alert_validity
 import weather_app.composeapp.generated.resources.atmospheric_pression
+import weather_app.composeapp.generated.resources.close
 import weather_app.composeapp.generated.resources.clouds
 import weather_app.composeapp.generated.resources.humidity
 import weather_app.composeapp.generated.resources.moon
@@ -91,6 +132,7 @@ import weather_app.composeapp.generated.resources.rain
 import weather_app.composeapp.generated.resources.snow
 import weather_app.composeapp.generated.resources.speed_km
 import weather_app.composeapp.generated.resources.sun
+import weather_app.composeapp.generated.resources.unknow
 import weather_app.composeapp.generated.resources.uv_index
 import weather_app.composeapp.generated.resources.uv_index_extreme
 import weather_app.composeapp.generated.resources.uv_index_high
@@ -101,6 +143,7 @@ import weather_app.composeapp.generated.resources.visibility
 import weather_app.composeapp.generated.resources.visibility_km
 import weather_app.composeapp.generated.resources.wind
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 @Composable
@@ -124,13 +167,15 @@ private fun getWeatherIndicators(
     val visibilityKmText = stringResource(Res.string.visibility_km)
     val cloudText = stringResource(Res.string.clouds)
     val atmosphericPressionText = stringResource(Res.string.atmospheric_pression)
+    val airQuality = stringResource(Res.string.air_quality)
+    val airQualityText = airQualityIndexDescription(currentWeather.current.airQuality.usEpaIndex)
 
     return listOf(
         Indicator.Wind(
             1,
             windText,
             speedKmText.format(currentWeather.current.windSpeedKph),
-            WeatherAppIcons.WindIndicator,
+            WeatherAppIcons.CompassIndicator,
             windDegree = currentWeather.current.windDegree.toFloat(),
         ),
         Indicator.Default(
@@ -193,6 +238,12 @@ private fun getWeatherIndicators(
             atmosphericPressionText,
             "${currentWeather.current.pressureMb} mbar",
             WeatherAppIcons.PressionIndicator
+        ),
+        Indicator.Default(
+            10,
+            airQuality,
+            airQualityText,
+            WeatherAppIcons.WindIndicator
         )
     ).filter { it.description.isNotBlank() }
 }
@@ -206,6 +257,7 @@ fun WeatherContentPortrait(
     imageQuality: String,
     currentLang: String,
     onHourItemClicked: (Hour) -> Unit,
+    onAlertItemClicked: (WeatherAlert) -> Unit,
     onDailyItemClicked: (DailyForecast) -> Unit,
     amountOfDays: Int = 3
 ) {
@@ -264,6 +316,7 @@ fun WeatherContentPortrait(
                 .fillMaxWidth()
                 .weight(1f),
             onHourItemClicked = onHourItemClicked,
+            onAlertItemClicked = onAlertItemClicked,
             onDailyItemClicked = onDailyItemClicked,
             amountOfDays = amountOfDays
         )
@@ -324,6 +377,7 @@ fun WeatherContentSection(
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onHourItemClicked: (Hour) -> Unit,
+    onAlertItemClicked: (WeatherAlert) -> Unit,
     onDailyItemClicked: (DailyForecast) -> Unit,
     amountOfDays: Int = 3
 ) {
@@ -331,6 +385,8 @@ fun WeatherContentSection(
     val currentDayForecast = currentWeather.getCurrentDayForecast(timeZone)
 
     val hours = currentDayForecast?.getUpcomingHours(timeZone).orEmpty()
+
+    val alerts = currentWeather.alerts
 
     val futureDays = currentWeather.getFutureDays(amountOfDays)
 
@@ -354,6 +410,22 @@ fun WeatherContentSection(
                             imageQuality = imageQuality,
                             darkTheme = isDarkTheme,
                             onItemClick = onHourItemClicked
+                        )
+                    }
+                }
+            }
+        }
+
+        if (alerts.isNotEmpty()) {
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items(alerts, key = { it.identifier.orEmpty() }) { alert ->
+                        AlertIndicator(
+                            alert = alert,
+                            darkTheme = isDarkTheme,
+                            onItemClick = onAlertItemClicked
                         )
                     }
                 }
@@ -433,6 +505,7 @@ fun WeatherContentLandscape(
     modifier: Modifier = Modifier,
     deviceScreenConfiguration: DeviceScreenConfiguration,
     onHourItemClicked: (Hour) -> Unit,
+    onAlertItemClicked: (WeatherAlert) -> Unit,
     onDailyItemClicked: (DailyForecast) -> Unit,
     amountOfDays: Int = 3
 ) {
@@ -476,6 +549,7 @@ fun WeatherContentLandscape(
                     imageQuality = imageQuality,
                     currentLang = currentLang,
                     onHourItemClicked = onHourItemClicked,
+                    onAlertItemClicked = onAlertItemClicked,
                     onDailyItemClicked = onDailyItemClicked,
                     amountOfDays = amountOfDays
                 )
@@ -495,6 +569,7 @@ fun WeatherContentLandscape(
                 scrollState = rememberLazyListState(),
                 modifier = Modifier.fillMaxSize(),
                 onHourItemClicked = onHourItemClicked,
+                onAlertItemClicked = onAlertItemClicked,
                 onDailyItemClicked = onDailyItemClicked,
                 amountOfDays = amountOfDays
             )
@@ -510,6 +585,19 @@ fun uvIndexDescription(index: Double): String {
         in 6.0..7.9 -> stringResource(Res.string.uv_index_high)
         in 8.0..10.9 -> stringResource(Res.string.uv_index_very_high)
         else -> stringResource(Res.string.uv_index_extreme)
+    }
+}
+
+@Composable
+fun airQualityIndexDescription(index: Int): String {
+    return when (index) {
+        1 -> stringResource(Res.string.air_quality_good)
+        2 -> stringResource(Res.string.air_quality_moderate)
+        3 -> stringResource(Res.string.air_quality_danger_sensitive_group)
+        4 -> stringResource(Res.string.air_quality_unhealthy)
+        5 -> stringResource(Res.string.air_quality_very_unhealthy)
+        6 -> stringResource(Res.string.air_quality_hazardous)
+        else -> stringResource(Res.string.unknow)
     }
 }
 
@@ -535,4 +623,242 @@ fun MoonPhase.name(): String = when (this) {
     MoonPhase.WANING_GIBBOUS -> stringResource(Res.string.moon_phase_waning_gibbous)
     MoonPhase.LAST_QUARTER -> stringResource(Res.string.moon_phase_last_quarter)
     MoonPhase.WANING_CRESCENT -> stringResource(Res.string.moon_phase_waning_crescent)
+}
+
+@Composable
+fun ShowCityInfoDialog(
+    cityName: String,
+    temp: String,
+    showDialog: Boolean,
+    confirmText: String,
+    onConfirm: () -> Unit,
+    cancelText: String,
+    onCancel: () -> Unit,
+    onClose: (() -> Unit)? = null
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                if (onClose != null)
+                    onClose()
+                else
+                    onCancel()
+            },
+            title = {},
+            text = {
+                Column {
+                    HeaderText(
+                        temp,
+                        size = ComponentSize.SMALL
+                    )
+
+                    TitleText(
+                        cityName,
+                        size = ComponentSize.MEDIUM
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onConfirm() }) {
+                    Text(
+                        text = confirmText,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onCancel() }) {
+                    Text(
+                        text = cancelText,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            shape = MaterialTheme.shapes.medium
+        )
+    }
+}
+
+@Composable
+fun ShowSelectedCityInfoDialog(
+    cityName: String,
+    temp: String,
+    iconUrl: String,
+    showDialog: Boolean,
+    confirmText: String,
+    onConfirm: () -> Unit,
+    onClose: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onClose,
+            title = {
+                TitleText(
+                    text = cityName,
+                    fontWeight = Bold
+                )
+            },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (iconUrl.isNotEmpty()) {
+                        val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+                            .data(iconUrl)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .build()
+
+                        AsyncImage(
+                            model = imageRequest,
+                            contentDescription = "Weather",
+                            modifier = Modifier.size(64.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+
+                    TitleText(
+                        text = temp,
+                        fontWeight = Bold,
+                        size = ComponentSize.MEDIUM
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onConfirm() }) {
+                    Text(
+                        text = confirmText,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            dismissButton = null
+        )
+    }
+}
+
+
+@OptIn(ExperimentalTime::class)
+@Composable
+fun ShowAlertInfoDialog(
+    alert: WeatherAlert?,
+    showDialog: Boolean,
+    onClose: () -> Unit,
+    isDarkTheme: Boolean
+) {
+    if (!showDialog) return
+
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                BodyText(
+                    text = alert?.headline.orEmpty(),
+                    size = ComponentSize.MEDIUM,
+                    fontWeight = Bold,
+                    isDarkTheme = isDarkTheme
+                )
+
+                alert?.event?.takeIf { it.isNotBlank() }?.let {
+                    TitleText(
+                        text = it,
+                        size = ComponentSize.SMALL,
+                        isDarkTheme = isDarkTheme
+                    )
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(
+                        rememberScrollState()
+                    ),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    alert?.severity?.takeIf { it.isNotBlank() }?.let {
+                        LabelText(
+                            text = "${stringResource(Res.string.alert_severity)}\n$it",
+                            isDarkTheme = isDarkTheme
+                        )
+                    }
+                    alert?.urgency?.takeIf { it.isNotBlank() }?.let {
+                        LabelText(
+                            text = "${stringResource(Res.string.alert_urgency)}\n$it",
+                            isDarkTheme = isDarkTheme
+                        )
+                    }
+                    alert?.certainty?.takeIf { it.isNotBlank() }?.let {
+                        LabelText(
+                            text = "${stringResource(Res.string.alert_certainty)}\n$it",
+                            isDarkTheme = isDarkTheme
+                        )
+                    }
+                }
+
+                alert?.areas?.takeIf { it.isNotBlank() }?.let {
+                    val areas = alert.areas
+                        .split(";")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        maxItemsInEachRow = 3,
+                        horizontalArrangement = Arrangement.spacedBy(1.dp),
+                        verticalArrangement = Arrangement.spacedBy(1.dp)
+                    ) {
+                        areas.forEach { area ->
+                            AssistChip(
+                                onClick = { },
+                                border = BorderStroke(
+                                    width = 1.dp,
+                                    color = Color.White
+                                ),
+                                label = {
+                                    LabelText(
+                                        text = area,
+                                        textColor = Color.White,
+                                        size = ComponentSize.EXTRA_SMALL,
+                                        fontWeight = Bold
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                alert?.instruction?.takeIf { it.isNotBlank() }?.let {
+                    BodyText(
+                        text = "${stringResource(Res.string.alert_instructions)}\n$it",
+                        fontWeight = FontWeight.Medium,
+                        isDarkTheme = isDarkTheme
+                    )
+                }
+
+                if (!alert?.effective.isNullOrBlank() || !alert?.expires.isNullOrBlank()) {
+                    val from = formatDateTime(Instant.parse(alert.effective.orEmpty()), "dd-MMM hh:mm aa")
+                    val until = formatDateTime(Instant.parse(alert.expires.orEmpty()), "dd-MMM hh:mm aa")
+                    LabelText(
+                        text = stringResource(Res.string.alert_validity).format(from,until),
+                        isDarkTheme = isDarkTheme
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onClose() }) {
+                Text(
+                    text = stringResource(Res.string.close),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+    )
 }

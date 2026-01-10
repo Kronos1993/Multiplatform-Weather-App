@@ -14,6 +14,7 @@ import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
+import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
@@ -47,6 +48,12 @@ class WeatherViewModel(
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+
+    private val _selectedAlert = MutableStateFlow<WeatherAlert?>(null)
+    val selectedAlert = _selectedAlert.asStateFlow()
+
+    private val _showAlertInfo = MutableStateFlow(false)
+    val showAlertInfo = _showAlertInfo.asStateFlow()
 
     private var weatherPrefKey = ""
     private var notificationTitle = ""
@@ -410,6 +417,11 @@ class WeatherViewModel(
                 NotificationType.FROM_APP
             )
         }
+    }
+
+    fun showAlertInfo(alert: WeatherAlert?) {
+        _selectedAlert.value = alert
+        _showAlertInfo.value = alert!=null
     }
 }
 
