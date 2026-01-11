@@ -22,4 +22,9 @@
     <string name="preference_image_quality_entries">Low,Medium,High</string>
     <string name="preference_image_quality_values">low,medium,high</string>
 
+    <string name="preference_measure_unit_title">Measure Unit</string>
+    <string name="preference_measure_unit_subtitle">Select measure unit</string>
+    <string name="preference_measure_unit_entries">International,Imperial</string>
+    <string name="preference_measure_unit_values">1,2</string>
+
 </resources>

@@ -4,7 +4,11 @@ import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
+import androidx.room.migration.Migration
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
+import com.kronos.multiplatform.weatherapp.data.local.database.ApplicationDatabase.Companion.MIGRATIONS
 import com.kronos.multiplatform.weatherapp.data.local.datasources.dao.UserCustomLocationDao
 import com.kronos.multiplatform.weatherapp.data.local.datasources.entity.UserCustomLocationEntity
 import kotlinx.coroutines.Dispatchers
@@ -13,35 +17,20 @@ import kotlinx.coroutines.IO
 
 const val DATABASE_NAME = "weather.db"
 
-/*val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(connection: SQLiteConnection) {
-        // Recrear la tabla para cambiar nullability
-        connection.execSQL("CREATE TABLE USER_CUSTOM_LOCATION_NEW (" +
-                "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                "CITY_NAME TEXT NOT NULL, " +
-                "TEMP_C REAL NOT NULL DEFAULT 0.0, " +
-                "ICON TEXT NOT NULL DEFAULT '', " +
-                "IS_CURRENT INTEGER NOT NULL DEFAULT 0, " +
-                "IS_SELECTED INTEGER NOT NULL DEFAULT 0, " +
-                "LATITUD REAL NOT NULL DEFAULT 0, " +
-                "LONGITUD REAL NOT NULL DEFAULT 0" +
-                ")")
-
-        // Copiar datos de la tabla vieja a la nueva
-        connection.execSQL("INSERT INTO USER_CUSTOM_LOCATION_NEW (ID, CITY_NAME, TEMP_C, ICON, IS_CURRENT, IS_SELECTED, LATITUD, LONGITUD) " +
-                "SELECT ID, CITY_NAME, 0.0, '', IS_CURRENT, IS_SELECTED, LATITUD, LONGITUD FROM USER_CUSTOM_LOCATION")
-
-        // Eliminar tabla vieja
-        connection.execSQL("DROP TABLE USER_CUSTOM_LOCATION")
-
-        // Renombrar nueva tabla
-        connection.execSQL("ALTER TABLE USER_CUSTOM_LOCATION_NEW RENAME TO USER_CUSTOM_LOCATION")
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(database: SQLiteConnection) {
+        database.execSQL(
+            """
+            ALTER TABLE USER_CUSTOM_LOCATION 
+            ADD COLUMN TEMP_F REAL NOT NULL DEFAULT 0.0
+            """.trimIndent()
+        )
     }
-}*/
+}
 
 @Database(
     entities = [UserCustomLocationEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @ConstructedBy(ApplicationDatabaseConstructor::class)
@@ -52,11 +41,11 @@ abstract class ApplicationDatabase : RoomDatabase(),DB {
         super.clearAllTables()
     }
 
-    /*companion object {
+    companion object {
         val MIGRATIONS = arrayOf(
             MIGRATION_1_2
         )
-    }*/
+    }
 }
 
 interface DB{
@@ -72,7 +61,7 @@ fun getRoomDatabase(
     builder: RoomDatabase.Builder<ApplicationDatabase>
 ): ApplicationDatabase {
     return builder
-        //.addMigrations(*MIGRATIONS)
+        .addMigrations(*MIGRATIONS)
         .fallbackToDestructiveMigrationOnDowngrade(false)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)

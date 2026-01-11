@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +35,9 @@ class PreferenceViewModel(
     private var _preferenceCurrentCityFlow = MutableStateFlow("")
     val preferenceCurrentCityFlow: StateFlow<String> = _preferenceCurrentCityFlow.asStateFlow()
 
+    private var _preferenceMeasureUnitFlow = MutableStateFlow(MeasureUnit.INTERNATIONAL)
+    val preferenceMeasureUnitFlow: StateFlow<MeasureUnit> = _preferenceMeasureUnitFlow.asStateFlow()
+
     private val _prefsLoaded = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _prefsLoaded
         .stateIn(
@@ -52,7 +56,9 @@ class PreferenceViewModel(
         imageQualityKey: String,
         imageQualityDefault: String,
         defaultCityKey: String,
-        defaultCityDefault: String
+        defaultCityDefault: String,
+        defaultMeasureUnitKey: String,
+        defaultMeasureUnitDefault: MeasureUnit
     ) {
         viewModelScope.launch {
             try {
@@ -74,6 +80,13 @@ class PreferenceViewModel(
 
                 _preferenceDefaultCity.value =
                     preferenceRepository.getPreference(defaultCityKey, defaultCityDefault)
+
+                val measureUnit = preferenceRepository.getPreference(
+                    defaultMeasureUnitKey,
+                    defaultMeasureUnitDefault.value
+                )
+                _preferenceMeasureUnitFlow.value = MeasureUnit.fromInt(measureUnit.toInt())
+
 
                 _prefsLoaded.value = true
 
@@ -153,6 +166,10 @@ class PreferenceViewModel(
 
     fun setPreferenceImageQuality(value: String) {
         _preferenceImageQuality.value = value
+    }
+
+    fun setPreferenceMeasureUnit(value: String) {
+        _preferenceMeasureUnitFlow.value = MeasureUnit.from(value)
     }
 
     fun setPreferenceDefaultCity(value: String) {

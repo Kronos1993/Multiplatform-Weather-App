@@ -15,6 +15,7 @@ import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
@@ -74,7 +75,7 @@ class UserCustomLocationViewModel(
         _resetSwipe.value = resetSwipe
     }
 
-    fun initLocations(lang: String, apiKey: String, days: Int) {
+    fun initLocations(lang: String, apiKey: String, days: Int,measureUnit: MeasureUnit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _screenState.value = UserCustomLocationScreenState.Loading
@@ -87,7 +88,8 @@ class UserCustomLocationViewModel(
                     locationsFromDb,
                     lang,
                     apiKey,
-                    days
+                    days,
+                    measureUnit
                 )
 
                 _locations.value = updatedLocations.sortedWith(
@@ -110,7 +112,8 @@ class UserCustomLocationViewModel(
         locations: List<UserCustomLocation>,
         lang: String,
         apiKey: String,
-        days: Int
+        days: Int,
+        measureUnit: MeasureUnit
     ): List<UserCustomLocation> {
         return locations.map { location ->
             try {
@@ -135,10 +138,11 @@ class UserCustomLocationViewModel(
                     .onSuccess { forecast ->
                         location.icon = forecast.current.condition.icon
                         location.tempC = forecast.current.tempC
+                        location.tempF = forecast.current.tempF
                         location.cityName = "${forecast.location.name}/${forecast.location.region}"
                         log("Location from coordinates acquired: ${forecast.location.name}", false)
                         if (location.isSelected) {
-                            createWeatherNotification(forecast)
+                            createWeatherNotification(forecast, measureUnit)
                             widgetUpdater.updateAllWeatherWidgets()
                         }
                     }
@@ -156,7 +160,8 @@ class UserCustomLocationViewModel(
         userLocation: UserCustomLocation,
         lang: String,
         apiKey: String,
-        days: Int
+        days: Int,
+        measureUnit: MeasureUnit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = UserCustomLocationScreenState.Loading
@@ -193,7 +198,7 @@ class UserCustomLocationViewModel(
                         weatherPrefKey,
                         it
                     )
-                    createWeatherNotification(it)
+                    createWeatherNotification(it, measureUnit)
                     widgetUpdater.updateAllWeatherWidgets()
                 }
                 _screenState.value = UserCustomLocationScreenState.LocationsObtained
@@ -231,7 +236,7 @@ class UserCustomLocationViewModel(
         }
     }
 
-    fun refreshLocations(lang: String, apiKey: String, days: Int) {
+    fun refreshLocations(lang: String, apiKey: String, days: Int, measureUnit: MeasureUnit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _screenState.value = UserCustomLocationScreenState.Loading
@@ -241,7 +246,8 @@ class UserCustomLocationViewModel(
                     locationsFromDb,
                     lang,
                     apiKey,
-                    days
+                    days,
+                    measureUnit
                 )
 
                 _locations.value = updatedLocations
@@ -273,8 +279,8 @@ class UserCustomLocationViewModel(
         _error.value = null
     }
 
-    fun retryLastOperation(lang: String, apiKey: String, days: Int) {
-        refreshLocations(lang, apiKey, days)
+    fun retryLastOperation(lang: String, apiKey: String, days: Int, measureUnit: MeasureUnit) {
+        refreshLocations(lang, apiKey, days, measureUnit)
     }
 
     private fun handleError(e: Exception) {
@@ -288,10 +294,13 @@ class UserCustomLocationViewModel(
         _error.value = message
     }
 
-    private fun createWeatherNotification(forecast: Forecast) {
+    private fun createWeatherNotification(
+        forecast: Forecast,
+        measureUnit: MeasureUnit
+    ) {
         notifications.createNotification(
             notificationTitle.format(
-                forecast.current.tempC,
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.tempC else forecast.current.tempF,
                 forecast.location.region.orEmpty()
             ),
             notificationShortDetails.format(
@@ -300,9 +309,9 @@ class UserCustomLocationViewModel(
             ),
             notificationLongDetails.format(
                 forecast.current.condition.description,
-                forecast.current.feelslikeC,
-                forecast.forecast.forecastDay[0].day.mintempC.toString(),
-                forecast.forecast.forecastDay[0].day.maxtempC.toString(),
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF,
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.mintempC.toString() else forecast.forecast.forecastDay[0].day.mintempF.toString(),
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.maxtempC.toString() else forecast.forecast.forecastDay[0].day.maxtempF.toString(),
                 forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
             ),
             "https:${forecast.current.condition.icon}",

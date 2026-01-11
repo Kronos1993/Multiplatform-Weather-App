@@ -15,7 +15,9 @@ import com.kronos.multiplatform.weatherapp.core.preferences.repository.Preferenc
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
+import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
@@ -135,7 +137,7 @@ class WeatherNotificationWorker(
                     forecast
                 )
                 widgetUpdater.updateAllWeatherWidgets()
-                createWeatherNotification(forecast)
+                createWeatherNotification(forecast, weatherParams.measureUnit)
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }
             .onError { error ->
@@ -157,7 +159,10 @@ class WeatherNotificationWorker(
                     throw e
                 }
 
-                log("Intento ${attempt + 1} falló: ${e.message}. Reintentando en ${currentDelay}ms...", true)
+                log(
+                    "Intento ${attempt + 1} falló: ${e.message}. Reintentando en ${currentDelay}ms...",
+                    true
+                )
 
                 if (isNetworkRelatedError(e)) {
                     delay(currentDelay)
@@ -195,10 +200,12 @@ class WeatherNotificationWorker(
                 log("Error de red/DNS en background: ${e.message}", true)
                 Result.retry()
             }
+
             e is CancellationException -> {
                 log("Worker cancelado", true)
                 Result.success()
             }
+
             else -> {
                 log("Error no manejado: ${e.message}", true)
                 Result.failure()
@@ -206,23 +213,24 @@ class WeatherNotificationWorker(
         }
     }
 
-    private fun createWeatherNotification(forecast: Forecast) {
+    private fun createWeatherNotification(forecast: Forecast, measureUnit: MeasureUnit) {
         notifications.createNotification(
-            applicationContext.getString(R.string.notification_title)
-                .format(forecast.current.tempC, forecast.location.region),
+            applicationContext.getString(R.string.notification_title).format(
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.tempC else forecast.current.tempF,
+                forecast.location.region.orEmpty()
+            ),
             applicationContext.getString(R.string.notification_short_details)
                 .format(
                     forecast.current.condition.description,
                     forecast.current.feelslikeC
                 ),
-            applicationContext.getString(R.string.notification_long_details)
-                .format(
-                    forecast.current.condition.description,
-                    forecast.current.feelslikeC,
-                    forecast.forecast.forecastDay[0].day.mintempC,
-                    forecast.forecast.forecastDay[0].day.maxtempC,
-                    forecast.forecast.forecastDay[0].day.dailyChanceOfRain
-                ),
+            applicationContext.getString(R.string.notification_long_details).format(
+                forecast.current.condition.description,
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF,
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.mintempC.toString() else forecast.forecast.forecastDay[0].day.mintempF.toString(),
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.maxtempC.toString() else forecast.forecast.forecastDay[0].day.maxtempF.toString(),
+                forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+            ),
             "https:${forecast.current.condition.icon}",
             NotificationGroup.GENERAL,
             NotificationType.FROM_APP
@@ -232,7 +240,8 @@ class WeatherNotificationWorker(
     private data class WeatherParams(
         val lang: String,
         val apiKey: String,
-        val days: Int
+        val days: Int,
+        val measureUnit: MeasureUnit
     )
 
     private suspend fun getWeatherParams(): WeatherParams {
@@ -245,7 +254,13 @@ class WeatherNotificationWorker(
             days = preferenceRepository.getPreference(
                 applicationContext.getString(R.string.default_days_key),
                 applicationContext.getString(R.string.default_days_values)
-            ).toInt()
+            ).toInt(),
+            measureUnit = MeasureUnit.from(
+                preferenceRepository.getPreference(
+                    applicationContext.getString(R.string.measure_unit_key),
+                    applicationContext.getString(R.string.measure_unit_preference_default_value)
+                )
+            )
         )
     }
 

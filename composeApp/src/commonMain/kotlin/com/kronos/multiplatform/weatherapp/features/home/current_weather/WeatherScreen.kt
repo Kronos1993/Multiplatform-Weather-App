@@ -31,6 +31,7 @@ import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowAlertInfoDialog
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentLandscape
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.WeatherContentPortrait
@@ -55,6 +56,7 @@ fun WeatherScreen(
     amountOfDays: Int,
     defaultCity: String,
     isDarkTheme: Boolean,
+    measureUnit: MeasureUnit
 ) {
     val viewModel = koinViewModel<WeatherViewModel>()
     val weather by viewModel.weather.collectAsStateWithLifecycle()
@@ -197,6 +199,7 @@ fun WeatherScreen(
                                             urlProvider = viewModel.urlProvider,
                                             currentLang = currentLang,
                                             imageQuality = imageQuality,
+                                            measureUnit = measureUnit,
                                             onHourItemClicked = {},
                                             onDailyItemClicked = {},
                                             onAlertItemClicked = {
@@ -259,6 +262,7 @@ fun WeatherScreen(
                                         urlProvider = viewModel.urlProvider,
                                         imageQuality = imageQuality,
                                         currentLang = currentLang,
+                                        measureUnit = measureUnit,
                                         modifier = rootModifier,
                                         deviceScreenConfiguration = deviceScreenConfiguration,
                                         onHourItemClicked = {},
@@ -327,6 +331,7 @@ fun WeatherScreen(
                                             urlProvider = viewModel.urlProvider,
                                             imageQuality = imageQuality,
                                             currentLang = currentLang,
+                                            measureUnit = measureUnit,
                                             onHourItemClicked = {},
                                             onDailyItemClicked = {},
                                             onAlertItemClicked = {
@@ -396,6 +401,7 @@ fun WeatherScreen(
                                             urlProvider = viewModel.urlProvider,
                                             imageQuality = imageQuality,
                                             currentLang = currentLang,
+                                            measureUnit = measureUnit,
                                             deviceScreenConfiguration = deviceScreenConfiguration,
                                             onHourItemClicked = {},
                                             onDailyItemClicked = {},

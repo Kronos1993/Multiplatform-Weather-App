@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.kronos.multiplatform.weatherapp.components.UserCustomLocationItem
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 
 @Composable
@@ -18,6 +19,7 @@ fun GridList(
     items: List<UserCustomLocation>,
     urlProvider: UrlProvider,
     imageQuality: String,
+    measureUnit: MeasureUnit,
     darkTheme: Boolean,
     enableStartToEnd: Boolean = true,
     startToEndIcon: ImageVector,
@@ -43,6 +45,7 @@ fun GridList(
                 item = it,
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
+                measureUnit = measureUnit,
                 darkTheme = darkTheme,
                 enableStartToEnd = enableStartToEnd,
                 startToEndIcon = startToEndIcon,

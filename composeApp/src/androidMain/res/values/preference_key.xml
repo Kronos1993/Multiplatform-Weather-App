@@ -13,5 +13,8 @@
     <string name="default_image_quality_key" translatable="false">default_image_quality</string>
     <string name="image_quality_preference_default_value" translatable="false">low</string>
 
+    <string name="measure_unit_key" translatable="false">measure_unit</string>
+    <string name="measure_unit_preference_default_value" translatable="false">1</string>
+
     <string name="current_weather_key" translatable="false">current_weather</string>
 </resources>

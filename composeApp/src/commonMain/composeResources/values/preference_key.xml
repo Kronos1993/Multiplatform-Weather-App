@@ -18,4 +18,7 @@
     <string name="current_weather_key" translatable="false">current_weather</string>
     <string name="current_weather_preference_default_value">""</string>
 
+    <string name="measure_unit_key" translatable="false">measure_unit</string>
+    <string name="measure_unit_preference_default_value">1</string>
+
 </resources>

@@ -98,6 +98,7 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
@@ -131,6 +132,7 @@ import weather_app.composeapp.generated.resources.moon_phase_waxing_gibbous
 import weather_app.composeapp.generated.resources.rain
 import weather_app.composeapp.generated.resources.snow
 import weather_app.composeapp.generated.resources.speed_km
+import weather_app.composeapp.generated.resources.speed_miles
 import weather_app.composeapp.generated.resources.sun
 import weather_app.composeapp.generated.resources.unknow
 import weather_app.composeapp.generated.resources.uv_index
@@ -141,6 +143,7 @@ import weather_app.composeapp.generated.resources.uv_index_medium
 import weather_app.composeapp.generated.resources.uv_index_very_high
 import weather_app.composeapp.generated.resources.visibility
 import weather_app.composeapp.generated.resources.visibility_km
+import weather_app.composeapp.generated.resources.visibility_miles
 import weather_app.composeapp.generated.resources.wind
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -149,10 +152,12 @@ import kotlin.time.Instant
 @Composable
 private fun getWeatherIndicators(
     currentWeather: Forecast,
-    currentDayForecast: DailyForecast?
+    currentDayForecast: DailyForecast?,
+    measureUnit: MeasureUnit
 ): List<Indicator> {
     val windText = stringResource(Res.string.wind)
     val speedKmText = stringResource(Res.string.speed_km)
+    val speedMpHText = stringResource(Res.string.speed_miles)
     val humidityText = stringResource(Res.string.humidity)
     val uvIndexText = stringResource(Res.string.uv_index)
     val uvDescription = uvIndexDescription(currentWeather.current.uv)
@@ -165,6 +170,7 @@ private fun getWeatherIndicators(
         currentDayForecast?.astro?.moonPhase?.name() ?: stringResource(Res.string.moon)
     val visibilityText = stringResource(Res.string.visibility)
     val visibilityKmText = stringResource(Res.string.visibility_km)
+    val visibilityMpHText = stringResource(Res.string.visibility_miles)
     val cloudText = stringResource(Res.string.clouds)
     val atmosphericPressionText = stringResource(Res.string.atmospheric_pression)
     val airQuality = stringResource(Res.string.air_quality)
@@ -174,7 +180,10 @@ private fun getWeatherIndicators(
         Indicator.Wind(
             1,
             windText,
-            speedKmText.format(currentWeather.current.windSpeedKph),
+            if (measureUnit == MeasureUnit.INTERNATIONAL)
+                speedKmText.format(currentWeather.current.windSpeedKph)
+            else
+                speedMpHText.format(currentWeather.current.windSpeedMph),
             WeatherAppIcons.CompassIndicator,
             windDegree = currentWeather.current.windDegree.toFloat(),
         ),
@@ -224,7 +233,11 @@ private fun getWeatherIndicators(
         Indicator.Default(
             7,
             visibilityText,
-            visibilityKmText.format(currentWeather.current.visionKM),
+
+            if (measureUnit == MeasureUnit.INTERNATIONAL)
+                visibilityKmText.format(currentWeather.current.visionKM)
+            else
+                visibilityMpHText.format(currentWeather.current.visionMiles),
             WeatherAppIcons.VisibilityIndicator
         ),
         Indicator.Default(
@@ -256,6 +269,7 @@ fun WeatherContentPortrait(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     onHourItemClicked: (Hour) -> Unit,
     onAlertItemClicked: (WeatherAlert) -> Unit,
     onDailyItemClicked: (DailyForecast) -> Unit,
@@ -301,6 +315,7 @@ fun WeatherContentPortrait(
             urlProvider = urlProvider,
             imageQuality = imageQuality,
             currentLang = currentLang,
+            measureUnit = measureUnit,
             modifier = Modifier.fillMaxWidth(),
             isCompactMode = actualCompactMode,
         )
@@ -311,6 +326,7 @@ fun WeatherContentPortrait(
             urlProvider = urlProvider,
             imageQuality = imageQuality,
             currentLang = currentLang,
+            measureUnit = measureUnit,
             scrollState = scrollState,
             modifier = Modifier
                 .fillMaxWidth()
@@ -331,6 +347,7 @@ fun WeatherHeaderSection(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     modifier: Modifier = Modifier,
     isCompactMode: Boolean = false
 ) {
@@ -351,6 +368,7 @@ fun WeatherHeaderSection(
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
                 currentLang = currentLang,
+                measureUnit = measureUnit,
                 modifier = Modifier.wrapContentHeight()
             )
 
@@ -360,6 +378,7 @@ fun WeatherHeaderSection(
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
                 currentLang = currentLang,
+                measureUnit = measureUnit,
                 modifier = Modifier.wrapContentHeight()
             )
         }
@@ -374,6 +393,7 @@ fun WeatherContentSection(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     onHourItemClicked: (Hour) -> Unit,
@@ -390,7 +410,7 @@ fun WeatherContentSection(
 
     val futureDays = currentWeather.getFutureDays(amountOfDays)
 
-    val indicators = getWeatherIndicators(currentWeather, currentDayForecast)
+    val indicators = getWeatherIndicators(currentWeather, currentDayForecast, measureUnit)
 
 
     LazyColumn(
@@ -408,6 +428,7 @@ fun WeatherContentSection(
                             item = hour,
                             urlProvider = urlProvider,
                             imageQuality = imageQuality,
+                            measureUnit = measureUnit,
                             darkTheme = isDarkTheme,
                             onItemClick = onHourItemClicked
                         )
@@ -457,6 +478,7 @@ fun WeatherContentSection(
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
                         currentLang = currentLang,
+                        measureUnit = measureUnit,
                         modifier = Modifier.fillMaxWidth(),
                         onItemClick = onDailyItemClicked,
                     )
@@ -502,6 +524,7 @@ fun WeatherContentLandscape(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     modifier: Modifier = Modifier,
     deviceScreenConfiguration: DeviceScreenConfiguration,
     onHourItemClicked: (Hour) -> Unit,
@@ -527,6 +550,7 @@ fun WeatherContentLandscape(
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
                         currentLang = currentLang,
+                        measureUnit = measureUnit,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -538,6 +562,7 @@ fun WeatherContentLandscape(
                         urlProvider = urlProvider,
                         imageQuality = imageQuality,
                         currentLang = currentLang,
+                        measureUnit = measureUnit,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -548,6 +573,7 @@ fun WeatherContentLandscape(
                     urlProvider = urlProvider,
                     imageQuality = imageQuality,
                     currentLang = currentLang,
+                    measureUnit = measureUnit,
                     onHourItemClicked = onHourItemClicked,
                     onAlertItemClicked = onAlertItemClicked,
                     onDailyItemClicked = onDailyItemClicked,
@@ -566,6 +592,7 @@ fun WeatherContentLandscape(
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
                 currentLang = currentLang,
+                measureUnit = measureUnit,
                 scrollState = rememberLazyListState(),
                 modifier = Modifier.fillMaxSize(),
                 onHourItemClicked = onHourItemClicked,
@@ -836,17 +863,19 @@ fun ShowAlertInfoDialog(
 
                 alert?.instruction?.takeIf { it.isNotBlank() }?.let {
                     BodyText(
-                        text = "${stringResource(Res.string.alert_instructions)}\n$it",
+                        text = "${stringResource(Res.string.alert_instructions)}$it",
                         fontWeight = FontWeight.Medium,
                         isDarkTheme = isDarkTheme
                     )
                 }
 
                 if (!alert?.effective.isNullOrBlank() || !alert?.expires.isNullOrBlank()) {
-                    val from = formatDateTime(Instant.parse(alert.effective.orEmpty()), "dd-MMM hh:mm aa")
-                    val until = formatDateTime(Instant.parse(alert.expires.orEmpty()), "dd-MMM hh:mm aa")
+                    val from =
+                        formatDateTime(Instant.parse(alert.effective.orEmpty()), "dd-MMM hh:mm aa")
+                    val until =
+                        formatDateTime(Instant.parse(alert.expires.orEmpty()), "dd-MMM hh:mm aa")
                     LabelText(
-                        text = stringResource(Res.string.alert_validity).format(from,until),
+                        text = stringResource(Res.string.alert_validity).format(from, until),
                         isDarkTheme = isDarkTheme
                     )
                 }

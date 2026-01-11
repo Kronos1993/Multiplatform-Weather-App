@@ -191,6 +191,7 @@ class AddCityViewModel(
                     isSelected = true,
                     isCurrent = isCurrentLocation,
                     tempC = forecast.current.tempC,
+                    tempF = forecast.current.tempF,
                     icon = urlProvider.getImageUrl(
                         forecast.current.condition.icon,
                         ""
@@ -206,6 +207,7 @@ class AddCityViewModel(
                             lon = newLocation.lon,
                             isSelected = true,
                             tempC = newLocation.tempC,
+                            tempF = newLocation.tempF,
                             icon = newLocation.icon
                         )
                     }
@@ -252,7 +254,8 @@ class AddCityViewModel(
                     title = location.cityName,
                     description = "",
                     customProperties = mapOf(
-                        "temp" to location.tempC.toString(),
+                        "tempC" to location.tempC.toString(),
+                        "tempF" to location.tempF.toString(),
                         "icon" to location.icon
                     )
                 )

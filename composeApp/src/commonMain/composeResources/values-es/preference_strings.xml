@@ -17,4 +17,10 @@
     <string name="preference_image_quality_title">Calidad de imagen</string>
     <string name="preference_image_quality_subtitle">Selecciona la calidad de imagen</string>
     <string name="preference_image_quality_entries">Baja,Media,Alta</string>
+
+    <string name="preference_measure_unit_title">Unidad de medida</string>
+    <string name="preference_measure_unit_subtitle">Selecione la unidad de medida</string>
+    <string name="preference_measure_unit_entries">Internacional,Imperial</string>
+    <string name="preference_measure_unit_values">1,2</string>
+
 </resources>

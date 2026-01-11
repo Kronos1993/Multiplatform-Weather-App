@@ -225,7 +225,8 @@ class WeatherViewModel(
                             latitude = location.latitude,
                             longitude = location.longitude,
                             cityName = forecast.location.name,
-                            temp = forecast.current.tempC,
+                            tempC = forecast.current.tempC,
+                            tempF = forecast.current.tempF,
                             icon = urlProvider.getImageUrl(
                                 forecast.current.condition.icon,
                                 imageQuality
@@ -267,7 +268,8 @@ class WeatherViewModel(
                             latitude = forecast.location.lat,
                             longitude = forecast.location.lon,
                             cityName = city,
-                            temp = forecast.current.tempC,
+                            tempC = forecast.current.tempC,
+                            tempF = forecast.current.tempF,
                             icon = urlProvider.getImageUrl(
                                 forecast.current.condition.icon,
                                 imageQuality
@@ -309,7 +311,8 @@ class WeatherViewModel(
                             latitude = userLocation.lat?:0.0,
                             longitude = userLocation.lon?:0.0,
                             cityName = userLocation.cityName,
-                            temp = forecast.current.tempC,
+                            tempC = forecast.current.tempC,
+                            tempF = forecast.current.tempF,
                             icon = urlProvider.getImageUrl(
                                 forecast.current.condition.icon,
                                 imageQuality
@@ -341,7 +344,8 @@ class WeatherViewModel(
                     isSelected = true,
                     lat = location.latitude,
                     lon = location.longitude,
-                    tempC = location.temp ?: 0.0,
+                    tempC = location.tempC ?: 0.0,
+                    tempF = location.tempF ?: 0.0,
                     icon = location.icon.orEmpty()
                 )
 
