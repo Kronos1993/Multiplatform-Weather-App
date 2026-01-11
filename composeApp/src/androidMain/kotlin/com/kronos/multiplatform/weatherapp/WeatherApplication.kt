@@ -89,7 +89,7 @@ class WeatherApplication : Application() {
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             WeatherNotificationWorker::class.java.simpleName,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
     }
@@ -110,7 +110,7 @@ class WeatherApplication : Application() {
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             WeatherAlertNotificationWorker::class.java.simpleName,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
     }

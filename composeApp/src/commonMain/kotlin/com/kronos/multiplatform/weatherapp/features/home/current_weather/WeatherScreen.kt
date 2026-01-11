@@ -44,7 +44,9 @@ import weather_app.composeapp.generated.resources.gps_disable_message
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_long_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_short_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_title
 
 @Composable
@@ -72,15 +74,21 @@ fun WeatherScreen(
     viewModel.initNotificationsString(
         stringResource(Res.string.current_weather_key),
         stringResource(Res.string.notification_title),
-        stringResource(Res.string.notification_short_details),
-        stringResource(Res.string.notification_long_details),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_short_details)
+        else
+            stringResource(Res.string.notification_short_details_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_long_details)
+        else
+            stringResource(Res.string.notification_long_details_fahrenheit),
         stringResource(Res.string.gps_disable_message),
         stringResource(Res.string.gps_cant_get_location_error_message),
     )
 
     LaunchedEffect(currentLang) {
         if (currentLang.isNotBlank()) {
-            viewModel.initLocations(currentLang, apiKey, amountOfDays, imageQuality, defaultCity)
+            viewModel.initLocations(currentLang, apiKey, amountOfDays, imageQuality, defaultCity,measureUnit)
         }
     }
 
@@ -148,7 +156,8 @@ fun WeatherScreen(
                         apiKey,
                         amountOfDays,
                         imageQuality,
-                        defaultCity
+                        defaultCity,
+                        measureUnit
                     )
                 }
             ) {
@@ -184,7 +193,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -215,7 +225,8 @@ fun WeatherScreen(
                                                     apiKey,
                                                     amountOfDays,
                                                     imageQuality,
-                                                    defaultCity
+                                                    defaultCity,
+                                                    measureUnit
                                                 )
                                             }
                                         )
@@ -248,7 +259,8 @@ fun WeatherScreen(
                                             apiKey,
                                             amountOfDays,
                                             imageQuality,
-                                            defaultCity
+                                            defaultCity,
+                                            measureUnit
                                         )
                                     }
                                 )
@@ -280,7 +292,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -316,7 +329,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -347,7 +361,8 @@ fun WeatherScreen(
                                                     apiKey,
                                                     amountOfDays,
                                                     imageQuality,
-                                                    defaultCity
+                                                    defaultCity,
+                                                    measureUnit
                                                 )
                                             }
                                         )
@@ -387,7 +402,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -418,7 +434,8 @@ fun WeatherScreen(
                                                     apiKey,
                                                     amountOfDays,
                                                     imageQuality,
-                                                    defaultCity
+                                                    defaultCity,
+                                                    measureUnit
                                                 )
                                             }
                                         )

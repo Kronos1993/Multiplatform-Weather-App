@@ -305,7 +305,7 @@ class UserCustomLocationViewModel(
             ),
             notificationShortDetails.format(
                 forecast.current.condition.description,
-                forecast.current.feelslikeC
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF
             ),
             notificationLongDetails.format(
                 forecast.current.condition.description,

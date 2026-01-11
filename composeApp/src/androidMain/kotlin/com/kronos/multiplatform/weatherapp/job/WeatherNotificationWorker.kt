@@ -215,25 +215,42 @@ class WeatherNotificationWorker(
 
     private fun createWeatherNotification(forecast: Forecast, measureUnit: MeasureUnit) {
         notifications.createNotification(
-            applicationContext.getString(R.string.notification_title).format(
+            title = applicationContext.getString(R.string.notification_title).format(
                 if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.tempC else forecast.current.tempF,
                 forecast.location.region.orEmpty()
             ),
-            applicationContext.getString(R.string.notification_short_details)
-                .format(
+            shortDescription = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                applicationContext.getString(R.string.notification_short_details)
+                    .format(
+                        forecast.current.condition.description,
+                        forecast.current.feelslikeC
+                    )
+            else
+                applicationContext.getString(R.string.notification_short_details_fahrenheit)
+                    .format(
+                        forecast.current.condition.description,
+                        forecast.current.feelslikeF
+                    ),
+
+            description = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                applicationContext.getString(R.string.notification_long_details).format(
                     forecast.current.condition.description,
-                    forecast.current.feelslikeC
+                    forecast.current.feelslikeC,
+                    forecast.forecast.forecastDay[0].day.mintempC.toString(),
+                    forecast.forecast.forecastDay[0].day.maxtempC.toString(),
+                    forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+                )
+            else
+                applicationContext.getString(R.string.notification_long_details_fahrenheit).format(
+                    forecast.current.condition.description,
+                    forecast.current.feelslikeF,
+                    forecast.forecast.forecastDay[0].day.mintempF.toString(),
+                    forecast.forecast.forecastDay[0].day.maxtempF.toString(),
+                    forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
                 ),
-            applicationContext.getString(R.string.notification_long_details).format(
-                forecast.current.condition.description,
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF,
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.mintempC.toString() else forecast.forecast.forecastDay[0].day.mintempF.toString(),
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.maxtempC.toString() else forecast.forecast.forecastDay[0].day.maxtempF.toString(),
-                forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
-            ),
-            "https:${forecast.current.condition.icon}",
-            NotificationGroup.GENERAL,
-            NotificationType.FROM_APP
+            notificationImageUrl = "https:${forecast.current.condition.icon}",
+            group = NotificationGroup.GENERAL,
+            notificationsId = NotificationType.FROM_APP
         )
     }
 
