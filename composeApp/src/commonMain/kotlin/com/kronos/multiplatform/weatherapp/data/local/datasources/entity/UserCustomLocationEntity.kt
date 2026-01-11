@@ -16,6 +16,7 @@ data class UserCustomLocationEntity(
     @ColumnInfo(name = "ID") val id: Long,
     @ColumnInfo(name = "CITY_NAME") val cityName: String,
     @ColumnInfo(name = "TEMP_C")var tempC:Double = 0.0,
+    @ColumnInfo(name = "TEMP_F")var tempF:Double = 0.0,
     @ColumnInfo(name = "ICON")var icon:String = "",
     @ColumnInfo(name = "IS_CURRENT", defaultValue = "0") val isCurrent: Boolean,
     @ColumnInfo(name = "IS_SELECTED", defaultValue = "0") val isSelected:Boolean,

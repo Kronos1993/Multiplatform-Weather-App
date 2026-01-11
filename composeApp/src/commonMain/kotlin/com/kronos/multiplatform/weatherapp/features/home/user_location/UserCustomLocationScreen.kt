@@ -43,6 +43,7 @@ import com.kronos.multiplatform.weatherapp.components.UserCustomLocationIdleStat
 import com.kronos.multiplatform.weatherapp.components.UserCustomLocationLoadingState
 import com.kronos.multiplatform.weatherapp.components.button.FabButton
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.user_location.content.GridList
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -56,7 +57,9 @@ import weather_app.composeapp.generated.resources.delete_dialog_yes
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_long_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_short_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_title
 
 @Composable
@@ -67,6 +70,7 @@ fun UserCustomLocationScreen(
     apiKey: String,
     imageQuality: String,
     amountOfDays: Int,
+    measureUnit: MeasureUnit,
     isDarkTheme: Boolean,
 ) {
     val viewModel = koinViewModel<UserCustomLocationViewModel>()
@@ -79,8 +83,14 @@ fun UserCustomLocationScreen(
     viewModel.initString(
         stringResource(Res.string.current_weather_key),
         stringResource(Res.string.notification_title),
-        stringResource(Res.string.notification_short_details),
-        stringResource(Res.string.notification_long_details),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_short_details)
+        else
+            stringResource(Res.string.notification_short_details_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_long_details)
+        else
+            stringResource(Res.string.notification_long_details_fahrenheit),
     )
 
     var showFab by remember { mutableStateOf(true) }
@@ -102,7 +112,7 @@ fun UserCustomLocationScreen(
     var showConfirmDialog by mutableStateOf(false)
 
     LaunchedEffect(Unit) {
-        viewModel.initLocations(currentLang, apiKey, amountOfDays)
+        viewModel.initLocations(currentLang, apiKey, amountOfDays,measureUnit)
     }
 
     // Manejo de errores
@@ -177,7 +187,7 @@ fun UserCustomLocationScreen(
                 innerPadding = paddingValues,
                 isRefreshing = screenState == UserCustomLocationScreenState.Loading,
                 onRefresh = {
-                    viewModel.refreshLocations(currentLang, apiKey, amountOfDays)
+                    viewModel.refreshLocations(currentLang, apiKey, amountOfDays,measureUnit)
                 }
             ) {
                 val rootModifier = Modifier
@@ -207,7 +217,8 @@ fun UserCustomLocationScreen(
                                     viewModel.retryLastOperation(
                                         currentLang,
                                         apiKey,
-                                        amountOfDays
+                                        amountOfDays,
+                                        measureUnit
                                     )
                                 }
                             )
@@ -253,6 +264,7 @@ fun UserCustomLocationScreen(
                                     items = locations,
                                     urlProvider = viewModel.urlProvider,
                                     imageQuality = imageQuality,
+                                    measureUnit = measureUnit,
                                     darkTheme = isDarkTheme,
                                     enableStartToEnd = false,
                                     startToEndIcon = Icons.Filled.Delete,
@@ -269,7 +281,13 @@ fun UserCustomLocationScreen(
                                         }
                                     },
                                     onItemClick = {
-                                        viewModel.setLocationSelected(it,currentLang, apiKey, amountOfDays)
+                                        viewModel.setLocationSelected(
+                                            it,
+                                            currentLang,
+                                            apiKey,
+                                            amountOfDays,
+                                            measureUnit
+                                        )
                                     },
                                     onItemLongClick = {},
                                     resetSwipe = resetSwipe,
@@ -282,7 +300,8 @@ fun UserCustomLocationScreen(
                                         viewModel.retryLastOperation(
                                             currentLang,
                                             apiKey,
-                                            amountOfDays
+                                            amountOfDays,
+                                            measureUnit
                                         )
                                     }
                                 )

@@ -11,6 +11,14 @@ interface INotifications {
         notificationsId: NotificationType,
     )
 
+    fun createNotificationAlerts(
+        title: String,
+        shortDescription: String,
+        description: String,
+        group: NotificationGroup,
+        notificationsId: NotificationType,
+    )
+
     fun hideNotification(notificationType: NotificationType)
 
 }

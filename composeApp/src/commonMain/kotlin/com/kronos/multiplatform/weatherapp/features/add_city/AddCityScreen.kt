@@ -32,6 +32,8 @@ import com.kronos.multiplatform.weatherapp.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.components.button.FabButton
 import com.kronos.multiplatform.weatherapp.components.button.IconButton
 import com.kronos.multiplatform.weatherapp.components.maps.MapView
+import com.kronos.multiplatform.weatherapp.core.util.format
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowCityInfoDialog
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowSelectedCityInfoDialog
 import org.jetbrains.compose.resources.stringResource
@@ -46,6 +48,8 @@ import weather_app.composeapp.generated.resources.marker_to_close
 import weather_app.composeapp.generated.resources.notification_long_details
 import weather_app.composeapp.generated.resources.notification_short_details
 import weather_app.composeapp.generated.resources.notification_title
+import weather_app.composeapp.generated.resources.temp_celsius
+import weather_app.composeapp.generated.resources.temp_fahrenheit
 
 @Composable
 fun AddCityScreen(
@@ -53,6 +57,7 @@ fun AddCityScreen(
     currentLang: String,
     apiKey: String,
     isDarkTheme: Boolean,
+    measureUnit: MeasureUnit
 ) {
     val viewModel = koinViewModel<AddCityViewModel>()
     val forecast by viewModel.forecast.collectAsStateWithLifecycle()
@@ -188,7 +193,15 @@ fun AddCityScreen(
 
             ShowCityInfoDialog(
                 cityName = forecast?.location?.name ?: "",
-                temp = "${forecast?.current?.tempC ?: ""}°C",
+                temp =
+                    if (measureUnit == MeasureUnit.INTERNATIONAL)
+                        stringResource(Res.string.temp_celsius).format(
+                            forecast?.current?.tempC?:0.0,
+                        )
+                    else
+                        stringResource(Res.string.temp_fahrenheit).format(
+                            forecast?.current?.tempF?:0.0,
+                        ),
                 showDialog = screenState == AddCityScreenState.CityObtained,
                 confirmText = stringResource(Res.string.add_city),
                 onConfirm = { viewModel.addLocation() },
@@ -199,7 +212,15 @@ fun AddCityScreen(
 
             ShowSelectedCityInfoDialog(
                 cityName = markerSelected?.title ?: "",
-                temp = "${markerSelected?.customProperties["temp"] ?: ""}°C",
+                temp =
+                    if (measureUnit == MeasureUnit.INTERNATIONAL)
+                        stringResource(Res.string.temp_celsius).format(
+                            markerSelected?.customProperties["tempC"]?:0.0,
+                        )
+                    else
+                        stringResource(Res.string.temp_fahrenheit).format(
+                            markerSelected?.customProperties["tempF"]?:0.0,
+                        ),
                 iconUrl = markerSelected?.customProperties["icon"] ?: "",
                 showDialog = screenState == AddCityScreenState.ShowCityInfo,
                 confirmText = stringResource(Res.string.close),

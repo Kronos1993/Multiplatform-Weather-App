@@ -13,6 +13,7 @@ internal fun UserCustomLocationEntity.toDomain(): UserCustomLocation =
         lat = lat,
         lon = lon,
         tempC = tempC,
+        tempF = tempF,
         icon = icon
     )
 
@@ -25,6 +26,7 @@ internal fun UserCustomLocation.toEntity(): UserCustomLocationEntity =
         lat = lat!!,
         lon = lon!!,
         tempC = tempC,
+        tempF = tempF,
         icon = icon
     )
 

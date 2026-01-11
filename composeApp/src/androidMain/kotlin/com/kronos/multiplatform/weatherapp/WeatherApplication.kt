@@ -12,6 +12,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.di.initKoin
+import com.kronos.multiplatform.weatherapp.job.WeatherAlertNotificationWorker
 import com.kronos.multiplatform.weatherapp.job.WeatherNotificationWorker
 import com.mmk.kmpnotifier.notification.NotifierManager
 import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
@@ -36,7 +37,8 @@ class WeatherApplication : Application() {
         }
         createNotificationChanel()
 
-        scheduleWeatherWorker(15)
+        scheduleWeatherWorker(60)
+        scheduleWeatherAlertWorker(60*4)
 
         NotifierManager.initialize(
             configuration = NotificationPlatformConfiguration.Android(
@@ -87,6 +89,27 @@ class WeatherApplication : Application() {
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             WeatherNotificationWorker::class.java.simpleName,
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    private fun scheduleWeatherAlertWorker(minutes: Long) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(false)
+            .build()
+
+        val validMinutes = maxOf(minutes, 15L)
+
+        val workRequest = PeriodicWorkRequestBuilder<WeatherAlertNotificationWorker>(
+            validMinutes, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            WeatherAlertNotificationWorker::class.java.simpleName,
             ExistingPeriodicWorkPolicy.KEEP,
             workRequest
         )

@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class CurrentWeather(
     val tempC: Double = 0.0,
+    val tempF: Double = 0.0,
     val isDay: Boolean = false,
     val condition: Condition = Condition(),
     val windSpeedKph: Double = 0.0,

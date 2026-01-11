@@ -58,6 +58,7 @@ import com.kronos.multiplatform.weatherapp.core.util.toDayOfWeekText
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
@@ -66,6 +67,7 @@ import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.feels_like_temp_celsius
+import weather_app.composeapp.generated.resources.feels_like_temp_fahrenheit
 import weather_app.composeapp.generated.resources.friday
 import weather_app.composeapp.generated.resources.gps
 import weather_app.composeapp.generated.resources.location_name
@@ -73,6 +75,7 @@ import weather_app.composeapp.generated.resources.monday
 import weather_app.composeapp.generated.resources.saturday
 import weather_app.composeapp.generated.resources.sunday
 import weather_app.composeapp.generated.resources.temp_celsius
+import weather_app.composeapp.generated.resources.temp_fahrenheit
 import weather_app.composeapp.generated.resources.thursday
 import weather_app.composeapp.generated.resources.today
 import weather_app.composeapp.generated.resources.tomorrow
@@ -87,6 +90,7 @@ fun HourlyItemIndicator(
     item: Hour,
     urlProvider: UrlProvider,
     imageQuality: String,
+    measureUnit: MeasureUnit,
     darkTheme: Boolean,
     modifier: Modifier = Modifier,
     onItemClick: (Hour) -> Unit,
@@ -138,7 +142,15 @@ fun HourlyItemIndicator(
             )
 
             LabelText(
-                text = item.tempC.toString(),
+                text =
+                    if (measureUnit == MeasureUnit.INTERNATIONAL)
+                        stringResource(Res.string.temp_celsius).format(
+                            item.tempC,
+                        )
+                    else
+                        stringResource(Res.string.temp_fahrenheit).format(
+                            item.tempF,
+                        ),
                 modifier = Modifier.wrapContentSize(),
                 textColor = Color.White,
                 size = ComponentSize.MEDIUM,
@@ -257,7 +269,6 @@ fun AlertIndicator(
         }
     }
 }
-
 
 @Composable
 fun WeatherIndicatorItem(
@@ -438,6 +449,7 @@ fun CurrentWeatherItem(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -481,17 +493,29 @@ fun CurrentWeatherItem(
         )
 
         DisplayText(
-            stringResource(Res.string.temp_celsius).format(
-                currentWeather.current.tempC,
-            ),
+            text =
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    stringResource(Res.string.temp_celsius).format(
+                        currentWeather.current.tempC,
+                    )
+                else
+                    stringResource(Res.string.temp_fahrenheit).format(
+                        currentWeather.current.tempF,
+                    ),
             textColor = Color.White,
             size = ComponentSize.SMALL
         )
 
         BodyText(
-            stringResource(Res.string.feels_like_temp_celsius).format(
-                currentWeather.current.feelslikeC,
-            ),
+            text =
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    stringResource(Res.string.feels_like_temp_celsius).format(
+                        currentWeather.current.feelslikeC,
+                    )
+                else
+                    stringResource(Res.string.feels_like_temp_fahrenheit).format(
+                        currentWeather.current.feelslikeF,
+                    ),
             textColor = Color.White,
             size = ComponentSize.MEDIUM
         )
@@ -515,6 +539,7 @@ fun CurrentWeatherCompactItem(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -570,18 +595,30 @@ fun CurrentWeatherCompactItem(
             )
 
             HeaderText(
-                stringResource(Res.string.temp_celsius).format(
-                    currentWeather.current.tempC,
-                ),
+                text =
+                    if (measureUnit == MeasureUnit.INTERNATIONAL)
+                        stringResource(Res.string.temp_celsius).format(
+                            currentWeather.current.tempC,
+                        )
+                    else
+                        stringResource(Res.string.temp_fahrenheit).format(
+                            currentWeather.current.tempF,
+                        ),
                 textColor = Color.White,
                 size = ComponentSize.MEDIUM,
                 textAlign = TextAlign.End
             )
 
             BodyText(
-                stringResource(Res.string.feels_like_temp_celsius).format(
-                    currentWeather.current.feelslikeC,
-                ),
+                text =
+                    if (measureUnit == MeasureUnit.INTERNATIONAL)
+                        stringResource(Res.string.feels_like_temp_celsius).format(
+                            currentWeather.current.feelslikeC,
+                        )
+                    else
+                        stringResource(Res.string.feels_like_temp_fahrenheit).format(
+                            currentWeather.current.feelslikeF,
+                        ),
                 textColor = Color.White,
                 size = ComponentSize.SMALL,
                 textAlign = TextAlign.End
@@ -610,6 +647,7 @@ fun CurrentWeatherLandscapeCompactItem(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -691,18 +729,30 @@ fun CurrentWeatherLandscapeCompactItem(
             ) {
 
                 HeaderText(
-                    stringResource(Res.string.temp_celsius).format(
-                        currentWeather.current.tempC,
-                    ),
+                    text =
+                        if (measureUnit == MeasureUnit.INTERNATIONAL)
+                            stringResource(Res.string.temp_celsius).format(
+                                currentWeather.current.tempC,
+                            )
+                        else
+                            stringResource(Res.string.temp_fahrenheit).format(
+                                currentWeather.current.tempF,
+                            ),
                     textColor = Color.White,
                     size = ComponentSize.SMALL,
                     textAlign = TextAlign.End
                 )
 
                 BodyText(
-                    stringResource(Res.string.feels_like_temp_celsius).format(
-                        currentWeather.current.feelslikeC,
-                    ),
+                    text =
+                        if (measureUnit == MeasureUnit.INTERNATIONAL)
+                            stringResource(Res.string.feels_like_temp_celsius).format(
+                                currentWeather.current.feelslikeC,
+                            )
+                        else
+                            stringResource(Res.string.feels_like_temp_fahrenheit).format(
+                                currentWeather.current.feelslikeF,
+                            ),
                     textColor = Color.White,
                     size = ComponentSize.SMALL,
                     textAlign = TextAlign.End
@@ -720,6 +770,7 @@ fun CurrentWeatherBigScreenCompactItem(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     modifier: Modifier = Modifier,
 ) {
 
@@ -802,18 +853,30 @@ fun CurrentWeatherBigScreenCompactItem(
             ) {
 
                 DisplayText(
-                    stringResource(Res.string.temp_celsius).format(
-                        currentWeather.current.tempC,
-                    ),
+                    text =
+                        if (measureUnit == MeasureUnit.INTERNATIONAL)
+                            stringResource(Res.string.temp_celsius).format(
+                                currentWeather.current.tempC,
+                            )
+                        else
+                            stringResource(Res.string.temp_fahrenheit).format(
+                                currentWeather.current.tempF,
+                            ),
                     textColor = Color.White,
                     size = ComponentSize.SMALL,
                     textAlign = TextAlign.End
                 )
 
                 TitleText(
-                    stringResource(Res.string.feels_like_temp_celsius).format(
-                        currentWeather.current.feelslikeC,
-                    ),
+                    text =
+                        if (measureUnit == MeasureUnit.INTERNATIONAL)
+                            stringResource(Res.string.feels_like_temp_celsius).format(
+                                currentWeather.current.feelslikeC,
+                            )
+                        else
+                            stringResource(Res.string.feels_like_temp_fahrenheit).format(
+                                currentWeather.current.feelslikeF,
+                            ),
                     textColor = Color.White,
                     size = ComponentSize.MEDIUM,
                     textAlign = TextAlign.End
@@ -832,6 +895,7 @@ fun DailyWeatherItemIndicator(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     darkTheme: Boolean,
     modifier: Modifier = Modifier,
     onItemClick: (DailyForecast) -> Unit,
@@ -933,9 +997,15 @@ fun DailyWeatherItemIndicator(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 LabelText(
-                    text = stringResource(Res.string.temp_celsius).format(item.day.mintempC.toString()) +
-                            "\n" +
-                            stringResource(Res.string.temp_celsius).format(item.day.maxtempC.toString()),
+                    text =
+                        if (measureUnit == MeasureUnit.INTERNATIONAL)
+                            stringResource(Res.string.temp_celsius).format(item.day.mintempC.toString()) +
+                                    "\n" +
+                                    stringResource(Res.string.temp_celsius).format(item.day.maxtempC.toString())
+                        else
+                            stringResource(Res.string.temp_fahrenheit).format(item.day.mintempF.toString()) +
+                                    "\n" +
+                                    stringResource(Res.string.temp_fahrenheit).format(item.day.maxtempF.toString()),
                     modifier = Modifier,
                     textColor = Color.White,
                     size = ComponentSize.MEDIUM,
@@ -957,6 +1027,7 @@ fun DailyWeatherList(
     urlProvider: UrlProvider,
     imageQuality: String,
     currentLang: String,
+    measureUnit: MeasureUnit,
     modifier: Modifier = Modifier,
     onItemClick: (DailyForecast) -> Unit
 ) {
@@ -972,6 +1043,7 @@ fun DailyWeatherList(
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
                 currentLang = currentLang,
+                measureUnit = measureUnit,
                 darkTheme = darkTheme,
                 modifier = Modifier.fillMaxWidth(),
                 onItemClick
@@ -1039,6 +1111,7 @@ fun UserCustomLocationItem(
     item: UserCustomLocation,
     urlProvider: UrlProvider,
     imageQuality: String,
+    measureUnit: MeasureUnit,
     darkTheme: Boolean,
     enableStartToEnd: Boolean = true,
     startToEndIcon: ImageVector,
@@ -1107,7 +1180,11 @@ fun UserCustomLocationItem(
                     )
 
                     HeaderText(
-                        text = stringResource(Res.string.temp_celsius).format(item.tempC.toString()),
+                        text =
+                            if (measureUnit == MeasureUnit.INTERNATIONAL)
+                                stringResource(Res.string.temp_celsius).format(item.tempC.toString())
+                            else
+                                stringResource(Res.string.temp_fahrenheit).format(item.tempF.toString()),
                         modifier = Modifier.weight(1f),
                         textColor = Color.White,
                         size = ComponentSize.MEDIUM,

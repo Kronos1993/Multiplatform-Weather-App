@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.kronos.multiplatform.weatherapp.components.theme.AppTheme
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.add_city.AddCityScreen
 import com.kronos.multiplatform.weatherapp.features.home.HomeScreen
 import org.jetbrains.compose.resources.stringResource
@@ -30,6 +31,8 @@ import weather_app.composeapp.generated.resources.default_image_quality_key
 import weather_app.composeapp.generated.resources.default_image_quality_value
 import weather_app.composeapp.generated.resources.default_lang_key
 import weather_app.composeapp.generated.resources.lang_preference_default_value
+import weather_app.composeapp.generated.resources.measure_unit_key
+import weather_app.composeapp.generated.resources.measure_unit_preference_default_value
 import weather_app.composeapp.generated.resources.theme_preference_default_value
 import weather_app.composeapp.generated.resources.theme_preference_key
 
@@ -50,6 +53,9 @@ fun App() {
     val defaultCityPreferenceDefault = stringResource(Res.string.default_city_value)
     val imageQualityPreferenceKey = stringResource(Res.string.default_image_quality_key)
     val imageQualityPreferenceDefault = stringResource(Res.string.default_image_quality_value)
+    val measureUnitPreferenceKey = stringResource(Res.string.measure_unit_key)
+    val measureUnitPreferenceDefault = stringResource(Res.string.measure_unit_preference_default_value)
+
     val apiKey = stringResource(Res.string.api_key)
 
     val isDarkTheme by viewModel.preferenceThemeFlow.collectAsStateWithLifecycle()
@@ -57,6 +63,8 @@ fun App() {
     val amountDays by viewModel.preferenceDays.collectAsStateWithLifecycle()
     val imageQuality by viewModel.preferenceImageQuality.collectAsStateWithLifecycle()
     val defaultCity by viewModel.preferenceDefaultCity.collectAsStateWithLifecycle()
+    val measureUnit by viewModel.preferenceMeasureUnitFlow.collectAsStateWithLifecycle()
+
     val apiKeyRemember by remember { mutableStateOf(apiKey) }
 
     LaunchedEffect(Unit) {
@@ -70,7 +78,9 @@ fun App() {
             imageQualityKey = imageQualityPreferenceKey,
             imageQualityDefault = imageQualityPreferenceDefault,
             defaultCityKey = defaultCityPreferenceKey,
-            defaultCityDefault = defaultCityPreferenceDefault
+            defaultCityDefault = defaultCityPreferenceDefault,
+            defaultMeasureUnitKey = measureUnitPreferenceKey,
+            defaultMeasureUnitDefault = MeasureUnit.from(measureUnitPreferenceDefault)
         )
     }
 
@@ -103,6 +113,7 @@ fun App() {
                             imageQuality,
                             amountDays,
                             defaultCity,
+                            measureUnit,
                             deviceScreenConfiguration = deviceScreenConfiguration,
                         )
                     }
@@ -112,6 +123,7 @@ fun App() {
                             currentLang,
                             apiKeyRemember,
                             isDarkTheme == stringResource(Res.string.theme_preference_default_value),
+                            measureUnit
                         )
                     }
                 }

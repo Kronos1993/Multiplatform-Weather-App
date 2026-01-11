@@ -32,6 +32,7 @@ import com.kronos.multiplatform.weatherapp.components.ScrollableTabView
 import com.kronos.multiplatform.weatherapp.components.TabItem
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.about.AboutScreen
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.WeatherScreen
 import com.kronos.multiplatform.weatherapp.features.home.setting.SettingsScreen
@@ -63,6 +64,7 @@ fun HomeScreen(
     imageQuality: String,
     amountOfDays: Int,
     defaultCity: String,
+    measureUnit: MeasureUnit,
     deviceScreenConfiguration: DeviceScreenConfiguration,
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
@@ -212,7 +214,8 @@ fun HomeScreen(
                 imageQuality,
                 amountOfDays,
                 defaultCity,
-                isDarkTheme
+                isDarkTheme,
+                measureUnit,
             )
         },
 
@@ -229,6 +232,7 @@ fun HomeScreen(
                 apiKey,
                 imageQuality,
                 amountOfDays,
+                measureUnit,
                 isDarkTheme
             )
         },
@@ -256,7 +260,7 @@ fun HomeScreen(
             Icons.Outlined.Info,
             4
         ) {
-            AboutScreen(navHost,isDarkTheme,deviceScreenConfiguration)
+            AboutScreen(navHost, isDarkTheme, deviceScreenConfiguration)
         },
     )
 

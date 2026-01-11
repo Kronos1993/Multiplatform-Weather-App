@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,6 +32,7 @@ import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.components.SettingRadioOptions
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -43,6 +45,8 @@ import weather_app.composeapp.generated.resources.default_image_quality_key
 import weather_app.composeapp.generated.resources.default_image_quality_value
 import weather_app.composeapp.generated.resources.default_lang_key
 import weather_app.composeapp.generated.resources.lang_preference_default_value
+import weather_app.composeapp.generated.resources.measure_unit_key
+import weather_app.composeapp.generated.resources.measure_unit_preference_default_value
 import weather_app.composeapp.generated.resources.preference_app_theme_entries
 import weather_app.composeapp.generated.resources.preference_app_theme_values
 import weather_app.composeapp.generated.resources.preference_days_entries
@@ -54,6 +58,10 @@ import weather_app.composeapp.generated.resources.preference_lang_entries
 import weather_app.composeapp.generated.resources.preference_lang_subtitle
 import weather_app.composeapp.generated.resources.preference_lang_title
 import weather_app.composeapp.generated.resources.preference_lang_values
+import weather_app.composeapp.generated.resources.preference_measure_unit_entries
+import weather_app.composeapp.generated.resources.preference_measure_unit_subtitle
+import weather_app.composeapp.generated.resources.preference_measure_unit_title
+import weather_app.composeapp.generated.resources.preference_measure_unit_values
 import weather_app.composeapp.generated.resources.preference_theme_subtitle
 import weather_app.composeapp.generated.resources.preference_theme_title
 import weather_app.composeapp.generated.resources.theme_preference_default_value
@@ -84,6 +92,8 @@ fun SettingsScreen(
     val imageQualityPreferenceDefault = stringResource(Res.string.default_image_quality_value)
     val defaultCityPreferenceKey = stringResource(Res.string.default_city_key)
     val defaultCityPreferenceDefault = stringResource(Res.string.default_city_value)
+    val measureUnitPreferenceKey = stringResource(Res.string.measure_unit_key)
+    val measureUnitPreferenceDefault = stringResource(Res.string.measure_unit_preference_default_value)
 
     // Obtener preferencias al iniciar
     LaunchedEffect(Unit) {
@@ -97,7 +107,9 @@ fun SettingsScreen(
             imageQualityKey = imageQualityPreferenceKey,
             imageQualityDefault = imageQualityPreferenceDefault,
             defaultCityKey = defaultCityPreferenceKey,
-            defaultCityDefault = defaultCityPreferenceDefault
+            defaultCityDefault = defaultCityPreferenceDefault,
+            defaultMeasureUnitKey = measureUnitPreferenceKey,
+            defaultMeasureUnitDefault = MeasureUnit.from(measureUnitPreferenceDefault)
         )
     }
 
@@ -106,6 +118,7 @@ fun SettingsScreen(
     val selectedDays by viewModel.preferenceDays.collectAsStateWithLifecycle()
     val selectedImageQuality by viewModel.preferenceImageQuality.collectAsStateWithLifecycle()
     val selectedTheme by viewModel.preferenceThemeFlow.collectAsStateWithLifecycle()
+    val selectedMeasureUnit by viewModel.preferenceMeasureUnitFlow.collectAsStateWithLifecycle()
 
 
     // Listas de opciones desde recursos
@@ -134,6 +147,16 @@ fun SettingsScreen(
             Pair(
                 entry.trim(),
                 stringResource(Res.string.preference_image_quality_values).split(",")[index].trim()
+            )
+        }
+
+
+    val measureUnitOptions = stringResource(Res.string.preference_measure_unit_entries)
+        .split(",")
+        .mapIndexed { index, entry ->
+            Pair(
+                entry.trim(),
+                stringResource(Res.string.preference_measure_unit_values).split(",")[index].trim()
             )
         }
 
@@ -250,6 +273,26 @@ fun SettingsScreen(
                                 )
                             }
                             viewModel.setPreferenceImageQuality(it)
+                        }
+                    )
+
+                    SettingRadioOptions(
+                        title = stringResource(Res.string.preference_measure_unit_title),
+                        subtitle = stringResource(Res.string.preference_measure_unit_subtitle),
+                        textColor = Color.White,
+                        iconTint = Color.White,
+                        icon = Icons.Filled.Scale,
+                        iconDesc = stringResource(Res.string.preference_measure_unit_subtitle),
+                        options = measureUnitOptions,
+                        selectedOption = selectedMeasureUnit.value,
+                        onOptionSelected = {
+                            scope.launch {
+                                viewModel.preferenceRepository.setPreference(
+                                    measureUnitPreferenceKey,
+                                    it
+                                )
+                            }
+                            viewModel.setPreferenceMeasureUnit(it)
                         }
                     )
 

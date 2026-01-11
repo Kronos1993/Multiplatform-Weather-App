@@ -34,6 +34,7 @@
     <string name="sunrise_sunset">Rise %s\nSet %s</string>
     <string name="visibility">Visibility</string>
     <string name="visibility_km">%s KM</string>
+    <string name="visibility_miles">%s M/H</string>
     <string name="clouds">Clouds</string>
     <string name="atmospheric_pression">Atmospheric Pression</string>
     <string name="air_quality">Air Quality</string>
@@ -59,6 +60,8 @@
     <string name="notification_title">%s° | %s</string>
     <string name="notification_short_details">%s. Feels like %s°C</string>
     <string name="notification_long_details">%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%</string>
+    <string name="notification_short_details_fahrenheit">%s. Feels like %s°F</string>
+    <string name="notification_long_details_fahrenheit">%s\nFeels like %s°F\nTemp min %s°F - max %s°F\nRain possibility %s%</string>
     <string name="location_name">%1$s/%2$s</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="today">Today</string>

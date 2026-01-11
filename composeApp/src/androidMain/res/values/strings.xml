@@ -5,6 +5,12 @@
     <string name="notification_short_details">%s. Feels like %s°C</string>
     <string name="notification_long_details">%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%%</string>
 
+    <string name="notification_short_details_fahrenheit">%s. Feels like %s°F</string>
+    <string name="notification_long_details_fahrenheit">%s\nFeels like %s°F\nTemp min %s°F - max %s°F\nRain possibility %s%</string>
+
+    <string name="notification_alerts_multiple_title">You have %s alerts</string>
+    <string name="notification_alerts_multiple_details">Click here to see more</string>
+
     <string name="temp_celsius">%s°C</string>
     <string name="temp_celsius_widget">%s°</string>
     <string name="temp_fahrenheit">%s°F</string>
