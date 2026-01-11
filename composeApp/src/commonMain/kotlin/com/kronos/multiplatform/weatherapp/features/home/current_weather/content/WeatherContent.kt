@@ -249,7 +249,10 @@ private fun getWeatherIndicators(
         Indicator.Default(
             9,
             atmosphericPressionText,
-            "${currentWeather.current.pressureMb} mbar",
+            if (measureUnit == MeasureUnit.INTERNATIONAL)
+                "${currentWeather.current.pressureMb} mbar"
+            else
+                "${currentWeather.current.pressureIn} inHg",
             WeatherAppIcons.PressionIndicator
         ),
         Indicator.Default(
