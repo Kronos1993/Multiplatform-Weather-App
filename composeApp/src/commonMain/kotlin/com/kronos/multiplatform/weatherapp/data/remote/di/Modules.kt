@@ -1,5 +1,7 @@
 package com.kronos.multiplatform.weatherapp.data.remote.di
 
+import com.kronos.multiplatform.weatherapp.data.remote.datasources.WeatherAlertsRemoteDataSource
+import com.kronos.multiplatform.weatherapp.data.remote.datasources.WeatherAlertsRemoteDataSourceImpl
 import com.kronos.multiplatform.weatherapp.data.remote.datasources.WeatherRemoteDataSource
 import com.kronos.multiplatform.weatherapp.data.remote.datasources.WeatherRemoteDataSourceImpl
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.KtorClientFactory
@@ -7,7 +9,9 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.PrivateKtorClientFac
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.PublicKtorClientFactoryImpl
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProviderImp
+import com.kronos.multiplatform.weatherapp.data.repository.alerts.WeatherAlertsRemoteRepositoryImpl
 import com.kronos.multiplatform.weatherapp.data.repository.weather.WeatherRemoteRepositoryImpl
+import com.kronos.multiplatform.weatherapp.domain.repository.WeatherAlertsRemoteRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -31,8 +35,18 @@ val commonRemoteModules = module {
         )
     }.bind<WeatherRemoteDataSource>()
 
+    single {
+        WeatherAlertsRemoteDataSourceImpl(
+            get(),
+            get(named(KtorClientFactoryType.PUBLIC)),
+            get(),
+        )
+    }.bind<WeatherAlertsRemoteDataSource>()
+
+
     //repositories
     singleOf(::WeatherRemoteRepositoryImpl).bind<WeatherRemoteRepository>()
+    singleOf(::WeatherAlertsRemoteRepositoryImpl).bind<WeatherAlertsRemoteRepository>()
 
     //url provider
     singleOf(::UrlProviderImp).bind<UrlProvider>()

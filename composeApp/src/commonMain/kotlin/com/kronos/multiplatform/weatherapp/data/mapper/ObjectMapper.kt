@@ -10,6 +10,7 @@ import com.kronos.multiplatform.weatherapp.data.remote.dto.ForecastDayDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.HourDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.LocationDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.WeatherAlertDto
+import com.kronos.multiplatform.weatherapp.data.remote.dto.current.CurrentAlertsForecastDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.current.CurrentForecastResponseDto
 import com.kronos.multiplatform.weatherapp.data.remote.dto.forecast.ForecastResponseDto
 import com.kronos.multiplatform.weatherapp.domain.model.AirQuality
@@ -23,6 +24,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Location
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
+import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentAlertsForecast
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 
@@ -45,6 +47,7 @@ fun ConditionDto.toCondition() = Condition(
 
 fun CurrentWeatherDto.toCurrentWeather() = CurrentWeather(
     tempC = temp_c,
+    tempF = temp_f,
     isDay = is_day == 1,
     condition = condition.toCondition(),
     windSpeedKph = wind_kph,
@@ -186,4 +189,9 @@ fun WeatherAlertDto.toWeatherAlert() = WeatherAlert(
     expires = expires,
     description = description,
     instruction = instruction
+)
+
+fun CurrentAlertsForecastDto.toCurrentAlertsForecast() = CurrentAlertsForecast(
+    location = location.toLocation(),
+    alerts = alerts.alertList.map { it.toWeatherAlert() }
 )
