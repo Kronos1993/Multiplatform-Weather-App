@@ -85,8 +85,7 @@ class WeatherAlertNotificationWorker(
             weatherParams.apiKey,
         )
             .onSuccess { alerts ->
-                if (alerts.alerts.isNotEmpty())
-                    createWeatherAlertNotification(alerts.alerts)
+                createWeatherAlertNotification(alerts.alerts)
                 log("Weather alert from $locationType acquired: ${alerts.location.name}", false)
             }
             .onError { error ->
@@ -163,28 +162,30 @@ class WeatherAlertNotificationWorker(
     }
 
     private fun createWeatherAlertNotification(alerts: List<WeatherAlert>) {
-        val notificationTitle = if (alerts.size > 1)
-            applicationContext.getString(R.string.notification_alerts_multiple_title)
-                .format(alerts.size)
-        else
-            alerts[0].headline.orEmpty()
-        val notificationShortDetails = if (alerts.size > 1)
-            applicationContext.getString(R.string.notification_alerts_multiple_details)
-        else
-            alerts[0].instruction.orEmpty()
+        if (alerts.isNotEmpty()) {
+            val notificationTitle = if (alerts.size > 1)
+                applicationContext.getString(R.string.notification_alerts_multiple_title)
+                    .format(alerts.size)
+            else
+                alerts[0].headline.orEmpty()
+            val notificationShortDetails = if (alerts.size > 1)
+                applicationContext.getString(R.string.notification_alerts_multiple_details)
+            else
+                alerts[0].instruction.orEmpty()
 
-        val notificationLongDetails = if (alerts.size > 1)
-            applicationContext.getString(R.string.notification_alerts_multiple_details)
-        else
-            alerts[0].description.orEmpty()
+            val notificationLongDetails = if (alerts.size > 1)
+                applicationContext.getString(R.string.notification_alerts_multiple_details)
+            else
+                alerts[0].description.orEmpty()
 
-        notifications.createNotificationAlerts(
-            title = notificationTitle,
-            shortDescription = notificationShortDetails,
-            description = notificationLongDetails,
-            NotificationGroup.GENERAL,
-            NotificationType.FROM_APP
-        )
+            notifications.createNotificationAlerts(
+                title = notificationTitle,
+                shortDescription = notificationShortDetails,
+                description = notificationLongDetails,
+                NotificationGroup.GENERAL,
+                NotificationType.FROM_APP
+            )
+        }
     }
 
     private data class WeatherAlertParams(
