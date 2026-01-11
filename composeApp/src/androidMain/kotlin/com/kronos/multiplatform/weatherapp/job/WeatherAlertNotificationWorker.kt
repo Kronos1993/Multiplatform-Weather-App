@@ -85,7 +85,8 @@ class WeatherAlertNotificationWorker(
             weatherParams.apiKey,
         )
             .onSuccess { alerts ->
-                createWeatherAlertNotification(alerts.alerts)
+                if (alerts.alerts.isNotEmpty())
+                    createWeatherAlertNotification(alerts.alerts)
                 log("Weather alert from $locationType acquired: ${alerts.location.name}", false)
             }
             .onError { error ->
