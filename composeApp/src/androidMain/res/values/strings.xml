@@ -3,7 +3,7 @@
 
     <string name="notification_title">%s° | %s</string>
     <string name="notification_short_details">%s. Feels like %s°C</string>
-    <string name="notification_long_details">%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%%</string>
+    <string name="notification_long_details">%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%</string>
 
     <string name="notification_short_details_fahrenheit">%s. Feels like %s°F</string>
     <string name="notification_long_details_fahrenheit">%s\nFeels like %s°F\nTemp min %s°F - max %s°F\nRain possibility %s%</string>
