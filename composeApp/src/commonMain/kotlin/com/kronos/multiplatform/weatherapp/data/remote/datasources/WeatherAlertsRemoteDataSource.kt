@@ -7,6 +7,8 @@ import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentAlertsFor
 interface WeatherAlertsRemoteDataSource {
 
     suspend fun getWeatherAlerts(
-        cityName: String, apiKey: String
+        lat: Double,
+        lon: Double,
+        apiKey: String
     ): Result<CurrentAlertsForecast, Error>
 }

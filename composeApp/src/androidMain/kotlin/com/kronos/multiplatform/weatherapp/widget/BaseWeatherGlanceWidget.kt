@@ -29,6 +29,7 @@ import com.kronos.multiplatform.weatherapp.core.util.of
 import com.kronos.multiplatform.weatherapp.core.util.toDayOfWeekText
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
@@ -52,8 +53,9 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     private val preferenceRepository: PreferenceRepository by inject()
     private val urlProvider: UrlProvider by inject()
     private val loggerManager: ILogManager by inject()
-
     private val changeLang: IChangeLang by inject()
+    protected var measureUnit: MeasureUnit = MeasureUnit.INTERNATIONAL
+
 
     protected abstract fun getClassName(): Class<out GlanceAppWidget>
 
@@ -70,6 +72,14 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             context.getString(R.string.default_language_value)
         )
         changeLang.onLangChange(currentLang)
+
+        measureUnit = MeasureUnit.from(
+            preferenceRepository.getPreference(
+                context.getString(R.string.measure_unit_key),
+                context.getString(R.string.measure_unit_preference_default_value)
+            )
+        )
+
         var weatherData: WeatherWidgetData? = null
         try {
             val cachedWeatherResult = loadCachedWeather(context)
@@ -274,8 +284,13 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         val weatherWidgetData = WeatherWidgetData(
             location = forecast.location.name,
             time = formatLocalTime(forecast.location.localtime, currentLanguage),
-            currentTemp = context.getString(R.string.temp_celsius_widget)
-                .format(forecast.current.tempC),
+            currentTemp =
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    context.getString(R.string.temp_celsius_widget)
+                        .format(forecast.current.tempC)
+                else
+                    context.getString(R.string.temp_fahrenheit_widget)
+                        .format(forecast.current.tempF),
             currentCondition = forecast.current.condition.description,
             tomorrowCondition = if (forecast.forecast.forecastDay.size > 2) {
                 forecast.forecast.forecastDay[1].day.condition.description
@@ -283,7 +298,11 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                 ""
             },
             humidity = forecast.current.humidity.toString(),
-            windSpeed = context.getString(R.string.speed_km).format(forecast.current.windSpeedKph),
+            windSpeed =
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    context.getString(R.string.speed_km).format(forecast.current.windSpeedKph)
+                else
+                    context.getString(R.string.speed_miles).format(forecast.current.windSpeedMph),
             windDirection = forecast.current.windDir,
             uvIndex = forecast.current.uv,
             currentIconUrl = currentIconUrl,

@@ -215,10 +215,18 @@ class WeatherNotificationWorker(
 
     private fun createWeatherNotification(forecast: Forecast, measureUnit: MeasureUnit) {
         notifications.createNotification(
-            title = applicationContext.getString(R.string.notification_title).format(
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.tempC else forecast.current.tempF,
-                forecast.location.region.orEmpty()
-            ),
+            title =
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    applicationContext.getString(R.string.notification_title).format(
+                        forecast.current.tempC,
+                        forecast.location.region.orEmpty()
+                    )
+                else
+                    applicationContext.getString(R.string.notification_title_fahrenheit).format(
+                        forecast.current.tempF,
+                        forecast.location.region.orEmpty()
+                    ),
+
             shortDescription = if (measureUnit == MeasureUnit.INTERNATIONAL)
                 applicationContext.getString(R.string.notification_short_details)
                     .format(
@@ -241,16 +249,17 @@ class WeatherNotificationWorker(
                     forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
                 )
             else
-                applicationContext.getString(R.string.notification_long_details_fahrenheit).format(
-                    forecast.current.condition.description,
-                    forecast.current.feelslikeF,
-                    forecast.forecast.forecastDay[0].day.mintempF.toString(),
-                    forecast.forecast.forecastDay[0].day.maxtempF.toString(),
-                    forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
-                ),
+                applicationContext.getString(R.string.notification_long_details_fahrenheit)
+                    .format(
+                        forecast.current.condition.description,
+                        forecast.current.feelslikeF,
+                        forecast.forecast.forecastDay[0].day.mintempF.toString(),
+                        forecast.forecast.forecastDay[0].day.maxtempF.toString(),
+                        forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+                    ),
             notificationImageUrl = "https:${forecast.current.condition.icon}",
             group = NotificationGroup.GENERAL,
-            notificationsId = NotificationType.FROM_APP
+            notificationsId = NotificationType.WEATHER_UPDATED
         )
     }
 

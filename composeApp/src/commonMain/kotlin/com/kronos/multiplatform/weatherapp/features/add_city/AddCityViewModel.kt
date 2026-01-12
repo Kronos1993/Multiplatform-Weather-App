@@ -17,6 +17,7 @@ import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
@@ -157,7 +158,7 @@ class AddCityViewModel(
         }
     }
 
-    fun addLocation() {
+    fun addLocation(measureUnit: MeasureUnit) {
         viewModelScope.launch(Dispatchers.IO) {
             val forecast = _forecast.value ?: run {
                 log("No forecast available to add location.", isError = true)
@@ -223,7 +224,7 @@ class AddCityViewModel(
                     forecast
                 )
 
-                createWeatherNotification()
+                createWeatherNotification(measureUnit)
                 widgetUpdater.updateAllWeatherWidgets()
 
                 _screenState.value = AddCityScreenState.CityAdded
@@ -297,27 +298,29 @@ class AddCityViewModel(
         }
     }
 
-    private fun createWeatherNotification() {
+    private fun createWeatherNotification(
+        measureUnit: MeasureUnit
+    ) {
         if (_forecast.value != null) {
             notifications.createNotification(
                 notificationTitle.format(
-                    _forecast.value!!.current.tempC,
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.current.tempC else _forecast.value!!.current.tempF,
                     _forecast.value!!.location.region.orEmpty()
                 ),
                 notificationShortDetails.format(
                     _forecast.value!!.current.condition.description,
-                    _forecast.value!!.current.feelslikeC
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.current.feelslikeC else _forecast.value!!.current.feelslikeF
                 ),
                 notificationLongDetails.format(
                     _forecast.value!!.current.condition.description,
-                    _forecast.value!!.current.feelslikeC,
-                    _forecast.value!!.forecast.forecastDay[0].day.mintempC.toString(),
-                    _forecast.value!!.forecast.forecastDay[0].day.maxtempC.toString(),
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.current.feelslikeC else _forecast.value!!.current.feelslikeF,
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.forecast.forecastDay[0].day.mintempC.toString() else _forecast.value!!.forecast.forecastDay[0].day.mintempF.toString(),
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.forecast.forecastDay[0].day.maxtempC.toString() else _forecast.value!!.forecast.forecastDay[0].day.maxtempF.toString(),
                     _forecast.value!!.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
                 ),
                 "https:${_forecast.value!!.current.condition.icon}",
                 NotificationGroup.GENERAL,
-                NotificationType.FROM_APP
+                NotificationType.WEATHER_UPDATED
             )
         }
     }

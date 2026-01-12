@@ -200,14 +200,30 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData?) {
 
                 Spacer(modifier = GlanceModifier.height(2.dp))
 
-                Text(
-                    text = weatherData.location,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = ColorProvider(Color.White, Color.White)
-                    ),
-                    maxLines = 1
-                )
+                Row(
+                    modifier = GlanceModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_locations_widget),
+                        contentDescription = "Location",
+                        modifier = GlanceModifier.size(12.dp)
+                    )
+
+                    Spacer(modifier = GlanceModifier.width(4.dp))
+
+                    Text(
+                        text = weatherData.location,
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            color = ColorProvider(Color.White, Color.White)
+                        ),
+                        maxLines = 1
+                    )
+
+                }
+
             }
         }
     }
@@ -417,14 +433,29 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
                     maxLines = 1
                 )
 
-                Text(
-                    text = weatherData.location,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = ColorProvider(Color.White, Color.White)
-                    ),
-                    maxLines = 1
-                )
+                Row(
+                    modifier = GlanceModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_locations_widget),
+                        contentDescription = "Location",
+                        modifier = GlanceModifier.size(12.dp)
+                    )
+
+                    Spacer(modifier = GlanceModifier.width(4.dp))
+
+                    Text(
+                        text = weatherData.location,
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            color = ColorProvider(Color.White, Color.White)
+                        ),
+                        maxLines = 1
+                    )
+
+                }
             }
         }
 
@@ -496,14 +527,29 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
                     maxLines = 1
                 )
 
-                Text(
-                    text = weatherData.location,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = ColorProvider(Color.White, Color.White)
-                    ),
-                    maxLines = 1
-                )
+                Row(
+                    modifier = GlanceModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_locations_widget),
+                        contentDescription = "Location",
+                        modifier = GlanceModifier.size(12.dp)
+                    )
+
+                    Spacer(modifier = GlanceModifier.width(4.dp))
+
+                    Text(
+                        text = weatherData.location,
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            color = ColorProvider(Color.White, Color.White)
+                        ),
+                        maxLines = 1
+                    )
+
+                }
             }
         }
 

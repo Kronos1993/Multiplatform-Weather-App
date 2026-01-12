@@ -57,31 +57,23 @@ class WeatherAlertNotificationWorker(
 
         val weatherParams = getWeatherAlertsParams()
 
-        val success = withRetry(maxRetries = 3) {
-            when {
-                currentCity != null -> {
-                    fetchAndNotifyWeatherAlert(
-                        queryCity = currentCity.cityName,
-                        weatherParams = weatherParams,
-                        locationType = "city"
-                    )
-                }
-            }
-            true
-        }
-
-        if (!success) {
-            throw Exception("Falló después de todos los reintentos")
-        }
+        fetchAndNotifyWeatherAlert(
+            lat = currentCity?.lat ?: 0.0,
+            lon = currentCity?.lon ?: 0.0,
+            weatherParams = weatherParams,
+            locationType = "city"
+        )
     }
 
     private suspend fun fetchAndNotifyWeatherAlert(
-        queryCity: String? = null,
+        lat: Double,
+        lon: Double,
         weatherParams: WeatherAlertParams,
         locationType: String
     ) {
         weatherAlertsRemoteRepository.getWeatherAlertsData(
-            queryCity ?: "",
+            lat,
+            lon,
             weatherParams.apiKey,
         )
             .onSuccess { alerts ->
@@ -91,36 +83,6 @@ class WeatherAlertNotificationWorker(
             .onError { error ->
                 throw Exception("Weather error from $locationType: ${error.errorMessage}")
             }
-    }
-
-    private suspend fun <T> withRetry(
-        maxRetries: Int = 3,
-        initialDelay: Long = 2000,
-        block: suspend () -> T
-    ): T {
-        var currentDelay = initialDelay
-        repeat(maxRetries) { attempt ->
-            try {
-                return block()
-            } catch (e: Exception) {
-                if (attempt == maxRetries - 1) {
-                    throw e
-                }
-
-                log(
-                    "Intento ${attempt + 1} falló: ${e.message}. Reintentando en ${currentDelay}ms...",
-                    true
-                )
-
-                if (isNetworkRelatedError(e)) {
-                    delay(currentDelay)
-                    currentDelay *= 2
-                } else {
-                    throw e
-                }
-            }
-        }
-        throw IllegalStateException("Unreachable")
     }
 
     private fun isNetworkRelatedError(e: Exception): Boolean {
@@ -182,8 +144,8 @@ class WeatherAlertNotificationWorker(
                 title = notificationTitle,
                 shortDescription = notificationShortDetails,
                 description = notificationLongDetails,
-                NotificationGroup.GENERAL,
-                NotificationType.FROM_APP
+                NotificationGroup.WEATHER_ALERT,
+                NotificationType.WEATHER_ALERT
             )
         }
     }

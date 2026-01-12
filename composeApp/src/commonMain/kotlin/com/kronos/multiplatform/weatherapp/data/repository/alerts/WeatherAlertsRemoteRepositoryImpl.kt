@@ -11,9 +11,10 @@ class WeatherAlertsRemoteRepositoryImpl(
 ) : WeatherAlertsRemoteRepository {
 
     override suspend fun getWeatherAlertsData(
-        city: String,
+        lat: Double,
+        lon: Double,
         apiKey: String
     ): Result<CurrentAlertsForecast, Error> {
-        return weatherAlertsRemoteDataSource.getWeatherAlerts(city, apiKey)
+        return weatherAlertsRemoteDataSource.getWeatherAlerts(lat,lon, apiKey)
     }
 }

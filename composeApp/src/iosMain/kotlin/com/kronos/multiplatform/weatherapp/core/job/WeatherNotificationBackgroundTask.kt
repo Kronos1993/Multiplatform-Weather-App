@@ -162,7 +162,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
             description = longDetails,
             notificationImageUrl = "https:${forecast.current.condition.icon}",
             group = NotificationGroup.GENERAL,
-            notificationsId = NotificationType.FROM_APP
+            notificationsId = NotificationType.WEATHER_UPDATED
         )
     }
 

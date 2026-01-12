@@ -48,6 +48,7 @@ import weather_app.composeapp.generated.resources.notification_long_details_fahr
 import weather_app.composeapp.generated.resources.notification_short_details
 import weather_app.composeapp.generated.resources.notification_short_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_title
+import weather_app.composeapp.generated.resources.notification_title_fahrenheit
 
 @Composable
 fun WeatherScreen(
@@ -73,7 +74,10 @@ fun WeatherScreen(
 
     viewModel.initNotificationsString(
         stringResource(Res.string.current_weather_key),
-        stringResource(Res.string.notification_title),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_title)
+        else
+            stringResource(Res.string.notification_title_fahrenheit),
         if (measureUnit == MeasureUnit.INTERNATIONAL)
             stringResource(Res.string.notification_short_details)
         else

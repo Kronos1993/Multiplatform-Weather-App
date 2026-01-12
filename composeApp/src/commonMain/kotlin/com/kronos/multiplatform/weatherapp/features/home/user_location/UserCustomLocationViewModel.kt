@@ -316,7 +316,7 @@ class UserCustomLocationViewModel(
             ),
             "https:${forecast.current.condition.icon}",
             NotificationGroup.GENERAL,
-            NotificationType.FROM_APP
+            NotificationType.WEATHER_UPDATED
         )
     }
 }

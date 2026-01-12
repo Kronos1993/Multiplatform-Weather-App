@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit
 
 
 const val NOTIFICATION_CHANNEL = "KMP_WEATHER_NOTIFICATION_CHANNEL"
+const val WEATHER_ALERT_NOTIFICATION_CHANNEL = "KMP_WEATHER_ALERT_NOTIFICATION_CHANNEL"
 const val TAG = "WeatherApp"
 
 
@@ -36,6 +37,7 @@ class WeatherApplication : Application() {
             androidContext(this@WeatherApplication)
         }
         createNotificationChanel()
+        createWeatherAlertNotificationChanel()
 
         scheduleWeatherWorker(60)
         scheduleWeatherAlertWorker(60*4)
@@ -72,6 +74,21 @@ class WeatherApplication : Application() {
             notificationManager.createNotificationChannel(notificationChannel)
         }
     }
+
+
+    private fun createWeatherAlertNotificationChanel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                WEATHER_ALERT_NOTIFICATION_CHANNEL, WEATHER_ALERT_NOTIFICATION_CHANNEL, NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationChannel.description = WEATHER_ALERT_NOTIFICATION_CHANNEL
+            val notificationManager = getSystemService(
+                NotificationManager::class.java
+            )
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
 
     private fun scheduleWeatherWorker(minutes: Long) {
         val constraints = Constraints.Builder()

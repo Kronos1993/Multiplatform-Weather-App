@@ -496,7 +496,7 @@ class WeatherViewModel(
                 ),
                 "https:${_weather.value!!.current.condition.icon}",
                 NotificationGroup.GENERAL,
-                NotificationType.FROM_APP
+                NotificationType.WEATHER_UPDATED
             )
         }
     }

@@ -46,8 +46,11 @@ import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.marker_to_close
 import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_long_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_short_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_title
+import weather_app.composeapp.generated.resources.notification_title_fahrenheit
 import weather_app.composeapp.generated.resources.temp_celsius
 import weather_app.composeapp.generated.resources.temp_fahrenheit
 
@@ -74,9 +77,18 @@ fun AddCityScreen(
 
     viewModel.initString(
         stringResource(Res.string.current_weather_key),
-        stringResource(Res.string.notification_title),
-        stringResource(Res.string.notification_short_details),
-        stringResource(Res.string.notification_long_details),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_title)
+        else
+            stringResource(Res.string.notification_title_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_short_details)
+        else
+            stringResource(Res.string.notification_short_details_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_long_details)
+        else
+            stringResource(Res.string.notification_long_details_fahrenheit),
     )
 
     LaunchedEffect(error) {
@@ -204,7 +216,7 @@ fun AddCityScreen(
                         ),
                 showDialog = screenState == AddCityScreenState.CityObtained,
                 confirmText = stringResource(Res.string.add_city),
-                onConfirm = { viewModel.addLocation() },
+                onConfirm = { viewModel.addLocation(measureUnit) },
                 cancelText = stringResource(Res.string.close),
                 onCancel = { viewModel.dismissCityInfo() },
                 onClose = { viewModel.dismissCityInfo() }

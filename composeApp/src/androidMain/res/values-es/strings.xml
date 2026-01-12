@@ -1,8 +1,9 @@
 <resources>
-    <string name="notification_title">%s° | %s</string>
+    <string name="notification_title">%s°C | %s</string>
     <string name="notification_short_details">%s. Sensación térmica %s°C</string>
     <string name="notification_long_details">%s\nSensación térmica %s°C\nTemp min %s°C - max %s°C\nPosibilidad de lluvia %s%%</string>
 
+    <string name="notification_title_fahrenheit">%s°F | %s</string>
     <string name="notification_short_details_fahrenheit">%s. Sensación térmica %s°F</string>
     <string name="notification_long_details_fahrenheit">%s\nSensación térmica %s°F\nTemp min %s°F - max %s°F\nPosibilidad de lluvia %s%</string>
 
@@ -10,8 +11,9 @@
     <string name="notification_alerts_multiple_details">Has click aquí para saber más.</string>
 
     <string name="temp_celsius">%s°C</string>
-    <string name="temp_celsius_widget">%s°</string>
+    <string name="temp_celsius_widget">%s°C</string>
     <string name="temp_fahrenheit">%s°F</string>
+    <string name="temp_fahrenheit_widget">%s°F</string>
     <string name="feels_like_temp_celsius">Sensación térmica %s°C</string>
     <string name="feels_like_temp_fahrenheit">Sensación térmica %s°F</string>
     <string name="speed_km">%s KM/H</string>

@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.kronos.multiplatform.weatherapp.MainActivity
 import com.kronos.multiplatform.weatherapp.NOTIFICATION_CHANNEL
 import com.kronos.multiplatform.weatherapp.R
+import com.kronos.multiplatform.weatherapp.WEATHER_ALERT_NOTIFICATION_CHANNEL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.net.URL
@@ -95,7 +96,7 @@ actual class AppNotification(
                 PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
 
             val notification: Notification =
-                NotificationCompat.Builder(context, NOTIFICATION_CHANNEL)
+                NotificationCompat.Builder(context, WEATHER_ALERT_NOTIFICATION_CHANNEL)
                     .setSmallIcon(R.drawable.ic_weather_app_icon)
                     .setContentTitle(title)
                     .setStyle(
