@@ -872,11 +872,11 @@ fun ShowAlertInfoDialog(
                     )
                 }
 
-                if (!alert?.effective.isNullOrBlank() || !alert?.expires.isNullOrBlank()) {
+                if (!alert?.effective.isNullOrBlank() && !alert.expires.isNullOrBlank()) {
                     val from =
-                        formatDateTime(Instant.parse(alert.effective.orEmpty()), "dd-MMM hh:mm aa")
+                        formatDateTime(Instant.parse(alert.effective), "dd-MMM hh:mm aa")
                     val until =
-                        formatDateTime(Instant.parse(alert.expires.orEmpty()), "dd-MMM hh:mm aa")
+                        formatDateTime(Instant.parse(alert.expires), "dd-MMM hh:mm aa")
                     LabelText(
                         text = stringResource(Res.string.alert_validity).format(from, until),
                         isDarkTheme = isDarkTheme
