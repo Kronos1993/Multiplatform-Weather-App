@@ -19,10 +19,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.SunIndicator: ImageVector
     get() {
-        if (_sunIndicator != null) {
-            return _sunIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunIndicator!!
         }
-        _sunIndicator = Builder(name = "SunIndicator", defaultWidth = 800.0.dp, defaultHeight =
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunIndicator = Builder(name = "SunIndicator", defaultWidth = 800.0.dp, defaultHeight =
                 800.0.dp, viewportWidth = 32.0f, viewportHeight = 32.0f).apply {
             path(fill = SolidColor(Color(0xFFFFC10A)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -136,7 +136,7 @@ public val WeatherAppIcons.SunIndicator: ImageVector
             }
         }
         .build()
-        return _sunIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunIndicator!!
     }
 
 private var _sunIndicator: ImageVector? = null

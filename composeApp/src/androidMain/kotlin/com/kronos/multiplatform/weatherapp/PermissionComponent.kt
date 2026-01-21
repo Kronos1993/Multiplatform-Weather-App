@@ -17,7 +17,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.kronos.multiplatform.weatherapp.components.ConfirmDialog
+import com.kronos.multiplatform.weatherapp.core.ui.components.ConfirmDialog
 import org.jetbrains.compose.resources.stringResource
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.cancel

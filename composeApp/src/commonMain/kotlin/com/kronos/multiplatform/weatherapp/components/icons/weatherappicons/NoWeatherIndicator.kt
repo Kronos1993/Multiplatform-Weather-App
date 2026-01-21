@@ -19,10 +19,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.NoWeatherIndicator: ImageVector
     get() {
-        if (_noWeatherIndicator != null) {
-            return _noWeatherIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._noWeatherIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._noWeatherIndicator!!
         }
-        _noWeatherIndicator = Builder(name = "NoWeatherIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._noWeatherIndicator = Builder(name = "NoWeatherIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 16.001f, viewportHeight = 16.001f).apply {
             path(fill = SolidColor(Color(0xFF808080)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -83,7 +83,7 @@ public val WeatherAppIcons.NoWeatherIndicator: ImageVector
             }
         }
         .build()
-        return _noWeatherIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._noWeatherIndicator!!
     }
 
 private var _noWeatherIndicator: ImageVector? = null

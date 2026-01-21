@@ -19,10 +19,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.MoonFallIndicator: ImageVector
     get() {
-        if (_moonFallIndicator != null) {
-            return _moonFallIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._moonFallIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._moonFallIndicator!!
         }
-        _moonFallIndicator = Builder(name = "MoonFallIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._moonFallIndicator = Builder(name = "MoonFallIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 32.0f, viewportHeight = 32.0f).apply {
             path(fill = SolidColor(Color(0xFFFFC10A)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -88,7 +88,7 @@ public val WeatherAppIcons.MoonFallIndicator: ImageVector
             }
         }
         .build()
-        return _moonFallIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._moonFallIndicator!!
     }
 
 private var _moonFallIndicator: ImageVector? = null

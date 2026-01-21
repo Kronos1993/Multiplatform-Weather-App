@@ -19,10 +19,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.RainyIndicator: ImageVector
     get() {
-        if (_rainyIndicator != null) {
-            return _rainyIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._rainyIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._rainyIndicator!!
         }
-        _rainyIndicator = Builder(name = "RainyIndicator", defaultWidth = 800.0.dp, defaultHeight =
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._rainyIndicator = Builder(name = "RainyIndicator", defaultWidth = 800.0.dp, defaultHeight =
                 800.0.dp, viewportWidth = 48.0f, viewportHeight = 48.0f).apply {
             path(fill = SolidColor(Color(0xFFe1e6e8)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -80,7 +80,7 @@ public val WeatherAppIcons.RainyIndicator: ImageVector
             }
         }
         .build()
-        return _rainyIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._rainyIndicator!!
     }
 
 private var _rainyIndicator: ImageVector? = null

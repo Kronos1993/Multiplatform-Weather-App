@@ -19,10 +19,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val MoonPhasesGroup.WaningCrescentMoonIndicator: ImageVector
     get() {
-        if (_waningCrescentMoonIndicator != null) {
-            return _waningCrescentMoonIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waningCrescentMoonIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waningCrescentMoonIndicator!!
         }
-        _waningCrescentMoonIndicator = Builder(name = "WaningCrescentMoonIndicator", defaultWidth =
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waningCrescentMoonIndicator = Builder(name = "WaningCrescentMoonIndicator", defaultWidth =
                 32.0.dp, defaultHeight = 32.0.dp, viewportWidth = 32.0f, viewportHeight =
                 32.0f).apply {
             path(fill = SolidColor(Color(0xFFD9D9D9)), stroke = null, strokeLineWidth = 0.0f,
@@ -75,7 +75,7 @@ public val MoonPhasesGroup.WaningCrescentMoonIndicator: ImageVector
             }
         }
         .build()
-        return _waningCrescentMoonIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waningCrescentMoonIndicator!!
     }
 
 private var _waningCrescentMoonIndicator: ImageVector? = null

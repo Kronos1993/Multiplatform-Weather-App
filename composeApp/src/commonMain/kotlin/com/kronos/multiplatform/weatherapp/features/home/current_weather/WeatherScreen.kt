@@ -25,11 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kronos.multiplatform.weatherapp.components.LoadingDialog
-import com.kronos.multiplatform.weatherapp.components.NoWeatherItem
-import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
+import com.kronos.multiplatform.weatherapp.core.ui.components.LoadingDialog
+import com.kronos.multiplatform.weatherapp.core.ui.components.NoWeatherItem
+import com.kronos.multiplatform.weatherapp.core.ui.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowAlertInfoDialog

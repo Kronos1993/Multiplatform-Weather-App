@@ -260,3 +260,19 @@ fun Instant.toDayOfWeekText(timeZone: TimeZone = TimeZone.currentSystemDefault()
     val localDateTime = this.toLocalDateTime(timeZone)
     return localDateTime.dayOfWeek
 }
+
+@OptIn(ExperimentalTime::class)
+fun Instant.format(
+    pattern: String,
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val dt = toLocalDateTime(timeZone)
+
+    return pattern
+        .replace("MM", dt.monthNumber.toString().padStart(2, '0'))
+        .replace("dd", dt.dayOfMonth.toString().padStart(2, '0'))
+        .replace("yyyy", dt.year.toString())
+        .replace("hh", ((dt.hour % 12).takeIf { it != 0 } ?: 12).toString().padStart(2, '0'))
+        .replace("mm", dt.minute.toString().padStart(2, '0'))
+        .replace("a", if (dt.hour < 12) "AM" else "PM")
+}

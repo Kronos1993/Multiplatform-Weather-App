@@ -19,10 +19,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val MoonPhasesGroup.NewMoonIndicator: ImageVector
     get() {
-        if (_newMoonIndicator != null) {
-            return _newMoonIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._newMoonIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._newMoonIndicator!!
         }
-        _newMoonIndicator = Builder(name = "NewMoonIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._newMoonIndicator = Builder(name = "NewMoonIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 32.0f, viewportHeight = 32.0f).apply {
             path(fill = SolidColor(Color(0xFFD9D9D9)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -70,7 +70,7 @@ public val MoonPhasesGroup.NewMoonIndicator: ImageVector
             }
         }
         .build()
-        return _newMoonIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._newMoonIndicator!!
     }
 
 private var _newMoonIndicator: ImageVector? = null

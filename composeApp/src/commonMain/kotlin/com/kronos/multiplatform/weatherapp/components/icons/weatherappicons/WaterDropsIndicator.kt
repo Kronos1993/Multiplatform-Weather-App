@@ -20,10 +20,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.WaterDropsIndicator: ImageVector
     get() {
-        if (_waterDropsIndicator != null) {
-            return _waterDropsIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._waterDropsIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._waterDropsIndicator!!
         }
-        _waterDropsIndicator = Builder(name = "WaterDropsIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._waterDropsIndicator = Builder(name = "WaterDropsIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 64.0f, viewportHeight = 64.0f).apply {
             path(fill = SolidColor(Color(0xFFB4DFFB)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -61,7 +61,7 @@ public val WeatherAppIcons.WaterDropsIndicator: ImageVector
             }
         }
         .build()
-        return _waterDropsIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._waterDropsIndicator!!
     }
 
 private var _waterDropsIndicator: ImageVector? = null

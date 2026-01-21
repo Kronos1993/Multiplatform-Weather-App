@@ -19,10 +19,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.PressionIndicator: ImageVector
     get() {
-        if (_pressionIndicator != null) {
-            return _pressionIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._pressionIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._pressionIndicator!!
         }
-        _pressionIndicator = Builder(name = "PressionIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._pressionIndicator = Builder(name = "PressionIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 512.0f, viewportHeight = 512.0f).apply {
             path(fill = SolidColor(Color(0xFFF2F2F2)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -108,7 +108,7 @@ public val WeatherAppIcons.PressionIndicator: ImageVector
             }
         }
         .build()
-        return _pressionIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._pressionIndicator!!
     }
 
 private var _pressionIndicator: ImageVector? = null

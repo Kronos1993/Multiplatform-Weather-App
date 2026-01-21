@@ -12,8 +12,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.kronos.multiplatform.weatherapp.components.theme.AppTheme
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
+import com.kronos.multiplatform.weatherapp.core.ui.components.theme.AppTheme
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.add_city.AddCityScreen
