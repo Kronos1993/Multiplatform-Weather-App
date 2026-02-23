@@ -25,10 +25,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -75,7 +71,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
@@ -708,194 +703,3 @@ fun SearchBar(
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
     )
 }
-
-@OptIn(ExperimentalTime::class)
-@Preview(showBackground = true, widthDp = 900, heightDp = 600)
-@Composable
-fun TablePagingViewPreview() {
-
-    val now = Clock.System.now()
-
-    data class FakeObject(
-        val id: Int,
-        val name: String,
-        val description: String,
-        val date: Instant
-    )
-
-    fun fakeData() = List(10) {
-        FakeObject(
-            id = it + 1,
-            name = "Item ${it + 1}",
-            description = "Description for item ${it + 1}",
-            date = now
-        )
-
-    }
-
-    val focusManager = LocalFocusManager.current
-    var sortOrder by remember { mutableStateOf(SortOrder.DESC) }
-
-    val data = remember(sortOrder) {
-        fakeData().let {
-            when (sortOrder) {
-                SortOrder.ASC -> it.sortedBy { f -> f.date }
-                SortOrder.DESC -> it.sortedByDescending { f -> f.date }
-            }
-        }
-    }
-
-    val columns = listOf(
-
-        // ---- ID ----
-        TableColumn(
-            id = "id",
-            weight = 0.5f,
-            items = buildList {
-                add(
-                    TableColumnItem.TableHeader<FakeObject>(
-                        header = ColumnHeader.Text("ID")
-                    )
-                )
-                data.forEach {
-                    add(
-                        TableColumnItem.TableData(it) { item ->
-                            BodyText(item.id.toString())
-                        }
-                    )
-                }
-            }
-        ),
-
-        // ---- NAME ----
-        TableColumn(
-            id = "name",
-            weight = 1f,
-            items = buildList {
-                add(
-                    TableColumnItem.TableHeader<FakeObject>(
-                        header = ColumnHeader.Text("Name")
-                    )
-                )
-                data.forEach {
-                    add(
-                        TableColumnItem.TableData(it) { item ->
-                            BodyText(item.name)
-                        }
-                    )
-                }
-            }
-        ),
-
-        // ---- DESCRIPTION ----
-        TableColumn(
-            id = "description",
-            weight = 2f,
-            items = buildList {
-                add(
-                    TableColumnItem.TableHeader<FakeObject>(
-                        header = ColumnHeader.Text("Description")
-                    )
-                )
-                data.forEach {
-                    add(
-                        TableColumnItem.TableData(it) { item ->
-                            BodyText(item.description)
-                        }
-                    )
-                }
-            }
-        ),
-
-        // ---- DATE (SORTABLE) ----
-        TableColumn(
-            id = "date",
-            weight = 1.2f,
-            items = buildList {
-                add(
-                    TableColumnItem.TableHeader<FakeObject>(
-                        header = ColumnHeader.Text("Date"),
-                        sortable = true,
-                        sortOrder = sortOrder,
-                        onSort = { sortOrder = it }
-                    )
-                )
-                data.forEach {
-                    add(
-                        TableColumnItem.TableData(it) { item ->
-                            BodyText(
-                                item.date.format(
-                                    "MM/dd/yyyy",
-                                    TimeZone.currentSystemDefault()
-                                )
-                            )
-                        }
-                    )
-                }
-            }
-        ),
-
-        // ---- ACTIONS ----
-        TableColumn(
-            id = "actions",
-            width = 120.dp,
-            items = buildList {
-                add(
-                    TableColumnItem.TableHeader<FakeObject>(
-                        header = ColumnHeader.Text("Actions")
-                    )
-                )
-                data.forEach {
-                    add(
-                        TableColumnItem.TableData(it) {
-                            Row {
-                                IconButton(onClick = {}) {
-                                    Icon(Icons.Default.Visibility, null)
-                                }
-                                IconButton(onClick = {}) {
-                                    Icon(Icons.Default.Edit, null)
-                                }
-                                IconButton(onClick = {}) {
-                                    Icon(Icons.Default.Delete, null)
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-        )
-    )
-
-    TableView(
-        state = TableState(
-            columns = columns,
-            rowCount = data.size,
-            focusManager = focusManager,
-
-            showSearch = true,
-            query = "",
-            queryPlaceholder = "Search...",
-            onSearch = {},
-
-            showDateFilter = true,
-            dateTimeFormat = "MM/dd/yyyy",
-            fromLabel = "From",
-            toLabel = "To",
-            acceptDateText = "OK",
-            cancelDateText = "Cancel",
-            onFromDateChange = {},
-            onToDateChange = {},
-
-            showTotalCount = true,
-            totalCountText = "Total: ${data.size}",
-
-            pagingMode = PagingMode.Buttons,
-            nextText = "Next",
-            backText = "Back",
-            pageTextIndicator = "Page 1"
-        )
-    )
-
-}
-
-

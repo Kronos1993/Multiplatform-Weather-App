@@ -121,6 +121,9 @@ kotlin {
 
             implementation(libs.maplibre.compose)
             implementation(libs.maplibre.composeMaterial3)
+
+            //charts
+            implementation (libs.compose.charts)
         }
 
         iosMain.dependencies {
