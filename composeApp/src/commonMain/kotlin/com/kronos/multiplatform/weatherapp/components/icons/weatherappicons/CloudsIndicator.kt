@@ -13,9 +13,9 @@ import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.CloudsIndicator: ImageVector
     get() {
