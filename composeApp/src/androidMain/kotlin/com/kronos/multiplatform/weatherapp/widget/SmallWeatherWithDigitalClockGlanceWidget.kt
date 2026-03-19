@@ -2,35 +2,27 @@ package com.kronos.multiplatform.weatherapp.widget
 
 import android.content.Context
 import androidx.glance.GlanceId
-import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
-import com.kronos.multiplatform.weatherapp.R
-import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetErrorContent
+import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetBackground
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWithDigitalClockContent
 
 class SmallWeatherWithDigitalClockGlanceWidget : BaseWeatherGlanceWidget() {
-
     override val TAG = this::class.simpleName.orEmpty()
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        try {
-            val weatherData = runCatching {
-                loadWeatherDataFromCache(context)
-            }.getOrNull()
-
-            provideContent{
-                WeatherWithDigitalClockContent(weatherData)
-            }
-
+        val weatherData = try {
+            loadWeatherDataFromCache(context)
         } catch (e: Exception) {
-            log("Error providing glance content: ${e.message}", true)
-            provideContent {
-                WeatherWidgetErrorContent(context.getString(R.string.widget_error_text))
+            log("Error fatal en provideGlance: ${e.message}", isError = true)
+            null
+        }
+
+        provideContent {
+            WeatherWidgetBackground {
+                WeatherWithDigitalClockContent(weatherData)
             }
         }
     }
 
-    override fun getClassName(): Class<out GlanceAppWidget> {
-        return SmallWeatherWithDigitalClockGlanceWidget::class.java
-    }
+    override fun getClassName() = SmallWeatherWithDigitalClockGlanceWidget::class.java
 }

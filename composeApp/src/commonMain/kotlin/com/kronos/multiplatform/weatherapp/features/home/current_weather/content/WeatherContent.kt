@@ -8,13 +8,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -442,14 +445,18 @@ fun WeatherContentSection(
 
         if (alerts.isNotEmpty()) {
             item {
-                LazyRow(
+                Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .height(IntrinsicSize.Max)
                 ) {
-                    items(alerts, key = { it.identifier.orEmpty() }) { alert ->
+                    alerts.forEach { alert ->
                         AlertIndicator(
                             alert = alert,
                             darkTheme = isDarkTheme,
-                            onItemClick = onAlertItemClicked
+                            onItemClick = onAlertItemClicked,
+                            modifier = Modifier.fillMaxHeight()
                         )
                     }
                 }

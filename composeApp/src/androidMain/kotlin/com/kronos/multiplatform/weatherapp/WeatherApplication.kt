@@ -14,6 +14,7 @@ import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.di.initKoin
 import com.kronos.multiplatform.weatherapp.job.WeatherAlertNotificationWorker
 import com.kronos.multiplatform.weatherapp.job.WeatherNotificationWorker
+import com.kronos.multiplatform.weatherapp.job.WeatherWidgetUpdateWorker
 import com.mmk.kmpnotifier.notification.NotifierManager
 import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
 import org.koin.android.ext.android.inject
@@ -40,7 +41,8 @@ class WeatherApplication : Application() {
         createWeatherAlertNotificationChanel()
 
         scheduleWeatherWorker(60)
-        scheduleWeatherAlertWorker(60*4)
+        scheduleWeatherAlertWorker(60 * 4)
+        scheduleWeatherWidgetUpdateWorker()
 
         NotifierManager.initialize(
             configuration = NotificationPlatformConfiguration.Android(
@@ -79,7 +81,9 @@ class WeatherApplication : Application() {
     private fun createWeatherAlertNotificationChanel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                WEATHER_ALERT_NOTIFICATION_CHANNEL, WEATHER_ALERT_NOTIFICATION_CHANNEL, NotificationManager.IMPORTANCE_DEFAULT
+                WEATHER_ALERT_NOTIFICATION_CHANNEL,
+                WEATHER_ALERT_NOTIFICATION_CHANNEL,
+                NotificationManager.IMPORTANCE_DEFAULT
             )
             notificationChannel.description = WEATHER_ALERT_NOTIFICATION_CHANNEL
             val notificationManager = getSystemService(
@@ -130,5 +134,9 @@ class WeatherApplication : Application() {
             ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
+    }
+
+    private fun scheduleWeatherWidgetUpdateWorker() {
+        WeatherWidgetUpdateWorker.schedule(this)
     }
 }
