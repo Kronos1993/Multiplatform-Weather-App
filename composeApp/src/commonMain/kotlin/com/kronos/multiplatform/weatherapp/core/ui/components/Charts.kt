@@ -41,8 +41,9 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun BarCharView(
-    data: List<Triple<String, Float, Color>>,
     title: String,
+    data: List<Triple<String, Float, Color>>,
+    legendLabels:Map<String,String> = emptyMap(),
     modifier: Modifier = Modifier,
     isDarkTheme: Boolean = false,
     xAxisTextColor: Color? = null,
@@ -53,7 +54,11 @@ fun BarCharView(
             label = it.first,
             values = listOf(
                 Bars.Data(
-                    label = it.second.toString(),
+                    label = if (legendLabels.isNotEmpty()){
+                        legendLabels[it.first].orEmpty()
+                    }else{
+                        it.first
+                    },
                     value = it.second.toDouble(),
                     color = Brush.verticalGradient(
                         listOf(
@@ -167,22 +172,28 @@ fun BarCharView(
 }
 
 
-// Crear el gráfico de lineas
 @Composable
 fun LineChartView(
-    data: List<Triple<String, Float, Color>> = listOf(),
     title: String,
+    data: List<Triple<String, Float, Color>> = listOf(),
+    legendLabels:Map<String,String> = emptyMap(),
     modifier: Modifier = Modifier,
     isDarkTheme: Boolean = false,
     xAxisTextColor: Color? = null,
-    yAxisTextColor: Color? = null
+    yAxisTextColor: Color? = null,
+    curveLines: Boolean = true
 ) {
 
     val graphData = data.map {
         Line(
-            label = it.second.toString(),
+            label = if (legendLabels.isNotEmpty()){
+                legendLabels[it.first].orEmpty()
+            }else{
+                it.first
+            },
             values = listOf(it.second.toDouble()),
             color = SolidColor(it.third),
+            curvedEdges = curveLines,
             firstGradientFillColor = it.third.copy(alpha = .8f),
             secondGradientFillColor = it.third.copy(alpha = .5f),
             strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
@@ -284,22 +295,28 @@ fun LineChartView(
 
 @Composable
 fun MultipleLineChartView(
-    data: List<Triple<String, List<Pair<String, Float>>, Color>>,
     title: String,
+    data: List<Triple<String, List<Pair<String, Float>>, Color>>,
+    legendLabels:Map<String,String> = emptyMap(),
     modifier: Modifier = Modifier,
     isDarkTheme: Boolean = false,
     xAxisTextColor: Color? = null,
-    yAxisTextColor: Color? = null
+    yAxisTextColor: Color? = null,
+    curveLines: Boolean = true
 ) {
     if (data.isEmpty()) return
 
     val lines = remember(data) {
-        data.map { (year, monthValues, color) ->
+        data.map { (first, second, color) ->
             Line(
-                label = year,
-                values = monthValues.map { it.second.toDouble() },
+                label = if (legendLabels.isNotEmpty()){
+                    legendLabels[first].orEmpty()
+                }else{
+                    first
+                },
+                values = second.map { it.second.toDouble() },
                 color = SolidColor(color),
-                curvedEdges = true,
+                curvedEdges = curveLines,
                 firstGradientFillColor = color.copy(alpha = .8f),
                 secondGradientFillColor = color.copy(alpha = .5f),
                 strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
@@ -382,7 +399,7 @@ fun MultipleLineChartView(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 ),
-                labels = data.map { "" },
+                labels = data.firstOrNull()?.second?.map { it.first } ?: emptyList()
             ),
             labelHelperProperties = LabelHelperProperties(
                 enabled = true,
@@ -401,7 +418,6 @@ fun MultipleLineChartView(
 }
 
 
-// Crear el gráfico de pastel
 @Composable
 fun PieChartView(
     data: List<Triple<String, Float, Color>> = listOf(),
@@ -479,9 +495,9 @@ fun BarChartViewPreview() {
         BarCharView(
             data = barChartPreviewData,
             title = "Sales per Month",
-            isDarkTheme = true,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
+            isDarkTheme = true,
         )
     }
 }
@@ -505,12 +521,12 @@ fun LineChartViewPreview() {
 
     MaterialTheme {
         LineChartView(
-            data = barChartPreviewData,
             title = "Sales per Month",
-            isDarkTheme = false,
+            data = barChartPreviewData,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp),
+            curveLines = false,
         )
     }
 }
