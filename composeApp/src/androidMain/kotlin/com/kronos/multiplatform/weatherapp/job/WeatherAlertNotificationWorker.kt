@@ -18,7 +18,6 @@ import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationL
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherAlertsRemoteRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

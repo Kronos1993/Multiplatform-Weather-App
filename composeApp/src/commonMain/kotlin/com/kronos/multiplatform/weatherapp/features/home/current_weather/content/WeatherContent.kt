@@ -871,6 +871,14 @@ fun ShowAlertInfoDialog(
                     }
                 }
 
+                alert?.description?.takeIf { it.isNotBlank() }?.let {
+                    BodyText(
+                        text = it,
+                        fontWeight = FontWeight.Medium,
+                        isDarkTheme = isDarkTheme
+                    )
+                }
+
                 alert?.instruction?.takeIf { it.isNotBlank() }?.let {
                     BodyText(
                         text = "${stringResource(Res.string.alert_instructions)}$it",
