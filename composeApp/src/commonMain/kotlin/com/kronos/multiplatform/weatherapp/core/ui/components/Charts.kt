@@ -38,6 +38,7 @@ import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.Pie
 import androidx.compose.ui.tooling.preview.Preview
+import ir.ehsannarmani.compose_charts.models.DotProperties
 
 @Composable
 fun BarCharView(
@@ -193,6 +194,13 @@ fun LineChartView(
             },
             values = listOf(it.second.toDouble()),
             color = SolidColor(it.third),
+            dotProperties = DotProperties(
+                enabled = true,
+                color = SolidColor(Color.White),
+                strokeWidth = 1.dp,
+                radius = 2.dp,
+                strokeColor = SolidColor(it.third),
+            ),
             curvedEdges = curveLines,
             firstGradientFillColor = it.third.copy(alpha = .8f),
             secondGradientFillColor = it.third.copy(alpha = .5f),
@@ -316,6 +324,13 @@ fun MultipleLineChartView(
                 },
                 values = second.map { it.second.toDouble() },
                 color = SolidColor(color),
+                dotProperties = DotProperties(
+                    enabled = true,
+                    color = SolidColor(Color.White),
+                    strokeWidth = 1.dp,
+                    radius = 2.dp,
+                    strokeColor = SolidColor(color),
+                ),
                 curvedEdges = curveLines,
                 firstGradientFillColor = color.copy(alpha = .8f),
                 secondGradientFillColor = color.copy(alpha = .5f),
