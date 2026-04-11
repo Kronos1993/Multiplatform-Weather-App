@@ -33,7 +33,7 @@ adaptive = "1.2.0"
 
 dateTimeVersion = "0.7.1-0.6.x-compat"
 
-ktor = "3.4.1"
+ktor = "3.4.2"
 
 composeMaterial = "1.7.3"
 
