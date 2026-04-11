@@ -23,6 +23,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -141,6 +142,10 @@ fun UserCustomLocationScreen(
                 )
             }
         }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.onLeavingScreen() }
     }
 
     Surface(
