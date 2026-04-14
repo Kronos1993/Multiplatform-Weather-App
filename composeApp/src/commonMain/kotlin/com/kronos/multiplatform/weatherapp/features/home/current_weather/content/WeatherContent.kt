@@ -55,6 +55,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.CachePolicy
@@ -90,6 +91,7 @@ import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moon
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases.WaxingGibbousMoonIndicator
 import com.kronos.multiplatform.weatherapp.core.ui.components.BodyText
 import com.kronos.multiplatform.weatherapp.core.ui.components.ComponentSize
+import com.kronos.multiplatform.weatherapp.core.ui.components.ExpressiveBaseCardView
 import com.kronos.multiplatform.weatherapp.core.ui.components.HeaderText
 import com.kronos.multiplatform.weatherapp.core.ui.components.LabelText
 import com.kronos.multiplatform.weatherapp.core.ui.components.TitleText
@@ -97,12 +99,16 @@ import com.kronos.multiplatform.weatherapp.core.ui.components.maps.FixMapView
 import com.kronos.multiplatform.weatherapp.core.ui.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
+import com.kronos.multiplatform.weatherapp.data.mapper.mapCurrentSuggestions
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionPriority
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionType
+import com.kronos.multiplatform.weatherapp.domain.model.WeatherSuggestionModel
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import org.jetbrains.compose.resources.stringResource
@@ -136,6 +142,30 @@ import weather_app.composeapp.generated.resources.rain
 import weather_app.composeapp.generated.resources.snow
 import weather_app.composeapp.generated.resources.speed_km
 import weather_app.composeapp.generated.resources.speed_miles
+import weather_app.composeapp.generated.resources.suggestion_heat_message
+import weather_app.composeapp.generated.resources.suggestion_heat_title
+import weather_app.composeapp.generated.resources.suggestion_humidity_message
+import weather_app.composeapp.generated.resources.suggestion_humidity_title
+import weather_app.composeapp.generated.resources.suggestion_morning_heat_message
+import weather_app.composeapp.generated.resources.suggestion_morning_heat_title
+import weather_app.composeapp.generated.resources.suggestion_morning_rain_message
+import weather_app.composeapp.generated.resources.suggestion_morning_rain_title
+import weather_app.composeapp.generated.resources.suggestion_morning_uv_message
+import weather_app.composeapp.generated.resources.suggestion_morning_uv_title
+import weather_app.composeapp.generated.resources.suggestion_rain_message
+import weather_app.composeapp.generated.resources.suggestion_rain_title
+import weather_app.composeapp.generated.resources.suggestion_tomorrow_clear_message
+import weather_app.composeapp.generated.resources.suggestion_tomorrow_clear_title
+import weather_app.composeapp.generated.resources.suggestion_tomorrow_rain_message
+import weather_app.composeapp.generated.resources.suggestion_tomorrow_rain_title
+import weather_app.composeapp.generated.resources.suggestion_tomorrow_uv_message
+import weather_app.composeapp.generated.resources.suggestion_tomorrow_uv_title
+import weather_app.composeapp.generated.resources.suggestion_uv_high_message
+import weather_app.composeapp.generated.resources.suggestion_uv_high_title
+import weather_app.composeapp.generated.resources.suggestion_uv_medium_message
+import weather_app.composeapp.generated.resources.suggestion_uv_medium_title
+import weather_app.composeapp.generated.resources.suggestion_wind_message
+import weather_app.composeapp.generated.resources.suggestion_wind_title
 import weather_app.composeapp.generated.resources.sun
 import weather_app.composeapp.generated.resources.unknow
 import weather_app.composeapp.generated.resources.uv_index
@@ -270,6 +300,7 @@ private fun getWeatherIndicators(
 @Composable
 fun WeatherContentPortrait(
     weather: Forecast,
+    rainRadarTiles: String,
     deviceScreenConfiguration: DeviceScreenConfiguration,
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
@@ -328,6 +359,7 @@ fun WeatherContentPortrait(
 
         WeatherContentSection(
             currentWeather = weather,
+            rainRadarTiles = rainRadarTiles,
             isDarkTheme = isDarkTheme,
             urlProvider = urlProvider,
             imageQuality = imageQuality,
@@ -395,6 +427,7 @@ fun WeatherHeaderSection(
 @Composable
 fun WeatherContentSection(
     currentWeather: Forecast,
+    rainRadarTiles: String,
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
@@ -418,6 +451,7 @@ fun WeatherContentSection(
 
     val indicators = getWeatherIndicators(currentWeather, currentDayForecast, measureUnit)
 
+    val suggestions = currentWeather.mapCurrentSuggestions(timeZone,measureUnit)
 
     LazyColumn(
         state = scrollState,
@@ -460,6 +494,16 @@ fun WeatherContentSection(
                         )
                     }
                 }
+            }
+        }
+
+        if (suggestions.isNotEmpty()) {
+            item {
+                SuggestionList(
+                    suggestions = suggestions,
+                    isDarkTheme = isDarkTheme,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
 
@@ -515,6 +559,7 @@ fun WeatherContentSection(
                         )
                     )
                 ),
+                rainRadarTiles = rainRadarTiles,
                 onMapClick = {},
                 onMapLongClick = {},
                 darkTheme = isDarkTheme,
@@ -530,6 +575,7 @@ fun WeatherContentSection(
 @Composable
 fun WeatherContentLandscape(
     weather: Forecast,
+    rainRadarTiles: String,
     isDarkTheme: Boolean,
     urlProvider: UrlProvider,
     imageQuality: String,
@@ -578,6 +624,7 @@ fun WeatherContentLandscape(
 
                 else -> WeatherContentPortrait(
                     weather = weather,
+                    rainRadarTiles = rainRadarTiles,
                     deviceScreenConfiguration = deviceScreenConfiguration,
                     isDarkTheme = isDarkTheme,
                     urlProvider = urlProvider,
@@ -598,6 +645,7 @@ fun WeatherContentLandscape(
         ) {
             WeatherContentSection(
                 currentWeather = weather,
+                rainRadarTiles = rainRadarTiles,
                 isDarkTheme = isDarkTheme,
                 urlProvider = urlProvider,
                 imageQuality = imageQuality,
@@ -736,31 +784,33 @@ fun ShowSelectedCityInfoDialog(
                 )
             },
             text = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.fillMaxWidth()
+                ExpressiveBaseCardView(
+                    modifier = Modifier.fillMaxWidth(),
+                    cardBackgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+                    elevation = 0.dp
                 ) {
-                    if (iconUrl.isNotEmpty()) {
-                        val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
-                            .data(iconUrl)
-                            .memoryCachePolicy(CachePolicy.ENABLED)
-                            .diskCachePolicy(CachePolicy.ENABLED)
-                            .build()
-
-                        AsyncImage(
-                            model = imageRequest,
-                            contentDescription = "Weather",
-                            modifier = Modifier.size(64.dp),
-                            contentScale = ContentScale.Fit
-                        )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        if (iconUrl.isNotEmpty()) {
+                            val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+                                .data(iconUrl)
+                                .memoryCachePolicy(CachePolicy.ENABLED)
+                                .diskCachePolicy(CachePolicy.ENABLED)
+                                .build()
+                            AsyncImage(
+                                model = imageRequest,
+                                contentDescription = "Weather",
+                                modifier = Modifier.size(64.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                        TitleText(text = temp, fontWeight = Bold, size = ComponentSize.MEDIUM)
                     }
-
-                    TitleText(
-                        text = temp,
-                        fontWeight = Bold,
-                        size = ComponentSize.MEDIUM
-                    )
                 }
             },
             confirmButton = {
@@ -908,4 +958,124 @@ fun ShowAlertInfoDialog(
             }
         },
     )
+}
+
+@Composable
+fun SuggestionCard(
+    suggestion: WeatherSuggestionModel,
+    isDarkTheme: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    val backgroundColor = when (suggestion.priority) {
+        SuggestionPriority.HIGH   -> Color(0xFFB71C1C)
+        SuggestionPriority.MEDIUM -> Color(0xFFE65100)
+        SuggestionPriority.LOW    -> Color(0xFF1565C0)
+    }
+
+    ExpressiveBaseCardView(
+        modifier = modifier.fillMaxWidth(),
+        cardBackgroundColor = backgroundColor,
+        elevation = 2.dp,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = suggestion.icon,
+                fontSize = 28.sp
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = suggestion.resolveTitle(),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = suggestion.resolveMessage(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SuggestionList(
+    suggestions: List<WeatherSuggestionModel>,
+    isDarkTheme: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (suggestions.isEmpty()) return
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        suggestions.forEach { suggestion ->
+            SuggestionCard(
+                suggestion = suggestion,
+                isDarkTheme = isDarkTheme
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherSuggestionModel.resolveTitle(): String = when (type) {
+    SuggestionType.RAIN -> stringResource(Res.string.suggestion_rain_title)
+    SuggestionType.UV -> when (priority) {
+        SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_uv_high_title)
+        else -> stringResource(Res.string.suggestion_uv_medium_title)
+    }
+    SuggestionType.HEAT -> stringResource(Res.string.suggestion_heat_title)
+    SuggestionType.WIND -> stringResource(Res.string.suggestion_wind_title)
+    SuggestionType.HUMIDITY -> stringResource(Res.string.suggestion_humidity_title)
+    SuggestionType.TOMORROW_FORECAST -> when (priority) {
+        SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_tomorrow_rain_title)
+        SuggestionPriority.MEDIUM -> stringResource(Res.string.suggestion_tomorrow_uv_title)
+        else -> stringResource(Res.string.suggestion_tomorrow_clear_title)
+    }
+    SuggestionType.MORNING_SUMMARY -> when (priority) {
+        SuggestionPriority.HIGH -> when (icon) {
+            "🌂" -> stringResource(Res.string.suggestion_morning_rain_title)
+            else -> stringResource(Res.string.suggestion_morning_uv_title)
+        }
+        else -> stringResource(Res.string.suggestion_morning_heat_title)
+    }
+}
+
+@Composable
+fun WeatherSuggestionModel.resolveMessage(): String {
+    val template = when (type) {
+        SuggestionType.RAIN -> stringResource(Res.string.suggestion_rain_message)
+        SuggestionType.UV -> when (priority) {
+            SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_uv_high_message)
+            else -> stringResource(Res.string.suggestion_uv_medium_message)
+        }
+        SuggestionType.HEAT -> stringResource(Res.string.suggestion_heat_message)
+        SuggestionType.WIND -> stringResource(Res.string.suggestion_wind_message)
+        SuggestionType.HUMIDITY -> stringResource(Res.string.suggestion_humidity_message)
+        SuggestionType.TOMORROW_FORECAST -> when (priority) {
+            SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_tomorrow_rain_message)
+            SuggestionPriority.MEDIUM -> stringResource(Res.string.suggestion_tomorrow_uv_message)
+            else -> stringResource(Res.string.suggestion_tomorrow_clear_message)
+        }
+        SuggestionType.MORNING_SUMMARY -> when (priority) {
+            SuggestionPriority.HIGH -> when (icon) {
+                "🌂" -> stringResource(Res.string.suggestion_morning_rain_message)
+                else -> stringResource(Res.string.suggestion_morning_uv_message)
+            }
+            else -> stringResource(Res.string.suggestion_morning_heat_message)
+        }
+    }
+    // Aplicar args en orden
+    return args.foldIndexed(template) { index, acc, arg ->
+        acc.replace("%${index + 1}\$s", arg)
+    }
 }
