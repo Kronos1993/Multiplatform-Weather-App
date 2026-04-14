@@ -25,8 +25,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,6 +50,7 @@ import com.kronos.multiplatform.weatherapp.core.ui.components.BodyText
 import com.kronos.multiplatform.weatherapp.core.ui.components.CompassView
 import com.kronos.multiplatform.weatherapp.core.ui.components.ComponentSize
 import com.kronos.multiplatform.weatherapp.core.ui.components.DisplayText
+import com.kronos.multiplatform.weatherapp.core.ui.components.ExpressiveBaseCardView
 import com.kronos.multiplatform.weatherapp.core.ui.components.HeaderText
 import com.kronos.multiplatform.weatherapp.core.ui.components.IconPosition
 import com.kronos.multiplatform.weatherapp.core.ui.components.LabelText
@@ -106,28 +105,23 @@ fun HourlyItemIndicator(
     modifier: Modifier = Modifier,
     onItemClick: (Hour) -> Unit,
 ) {
-    val cardBackgroundColor = if (darkTheme) {
+    val cardBackgroundColor = if (darkTheme)
         extendedDark.backgroundCardColor.color
-    } else {
+    else
         extendedLight.backgroundCardColor.color
-    }
 
-    Card(
-        modifier = modifier
-            .padding(4.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        elevation = CardDefaults.cardElevation(4.dp),
+    ExpressiveBaseCardView(
+        modifier = modifier,
+        cardBackgroundColor = cardBackgroundColor,
+        elevation = 4.dp,
         onClick = { onItemClick(item) }
     ) {
         Column(
-            modifier = Modifier
-                .padding(8.dp),
+            modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-
             val date = Instant.of(item.time, true)
-
             val hour = date?.getHour() ?: ""
 
             LabelText(
@@ -153,15 +147,10 @@ fun HourlyItemIndicator(
             )
 
             LabelText(
-                text =
-                    if (measureUnit == MeasureUnit.INTERNATIONAL)
-                        stringResource(Res.string.temp_celsius).format(
-                            item.tempC,
-                        )
-                    else
-                        stringResource(Res.string.temp_fahrenheit).format(
-                            item.tempF,
-                        ),
+                text = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    stringResource(Res.string.temp_celsius).format(item.tempC)
+                else
+                    stringResource(Res.string.temp_fahrenheit).format(item.tempF),
                 modifier = Modifier.wrapContentSize(),
                 textColor = Color.White,
                 size = ComponentSize.MEDIUM,
@@ -179,15 +168,15 @@ fun AlertIndicator(
     modifier: Modifier = Modifier,
     onItemClick: (WeatherAlert) -> Unit,
 ) {
-    val cardBackgroundColor =
-        if (darkTheme) extendedDark.backgroundCardColor.color
-        else extendedLight.backgroundCardColor.color
+    val cardBackgroundColor = if (darkTheme)
+        extendedDark.backgroundCardColor.color
+    else
+        extendedLight.backgroundCardColor.color
 
-    Card(
-        modifier = modifier
-            .widthIn(max = 250.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+    ExpressiveBaseCardView(
+        modifier = modifier.widthIn(max = 250.dp),
+        cardBackgroundColor = cardBackgroundColor,
+        elevation = 4.dp,
         onClick = { onItemClick(alert) }
     ) {
         Column(
@@ -196,7 +185,6 @@ fun AlertIndicator(
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
             BodyText(
                 text = alert.headline.orEmpty(),
                 textColor = Color.White,
@@ -241,11 +229,8 @@ fun AlertIndicator(
                 ) {
                     visibleAreas.forEach { area ->
                         AssistChip(
-                            onClick = { },
-                            border = BorderStroke(
-                                width = 1.dp,
-                                color = Color.White
-                            ),
+                            onClick = {},
+                            border = BorderStroke(1.dp, Color.White),
                             label = {
                                 LabelText(
                                     text = area,
@@ -259,11 +244,8 @@ fun AlertIndicator(
 
                     if (hasMoreAreas) {
                         AssistChip(
-                            onClick = { },
-                            border = BorderStroke(
-                                width = 1.dp,
-                                color = Color.White
-                            ),
+                            onClick = {},
+                            border = BorderStroke(1.dp, Color.White),
                             label = {
                                 LabelText(
                                     text = "…",
@@ -276,7 +258,6 @@ fun AlertIndicator(
                     }
                 }
             }
-
         }
     }
 }
@@ -362,6 +343,174 @@ fun WindCompassIndicator(
 }
 
 @Composable
+fun WeatherIndicatorList(
+    indicators: List<Indicator>,
+    darkTheme: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val cardBackgroundColor = if (darkTheme)
+        extendedDark.backgroundCardColor.color
+    else
+        extendedLight.backgroundCardColor.color
+
+    ExpressiveBaseCardView(
+        modifier = modifier.fillMaxWidth(),
+        cardBackgroundColor = cardBackgroundColor,
+        elevation = 0.dp,
+        onClick = null
+    ) {
+        FlowRow(
+            modifier = Modifier.padding(4.dp),
+            maxItemsInEachRow = 3,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            indicators.forEach {
+                when (it) {
+                    is Indicator.UVIndex -> UvIndexProgressIndicator(
+                        it,
+                        darkTheme = darkTheme,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    is Indicator.Wind -> WindCompassIndicator(
+                        it,
+                        darkTheme = darkTheme,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    is Indicator.Default -> WeatherIndicatorItem(
+                        item = it,
+                        darkTheme = darkTheme,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalTime::class)
+@Composable
+fun DailyWeatherItemIndicator(
+    item: DailyForecast,
+    urlProvider: UrlProvider,
+    imageQuality: String,
+    currentLang: String,
+    measureUnit: MeasureUnit,
+    darkTheme: Boolean,
+    modifier: Modifier = Modifier,
+    onItemClick: (DailyForecast) -> Unit,
+) {
+    val cardBackgroundColor = if (darkTheme)
+        extendedDark.backgroundCardColor.color
+    else
+        extendedLight.backgroundCardColor.color
+
+    ExpressiveBaseCardView(
+        modifier = modifier,
+        cardBackgroundColor = cardBackgroundColor,
+        elevation = 4.dp,
+        onClick = { onItemClick(item) }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                val date = Instant.of(item.date, false)
+                val dayOfWeek = if (date != null) {
+                    if (date.isToday()) stringResource(Res.string.today)
+                    else if (date.isTomorrow()) stringResource(Res.string.tomorrow)
+                    else when (date.toDayOfWeekText()) {
+                        DayOfWeek.MONDAY -> stringResource(Res.string.monday)
+                        DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday)
+                        DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday)
+                        DayOfWeek.THURSDAY -> stringResource(Res.string.thursday)
+                        DayOfWeek.FRIDAY -> stringResource(Res.string.friday)
+                        DayOfWeek.SATURDAY -> stringResource(Res.string.saturday)
+                        DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
+                    }
+                } else ""
+
+                BodyText(
+                    text = dayOfWeek,
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
+                    textOverflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                LabelText(
+                    text = "${item.day.avghumidity}%",
+                    vector = WeatherAppIcons.WaterDropsIndicator,
+                    iconPosition = IconPosition.START,
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+            }
+
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
+                    .data(urlProvider.getImageUrl(item.day.condition.icon, imageQuality))
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build()
+
+                AsyncImage(
+                    model = imageRequest,
+                    contentDescription = "weather",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(Color.Transparent),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                LabelText(
+                    text = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                        stringResource(Res.string.temp_celsius).format(item.day.mintempC.toString()) +
+                                "\n" +
+                                stringResource(Res.string.temp_celsius).format(item.day.maxtempC.toString())
+                    else
+                        stringResource(Res.string.temp_fahrenheit).format(item.day.mintempF.toString()) +
+                                "\n" +
+                                stringResource(Res.string.temp_fahrenheit).format(item.day.maxtempF.toString()),
+                    textColor = Color.White,
+                    size = ComponentSize.MEDIUM,
+                    vector = WeatherAppIcons.TempIndicator,
+                    iconPosition = IconPosition.START,
+                    textAlign = TextAlign.End,
+                    maxLines = 2
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
 fun UvIndexProgressIndicator(
     item: Indicator.UVIndex,
     modifier: Modifier = Modifier,
@@ -393,62 +542,6 @@ fun UvIndexProgressIndicator(
             size = ComponentSize.EXTRA_SMALL,
             modifier = Modifier.wrapContentWidth()
         )
-    }
-}
-
-@Composable
-fun WeatherIndicatorList(
-    indicators: List<Indicator>,
-    darkTheme: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val cardBackgroundColor = if (darkTheme) {
-        extendedDark.backgroundCardColor.color
-    } else {
-        extendedLight.backgroundCardColor.color
-    }
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(4.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        elevation = CardDefaults.cardElevation(0.dp),
-    ) {
-        FlowRow(
-            modifier = Modifier.padding(4.dp),
-            maxItemsInEachRow = 3,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            indicators.forEach {
-                when (it) {
-                    is Indicator.UVIndex -> {
-                        UvIndexProgressIndicator(
-                            it,
-                            darkTheme = darkTheme,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    is Indicator.Wind -> {
-                        WindCompassIndicator(
-                            it,
-                            darkTheme = darkTheme,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    is Indicator.Default -> {
-                        WeatherIndicatorItem(
-                            item = it,
-                            darkTheme = darkTheme,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -899,138 +992,6 @@ fun CurrentWeatherBigScreenCompactItem(
 }
 
 
-@OptIn(ExperimentalTime::class)
-@Composable
-fun DailyWeatherItemIndicator(
-    item: DailyForecast,
-    urlProvider: UrlProvider,
-    imageQuality: String,
-    currentLang: String,
-    measureUnit: MeasureUnit,
-    darkTheme: Boolean,
-    modifier: Modifier = Modifier,
-    onItemClick: (DailyForecast) -> Unit,
-) {
-    val cardBackgroundColor = if (darkTheme) {
-        extendedDark.backgroundCardColor.color
-    } else {
-        extendedLight.backgroundCardColor.color
-    }
-
-    Card(
-        modifier = modifier
-            .padding(4.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        elevation = CardDefaults.cardElevation(4.dp),
-        onClick = {
-            onItemClick(item)
-        }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                val date = Instant.of(item.date, false)
-                val dayOfWeek = if (date != null) {
-                    if (date.isToday()) {
-                        stringResource(Res.string.today)
-                    } else if (date.isTomorrow()) {
-                        stringResource(Res.string.tomorrow)
-                    } else {
-                        when (date.toDayOfWeekText()) {
-                            DayOfWeek.MONDAY -> stringResource(Res.string.monday)
-                            DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday)
-                            DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday)
-                            DayOfWeek.THURSDAY -> stringResource(Res.string.thursday)
-                            DayOfWeek.FRIDAY -> stringResource(Res.string.friday)
-                            DayOfWeek.SATURDAY -> stringResource(Res.string.saturday)
-                            DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
-                        }
-                    }
-                } else {
-                    ""
-                }
-
-                BodyText(
-                    text = dayOfWeek,
-                    textColor = Color.White,
-                    size = ComponentSize.MEDIUM,
-                    textAlign = TextAlign.Start,
-                    maxLines = 1,
-                    textOverflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                LabelText(
-                    text = "${item.day.avghumidity}%",
-                    vector = WeatherAppIcons.WaterDropsIndicator,
-                    iconPosition = IconPosition.START,
-                    textColor = Color.White,
-                    size = ComponentSize.MEDIUM,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1
-                )
-            }
-
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                val imageRequest = ImageRequest.Builder(LocalPlatformContext.current)
-                    .data(urlProvider.getImageUrl(item.day.condition.icon, imageQuality))
-                    .memoryCachePolicy(CachePolicy.ENABLED)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .build()
-
-                AsyncImage(
-                    model = imageRequest,
-                    contentDescription = "weather",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .background(Color.Transparent),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                LabelText(
-                    text =
-                        if (measureUnit == MeasureUnit.INTERNATIONAL)
-                            stringResource(Res.string.temp_celsius).format(item.day.mintempC.toString()) +
-                                    "\n" +
-                                    stringResource(Res.string.temp_celsius).format(item.day.maxtempC.toString())
-                        else
-                            stringResource(Res.string.temp_fahrenheit).format(item.day.mintempF.toString()) +
-                                    "\n" +
-                                    stringResource(Res.string.temp_fahrenheit).format(item.day.maxtempF.toString()),
-                    modifier = Modifier,
-                    textColor = Color.White,
-                    size = ComponentSize.MEDIUM,
-                    vector = WeatherAppIcons.TempIndicator,
-                    iconPosition = IconPosition.START,
-                    textAlign = TextAlign.End,
-                    maxLines = 2
-                )
-            }
-        }
-    }
-}
-
-
 @Composable
 fun DailyWeatherList(
     days: List<DailyForecast>,
@@ -1135,43 +1096,31 @@ fun UserCustomLocationItem(
     resetSwipe: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-
-    val cardBackgroundColor = if (darkTheme) {
+    val cardBackgroundColor = if (darkTheme)
         extendedDark.backgroundCardColor.color
-    } else {
+    else
         extendedLight.backgroundCardColor.color
-    }
 
     SwipeActionContainer(
         item = item,
         modifier = Modifier.padding(5.dp),
         enableStartToEnd = enableStartToEnd,
         startToEndIcon = startToEndIcon,
-        onSwipeStartToEnd = {
-            onSwipeStartToEnd(item)
-        },
+        onSwipeStartToEnd = { onSwipeStartToEnd(item) },
         enableEndToStart = enableEndToStart,
         endToStartIcon = endToStartIcon,
-        onSwipeEndToStart = {
-            onSwipeEndToStart(item)
-        },
+        onSwipeEndToStart = { onSwipeEndToStart(item) },
         resetSwipe = resetSwipe
     ) {
-        Card(
-            modifier = modifier
-                .padding(4.dp),
-            colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-            elevation = CardDefaults.cardElevation(4.dp),
-            onClick = {
-                onItemClick(item)
-            },
+        ExpressiveBaseCardView(
+            modifier = modifier,
+            cardBackgroundColor = cardBackgroundColor,
+            elevation = 4.dp,
+            onClick = { onItemClick(item) }
         ) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
+            Column(modifier = Modifier.padding(8.dp)) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -1191,11 +1140,10 @@ fun UserCustomLocationItem(
                     )
 
                     HeaderText(
-                        text =
-                            if (measureUnit == MeasureUnit.INTERNATIONAL)
-                                stringResource(Res.string.temp_celsius).format(item.tempC.toString())
-                            else
-                                stringResource(Res.string.temp_fahrenheit).format(item.tempF.toString()),
+                        text = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                            stringResource(Res.string.temp_celsius).format(item.tempC.toString())
+                        else
+                            stringResource(Res.string.temp_fahrenheit).format(item.tempF.toString()),
                         modifier = Modifier.weight(1f),
                         textColor = Color.White,
                         size = ComponentSize.MEDIUM,
@@ -1204,8 +1152,7 @@ fun UserCustomLocationItem(
                 }
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
