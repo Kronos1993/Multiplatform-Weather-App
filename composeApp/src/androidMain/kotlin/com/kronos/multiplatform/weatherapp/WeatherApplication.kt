@@ -14,6 +14,7 @@ import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.di.initKoin
 import com.kronos.multiplatform.weatherapp.job.WeatherAlertNotificationWorker
 import com.kronos.multiplatform.weatherapp.job.WeatherNotificationWorker
+import com.kronos.multiplatform.weatherapp.job.WeatherSuggestionScheduler
 import com.kronos.multiplatform.weatherapp.job.WeatherWidgetUpdateWorker
 import com.mmk.kmpnotifier.notification.NotifierManager
 import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit
 
 const val NOTIFICATION_CHANNEL = "KMP_WEATHER_NOTIFICATION_CHANNEL"
 const val WEATHER_ALERT_NOTIFICATION_CHANNEL = "KMP_WEATHER_ALERT_NOTIFICATION_CHANNEL"
+const val SUGGESTION_NOTIFICATION_CHANNEL = "KMP_WEATHER_SUGGESTION_CHANNEL"
 const val TAG = "WeatherApp"
 
 
@@ -39,10 +41,12 @@ class WeatherApplication : Application() {
         }
         createNotificationChanel()
         createWeatherAlertNotificationChanel()
+        createSuggestionNotificationChannel()
 
         scheduleWeatherWorker(60)
         scheduleWeatherAlertWorker(60 * 4)
         scheduleWeatherWidgetUpdateWorker()
+        WeatherSuggestionScheduler.scheduleAll(this)
 
         NotifierManager.initialize(
             configuration = NotificationPlatformConfiguration.Android(
@@ -90,6 +94,20 @@ class WeatherApplication : Application() {
                 NotificationManager::class.java
             )
             notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
+    private fun createSuggestionNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                SUGGESTION_NOTIFICATION_CHANNEL,
+                SUGGESTION_NOTIFICATION_CHANNEL,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = SUGGESTION_NOTIFICATION_CHANNEL
+            }
+            getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(channel)
         }
     }
 

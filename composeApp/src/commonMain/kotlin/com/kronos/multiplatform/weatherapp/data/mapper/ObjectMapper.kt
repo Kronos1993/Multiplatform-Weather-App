@@ -22,7 +22,11 @@ import com.kronos.multiplatform.weatherapp.domain.model.Day
 import com.kronos.multiplatform.weatherapp.domain.model.ForecastDay
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Location
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionPriority
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionType
+import com.kronos.multiplatform.weatherapp.domain.model.WeatherSuggestionModel
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentAlertsForecast
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
@@ -195,3 +199,175 @@ fun CurrentAlertsForecastDto.toCurrentAlertsForecast() = CurrentAlertsForecast(
     location = location.toLocation(),
     alerts = alerts.alertList.map { it.toWeatherAlert() }
 )
+
+
+private const val MAX_SUGGESTIONS = 3
+
+fun Forecast.mapCurrentSuggestions(timeZone: String,measureUnit:MeasureUnit): List<WeatherSuggestionModel> {
+    val suggestions = mutableListOf<WeatherSuggestionModel>()
+    val current = this.current
+    val todayForecast = this.getCurrentDayForecast(timeZone)
+    val upcomingHours = todayForecast?.getUpcomingHours(timeZone) ?: emptyList()
+
+    val rainSoon = upcomingHours.take(3).any { it.precipMm > 0.5 || it.chanceOfRain > 50 }
+    if (rainSoon) {
+        val maxChance = upcomingHours.take(3).maxOfOrNull { it.chanceOfRain } ?: 0.0
+        suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.RAIN,
+                priority = SuggestionPriority.HIGH,
+                icon = "🌂",
+                args = listOf(maxChance.toInt().toString())
+            )
+        )
+    }
+
+    // ☀️ UV alto
+    when {
+        current.uv >= 8 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.UV,
+                priority = SuggestionPriority.HIGH,
+                icon = "🧴",
+                args = listOf(current.uv.toInt().toString())
+            )
+        )
+        current.uv >= 5 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.UV,
+                priority = SuggestionPriority.MEDIUM,
+                icon = "😎"
+            )
+        )
+    }
+
+    // 🌡️ Calor extremo
+    if (current.feelslikeC >= 38) suggestions.add(
+        WeatherSuggestionModel(
+            type = SuggestionType.HEAT,
+            priority = SuggestionPriority.HIGH,
+            icon = "💧",
+            args = listOf(
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    current.feelslikeC.toInt().toString()
+                else
+                    current.feelslikeF.toInt().toString()
+            )
+        )
+    )
+
+    // 💨 Viento fuerte
+    if (current.windSpeedKph >= 40) suggestions.add(
+        WeatherSuggestionModel(
+            type = SuggestionType.WIND,
+            priority = SuggestionPriority.MEDIUM,
+            icon = "⚠️",
+            args = listOf(
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    current.windSpeedKph.toInt().toString()
+                else
+                    current.windSpeedMph.toInt().toString()
+            )
+        )
+    )
+
+    // 💦 Humedad alta
+    if (current.humidity >= 85) suggestions.add(
+        WeatherSuggestionModel(
+            type = SuggestionType.HUMIDITY,
+            priority = SuggestionPriority.LOW,
+            icon = "👕"
+        )
+    )
+
+    return suggestions
+        .sortedBy { it.priority.ordinal }
+        .take(MAX_SUGGESTIONS)
+}
+
+fun Forecast.mapTomorrowNotification(measureUnit: MeasureUnit): WeatherSuggestionModel? {
+    val tomorrow = this.getFutureDays(1).firstOrNull() ?: return null
+    val day = tomorrow.day
+
+    return when {
+        day.dailyChanceOfRain > 70 -> WeatherSuggestionModel(
+            type = SuggestionType.TOMORROW_FORECAST,
+            priority = SuggestionPriority.HIGH,
+            icon = "🌧️",
+            args = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                listOf(
+                    day.dailyChanceOfRain.toInt().toString(),
+                    day.maxtempC.toInt().toString(),
+                    day.mintempC.toInt().toString()
+                )
+            else
+                listOf(
+                    day.dailyChanceOfRain.toInt().toString(),
+                    day.maxtempF.toInt().toString(),
+                    day.mintempF.toInt().toString()
+                )
+        )
+        day.uv >= 8 -> WeatherSuggestionModel(
+            type = SuggestionType.TOMORROW_FORECAST,
+            priority = SuggestionPriority.MEDIUM,
+            icon = "☀️",
+            args = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                listOf(day.maxtempC.toInt().toString(), day.uv.toInt().toString())
+            else
+                listOf(day.maxtempF.toInt().toString(), day.uv.toInt().toString())
+        )
+        else -> WeatherSuggestionModel(
+            type = SuggestionType.TOMORROW_FORECAST,
+            priority = SuggestionPriority.LOW,
+            icon = "🌤️",
+            args = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                listOf(day.maxtempC.toInt().toString(), day.mintempC.toInt().toString())
+            else
+                listOf(day.maxtempF.toInt().toString(), day.mintempF.toInt().toString())
+        )
+    }
+}
+
+fun Forecast.mapMorningSuggestions(timeZone: String,measureUnit: MeasureUnit): List<WeatherSuggestionModel> {
+    val suggestions = mutableListOf<WeatherSuggestionModel>()
+    val today = this.getCurrentDayForecast(timeZone) ?: return emptyList()
+    val day = today.day
+
+    if (day.dailyChanceOfRain > 50) suggestions.add(
+        WeatherSuggestionModel(
+            type = SuggestionType.MORNING_SUMMARY,
+            priority = SuggestionPriority.HIGH,
+            icon = "🌂",
+            args = listOf(day.dailyChanceOfRain.toInt().toString())
+        )
+    )
+
+    if (day.uv >= 8) suggestions.add(
+        WeatherSuggestionModel(
+            type = SuggestionType.MORNING_SUMMARY,
+            priority = SuggestionPriority.HIGH,
+            icon = "🧴",
+            args = listOf(day.uv.toInt().toString())
+        )
+    )
+
+    if (day.maxtempC >= 35) suggestions.add(
+        WeatherSuggestionModel(
+            type = SuggestionType.MORNING_SUMMARY,
+            priority = SuggestionPriority.MEDIUM,
+            icon = "🌡️",
+            args = listOf(
+                if (measureUnit == MeasureUnit.INTERNATIONAL) {
+                    day.maxtempC.toInt().toString()
+                }
+                else {
+                    day.maxtempF.toInt().toString()
+                }
+            )
+        )
+    )
+
+    return suggestions
+        .sortedBy { it.priority.ordinal }
+        .take(MAX_SUGGESTIONS)
+}

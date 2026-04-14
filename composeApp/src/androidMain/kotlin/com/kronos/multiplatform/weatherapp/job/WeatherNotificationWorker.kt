@@ -138,6 +138,7 @@ class WeatherNotificationWorker(
                 )
                 widgetUpdater.updateAllWeatherWidgets()
                 createWeatherNotification(forecast, weatherParams.measureUnit)
+                WeatherSuggestionScheduler.scheduleAll(applicationContext)
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }
             .onError { error ->

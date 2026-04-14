@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- RAIN -->
+    <string name="suggestion_rain_title">Lleva paraguas 🌂</string>
+    <string name="suggestion_rain_message">%1$s%% de probabilidad de lluvia en las próximas horas</string>
+
+    <!-- UV HIGH -->
+    <string name="suggestion_uv_high_title">UV muy alto 🧴</string>
+    <string name="suggestion_uv_high_message">Índice UV de %1$s. Aplica protector solar antes de salir</string>
+
+    <!-- UV MEDIUM -->
+    <string name="suggestion_uv_medium_title">UV moderado 😎</string>
+    <string name="suggestion_uv_medium_message">Considera usar lentes de sol y ropa ligera</string>
+
+    <!-- HEAT -->
+    <string name="suggestion_heat_title">Calor extremo 💧</string>
+    <string name="suggestion_heat_message">Sensación térmica de %1$s°. Mantente hidratado y evita el sol directo</string>
+
+    <!-- WIND -->
+    <string name="suggestion_wind_title">Vientos fuertes ⚠️</string>
+    <string name="suggestion_wind_message">Vientos de %1$s. Ten precaución al aire libre</string>
+
+    <!-- HUMIDITY -->
+    <string name="suggestion_humidity_title">Humedad alta 👕</string>
+    <string name="suggestion_humidity_message">Usa ropa ligera y transpirable hoy</string>
+
+    <!-- TOMORROW_FORECAST — rain -->
+    <string name="suggestion_tomorrow_rain_title">Lluvia mañana 🌧️</string>
+    <string name="suggestion_tomorrow_rain_message">%1$s%% de lluvia · %2$s° / %3$s°</string>
+
+    <!-- TOMORROW_FORECAST — uv -->
+    <string name="suggestion_tomorrow_uv_title">Soleado mañana ☀️</string>
+    <string name="suggestion_tomorrow_uv_message">Hasta %1$s° con índice UV %2$s</string>
+
+    <!-- TOMORROW_FORECAST — clear -->
+    <string name="suggestion_tomorrow_clear_title">Buen clima mañana 🌤️</string>
+    <string name="suggestion_tomorrow_clear_message">%1$s° / %2$s° — un buen día para estar afuera</string>
+
+    <!-- MORNING_SUMMARY — rain -->
+    <string name="suggestion_morning_rain_title">Se esperan lluvias hoy 🌂</string>
+    <string name="suggestion_morning_rain_message">%1$s%% de probabilidad de lluvia. No olvides el paraguas</string>
+
+    <!-- MORNING_SUMMARY — uv -->
+    <string name="suggestion_morning_uv_title">UV alto hoy 🧴</string>
+    <string name="suggestion_morning_uv_message">El índice UV llegará a %1$s. Usa protector solar</string>
+
+    <!-- MORNING_SUMMARY — heat -->
+    <string name="suggestion_morning_heat_title">Día caluroso 🌡️</string>
+    <string name="suggestion_morning_heat_message">Temperatura máxima de %1$s° hoy. Mantente hidratado</string>
+</resources>
