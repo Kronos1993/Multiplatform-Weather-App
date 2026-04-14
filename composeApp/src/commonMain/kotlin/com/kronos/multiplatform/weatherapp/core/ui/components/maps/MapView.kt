@@ -27,13 +27,16 @@ import org.maplibre.compose.expressions.dsl.format
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.offset
 import org.maplibre.compose.expressions.dsl.span
+import org.maplibre.compose.layers.RasterLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.TileSetOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.maplibre.compose.sources.rememberRasterSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
@@ -53,6 +56,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun FixMapView(
     markers: List<MapMarker> = listOf(),
+    rainRadarTiles:String,
     darkTheme: Boolean,
     onMapClick: (Position) -> Unit,
     onMapLongClick: (Position) -> Unit,
@@ -67,26 +71,32 @@ fun FixMapView(
         extendedLight.backgroundCardColor.color
     }
 
-    val camera =
-        rememberCameraState(
-            firstPosition = CameraPosition(
-                target = Position(markers[0].longitude, markers[0].latitude), zoom = 5.5
-            )
+    val initialPosition = markers.firstOrNull()?.let {
+        Position(it.longitude, it.latitude)
+    } ?: Position(-79.5199, 8.9824) // Panamá fallback
+
+    val camera = rememberCameraState(
+        firstPosition = CameraPosition(
+            target = initialPosition,
+            zoom = 5.5
         )
+    )
 
     val styleState = rememberStyleState()
 
     LaunchedEffect(Unit) {
         camera.animateTo(
-            finalPosition =
-                camera.position.copy(),
+            finalPosition = camera.position.copy(),
             duration = 3.seconds,
         )
     }
 
+    val radarTileUrl = remember {
+        rainRadarTiles
+    }
+
     Card(
-        modifier =
-            Modifier.padding(4.dp),
+        modifier = Modifier.padding(4.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
@@ -110,12 +120,25 @@ fun FixMapView(
                     ClickResult.Pass
                 }
             },
-            onMapLongClick = { pos, offset ->
+            onMapLongClick = { pos, _ ->
                 println("Long click at $pos")
                 onMapLongClick(pos)
                 ClickResult.Pass
             },
         ) {
+
+            val radarSource = rememberRasterSource(
+                tiles = listOf(radarTileUrl),
+                options = TileSetOptions(),
+                tileSize = 512,
+            )
+
+            RasterLayer(
+                id = "rainviewer-layer",
+                source = radarSource,
+                opacity = const(0.4f),
+            )
+
             val myMarkerGeoJson = remember(markers) {
                 GeoJsonMapper.markersToJsonString(markers)
             }
@@ -127,17 +150,15 @@ fun FixMapView(
             SymbolLayer(
                 id = "current-location",
                 source = myMarkerSource,
-                onClick = { features ->
-                    features.firstOrNull()
+                onClick = {
                     ClickResult.Consume
                 },
                 iconImage = image(marker),
                 iconSize = const(.5f),
                 iconColor = const(Color.Black),
-                textField =
-                    format(
-                        span(feature["title"].asString(), textSize = const(1f.em)),
-                    ),
+                textField = format(
+                    span(feature["title"].asString(), textSize = const(1f.em)),
+                ),
                 textFont = const(listOf("Noto Sans Regular")),
                 textColor = const(Color.Black),
                 textOffset = offset(0.em, 0.6.em),

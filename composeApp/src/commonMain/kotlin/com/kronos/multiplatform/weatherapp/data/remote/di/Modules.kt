@@ -10,7 +10,9 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.PublicKtorClientFact
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProviderImp
 import com.kronos.multiplatform.weatherapp.data.repository.alerts.WeatherAlertsRemoteRepositoryImpl
+import com.kronos.multiplatform.weatherapp.data.repository.radar.rain.RainRadarRepositoryImpl
 import com.kronos.multiplatform.weatherapp.data.repository.weather.WeatherRemoteRepositoryImpl
+import com.kronos.multiplatform.weatherapp.domain.repository.RainRadarRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherAlertsRemoteRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import org.koin.core.module.Module
@@ -47,6 +49,13 @@ val commonRemoteModules = module {
     //repositories
     singleOf(::WeatherRemoteRepositoryImpl).bind<WeatherRemoteRepository>()
     singleOf(::WeatherAlertsRemoteRepositoryImpl).bind<WeatherAlertsRemoteRepository>()
+
+    single {
+        RainRadarRepositoryImpl(
+            get(named(KtorClientFactoryType.PUBLIC)),
+            get(),
+        )
+    }.bind<RainRadarRepository>()
 
     //url provider
     singleOf(::UrlProviderImp).bind<UrlProvider>()

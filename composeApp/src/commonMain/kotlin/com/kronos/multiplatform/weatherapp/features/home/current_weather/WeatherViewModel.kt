@@ -18,6 +18,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
+import com.kronos.multiplatform.weatherapp.domain.repository.RainRadarRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 class WeatherViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
+    private val rainRadarRepository: RainRadarRepository,
     private val locationRepository: LocationRepository,
     private var notifications: INotifications,
     private val loggerManager: ILogManager,
@@ -44,6 +46,9 @@ class WeatherViewModel(
 
     private val _selectedUserLocation = MutableStateFlow<UserCustomLocation?>(null)
     val selectedUserLocation = _selectedUserLocation.asStateFlow()
+
+    private val _rainRadarTiles = MutableStateFlow<String?>(null)
+    val rainRadarTiles = _rainRadarTiles.asStateFlow()
 
     private val _screenState = MutableStateFlow<WeatherScreenState>(WeatherScreenState.Idle)
     val screenState = _screenState.asStateFlow()
@@ -94,6 +99,8 @@ class WeatherViewModel(
             try {
                 _screenState.value = WeatherScreenState.Loading
                 _error.value = null
+
+                _rainRadarTiles.value = rainRadarRepository.getRadarTileUrl()
 
                 // 1. Buscar ubicación guardada del usuario
                 var userLocation = userCustomLocationLocalRepository.getSelectedLocation()
