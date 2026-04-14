@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -451,12 +452,12 @@ fun WeatherContentSection(
 
     val indicators = getWeatherIndicators(currentWeather, currentDayForecast, measureUnit)
 
-    val suggestions = currentWeather.mapCurrentSuggestions(timeZone,measureUnit)
+    val suggestions = currentWeather.mapCurrentSuggestions(timeZone, measureUnit)
 
     LazyColumn(
         state = scrollState,
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (hours.isNotEmpty()) {
             item {
@@ -499,11 +500,19 @@ fun WeatherContentSection(
 
         if (suggestions.isNotEmpty()) {
             item {
-                SuggestionList(
-                    suggestions = suggestions,
-                    isDarkTheme = isDarkTheme,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .height(IntrinsicSize.Max)
+                ) {
+                    suggestions.forEach { suggestion ->
+                        SuggestionCard(
+                            suggestion = suggestion,
+                            isDarkTheme = isDarkTheme,
+                        )
+                    }
+                }
             }
         }
 
@@ -968,19 +977,21 @@ fun SuggestionCard(
     onClick: (() -> Unit)? = null
 ) {
     val backgroundColor = when (suggestion.priority) {
-        SuggestionPriority.HIGH   -> Color(0xFFB71C1C)
+        SuggestionPriority.HIGH -> Color(0xFFB71C1C)
         SuggestionPriority.MEDIUM -> Color(0xFFE65100)
-        SuggestionPriority.LOW    -> Color(0xFF1565C0)
+        SuggestionPriority.LOW -> Color(0xFF1565C0)
     }
 
     ExpressiveBaseCardView(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.widthIn(max = 250.dp),
         cardBackgroundColor = backgroundColor,
         elevation = 2.dp,
         onClick = onClick
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -1006,33 +1017,13 @@ fun SuggestionCard(
 }
 
 @Composable
-fun SuggestionList(
-    suggestions: List<WeatherSuggestionModel>,
-    isDarkTheme: Boolean,
-    modifier: Modifier = Modifier
-) {
-    if (suggestions.isEmpty()) return
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        suggestions.forEach { suggestion ->
-            SuggestionCard(
-                suggestion = suggestion,
-                isDarkTheme = isDarkTheme
-            )
-        }
-    }
-}
-
-@Composable
 fun WeatherSuggestionModel.resolveTitle(): String = when (type) {
     SuggestionType.RAIN -> stringResource(Res.string.suggestion_rain_title)
     SuggestionType.UV -> when (priority) {
         SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_uv_high_title)
         else -> stringResource(Res.string.suggestion_uv_medium_title)
     }
+
     SuggestionType.HEAT -> stringResource(Res.string.suggestion_heat_title)
     SuggestionType.WIND -> stringResource(Res.string.suggestion_wind_title)
     SuggestionType.HUMIDITY -> stringResource(Res.string.suggestion_humidity_title)
@@ -1041,11 +1032,13 @@ fun WeatherSuggestionModel.resolveTitle(): String = when (type) {
         SuggestionPriority.MEDIUM -> stringResource(Res.string.suggestion_tomorrow_uv_title)
         else -> stringResource(Res.string.suggestion_tomorrow_clear_title)
     }
+
     SuggestionType.MORNING_SUMMARY -> when (priority) {
         SuggestionPriority.HIGH -> when (icon) {
             "🌂" -> stringResource(Res.string.suggestion_morning_rain_title)
             else -> stringResource(Res.string.suggestion_morning_uv_title)
         }
+
         else -> stringResource(Res.string.suggestion_morning_heat_title)
     }
 }
@@ -1058,6 +1051,7 @@ fun WeatherSuggestionModel.resolveMessage(): String {
             SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_uv_high_message)
             else -> stringResource(Res.string.suggestion_uv_medium_message)
         }
+
         SuggestionType.HEAT -> stringResource(Res.string.suggestion_heat_message)
         SuggestionType.WIND -> stringResource(Res.string.suggestion_wind_message)
         SuggestionType.HUMIDITY -> stringResource(Res.string.suggestion_humidity_message)
@@ -1066,11 +1060,13 @@ fun WeatherSuggestionModel.resolveMessage(): String {
             SuggestionPriority.MEDIUM -> stringResource(Res.string.suggestion_tomorrow_uv_message)
             else -> stringResource(Res.string.suggestion_tomorrow_clear_message)
         }
+
         SuggestionType.MORNING_SUMMARY -> when (priority) {
             SuggestionPriority.HIGH -> when (icon) {
                 "🌂" -> stringResource(Res.string.suggestion_morning_rain_message)
                 else -> stringResource(Res.string.suggestion_morning_uv_message)
             }
+
             else -> stringResource(Res.string.suggestion_morning_heat_message)
         }
     }
