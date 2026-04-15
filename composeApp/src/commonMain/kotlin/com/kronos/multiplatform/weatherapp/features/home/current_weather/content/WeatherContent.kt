@@ -107,8 +107,10 @@ import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionArg
 import com.kronos.multiplatform.weatherapp.domain.model.SuggestionPriority
 import com.kronos.multiplatform.weatherapp.domain.model.SuggestionType
+import com.kronos.multiplatform.weatherapp.domain.model.UvIndexLevel
 import com.kronos.multiplatform.weatherapp.domain.model.WeatherSuggestionModel
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
@@ -143,28 +145,24 @@ import weather_app.composeapp.generated.resources.rain
 import weather_app.composeapp.generated.resources.snow
 import weather_app.composeapp.generated.resources.speed_km
 import weather_app.composeapp.generated.resources.speed_miles
-import weather_app.composeapp.generated.resources.suggestion_heat_message
-import weather_app.composeapp.generated.resources.suggestion_heat_title
+import weather_app.composeapp.generated.resources.suggestion_cold_message
+import weather_app.composeapp.generated.resources.suggestion_cold_title
+import weather_app.composeapp.generated.resources.suggestion_heat_high_message
+import weather_app.composeapp.generated.resources.suggestion_heat_high_title
+import weather_app.composeapp.generated.resources.suggestion_heat_low_message
+import weather_app.composeapp.generated.resources.suggestion_heat_low_title
+import weather_app.composeapp.generated.resources.suggestion_heat_medium_message
+import weather_app.composeapp.generated.resources.suggestion_heat_medium_title
 import weather_app.composeapp.generated.resources.suggestion_humidity_message
 import weather_app.composeapp.generated.resources.suggestion_humidity_title
-import weather_app.composeapp.generated.resources.suggestion_morning_heat_message
-import weather_app.composeapp.generated.resources.suggestion_morning_heat_title
-import weather_app.composeapp.generated.resources.suggestion_morning_rain_message
-import weather_app.composeapp.generated.resources.suggestion_morning_rain_title
-import weather_app.composeapp.generated.resources.suggestion_morning_uv_message
-import weather_app.composeapp.generated.resources.suggestion_morning_uv_title
 import weather_app.composeapp.generated.resources.suggestion_rain_message
 import weather_app.composeapp.generated.resources.suggestion_rain_title
-import weather_app.composeapp.generated.resources.suggestion_tomorrow_clear_message
-import weather_app.composeapp.generated.resources.suggestion_tomorrow_clear_title
-import weather_app.composeapp.generated.resources.suggestion_tomorrow_rain_message
-import weather_app.composeapp.generated.resources.suggestion_tomorrow_rain_title
-import weather_app.composeapp.generated.resources.suggestion_tomorrow_uv_message
-import weather_app.composeapp.generated.resources.suggestion_tomorrow_uv_title
 import weather_app.composeapp.generated.resources.suggestion_uv_high_message
 import weather_app.composeapp.generated.resources.suggestion_uv_high_title
 import weather_app.composeapp.generated.resources.suggestion_uv_medium_message
 import weather_app.composeapp.generated.resources.suggestion_uv_medium_title
+import weather_app.composeapp.generated.resources.suggestion_visibility_message
+import weather_app.composeapp.generated.resources.suggestion_visibility_title
 import weather_app.composeapp.generated.resources.suggestion_wind_message
 import weather_app.composeapp.generated.resources.suggestion_wind_title
 import weather_app.composeapp.generated.resources.sun
@@ -683,6 +681,15 @@ fun uvIndexDescription(index: Double): String {
 }
 
 @Composable
+fun UvIndexLevel.toLocalizedString(): String = when (this) {
+    UvIndexLevel.LOW -> stringResource(Res.string.uv_index_low)
+    UvIndexLevel.MEDIUM -> stringResource(Res.string.uv_index_medium)
+    UvIndexLevel.HIGH -> stringResource(Res.string.uv_index_high)
+    UvIndexLevel.VERY_HIGH -> stringResource(Res.string.uv_index_very_high)
+    UvIndexLevel.EXTREME -> stringResource(Res.string.uv_index_extreme)
+}
+
+@Composable
 fun airQualityIndexDescription(index: Int): String {
     return when (index) {
         1 -> stringResource(Res.string.air_quality_good)
@@ -995,21 +1002,15 @@ fun SuggestionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = suggestion.icon,
-                fontSize = 28.sp
-            )
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
+                BodyText(
                     text = suggestion.resolveTitle(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    size = ComponentSize.MEDIUM,
+                    fontWeight = Bold
                 )
-                Text(
+                LabelText(
                     text = suggestion.resolveMessage(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.9f)
+                    size = ComponentSize.LARGE,
                 )
             }
         }
@@ -1018,60 +1019,105 @@ fun SuggestionCard(
 
 @Composable
 fun WeatherSuggestionModel.resolveTitle(): String = when (type) {
-    SuggestionType.RAIN -> stringResource(Res.string.suggestion_rain_title)
+
+    SuggestionType.RAIN ->
+        stringResource(Res.string.suggestion_rain_title)
+
     SuggestionType.UV -> when (priority) {
-        SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_uv_high_title)
-        else -> stringResource(Res.string.suggestion_uv_medium_title)
+        SuggestionPriority.HIGH ->
+            stringResource(Res.string.suggestion_uv_high_title)
+
+        else ->
+            stringResource(Res.string.suggestion_uv_medium_title)
     }
 
-    SuggestionType.HEAT -> stringResource(Res.string.suggestion_heat_title)
-    SuggestionType.WIND -> stringResource(Res.string.suggestion_wind_title)
-    SuggestionType.HUMIDITY -> stringResource(Res.string.suggestion_humidity_title)
-    SuggestionType.TOMORROW_FORECAST -> when (priority) {
-        SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_tomorrow_rain_title)
-        SuggestionPriority.MEDIUM -> stringResource(Res.string.suggestion_tomorrow_uv_title)
-        else -> stringResource(Res.string.suggestion_tomorrow_clear_title)
+    // 🌡️ HEAT por niveles
+    SuggestionType.HEAT -> when (priority) {
+        SuggestionPriority.HIGH ->
+            stringResource(Res.string.suggestion_heat_high_title)
+
+        SuggestionPriority.MEDIUM ->
+            stringResource(Res.string.suggestion_heat_medium_title)
+
+        else ->
+            stringResource(Res.string.suggestion_heat_low_title)
     }
 
-    SuggestionType.MORNING_SUMMARY -> when (priority) {
-        SuggestionPriority.HIGH -> when (icon) {
-            "🌂" -> stringResource(Res.string.suggestion_morning_rain_title)
-            else -> stringResource(Res.string.suggestion_morning_uv_title)
-        }
+    // ❄️ COLD
+    SuggestionType.COLD ->
+        stringResource(Res.string.suggestion_cold_title)
 
-        else -> stringResource(Res.string.suggestion_morning_heat_title)
-    }
+    SuggestionType.WIND ->
+        stringResource(Res.string.suggestion_wind_title)
+
+    SuggestionType.HUMIDITY ->
+        stringResource(Res.string.suggestion_humidity_title)
+
+    // 🌫️ VISIBILITY
+    SuggestionType.VISIBILITY ->
+        stringResource(Res.string.suggestion_visibility_title)
+
+    else ->  stringResource(Res.string.suggestion_visibility_title)
+
 }
 
 @Composable
 fun WeatherSuggestionModel.resolveMessage(): String {
+
     val template = when (type) {
-        SuggestionType.RAIN -> stringResource(Res.string.suggestion_rain_message)
+
+        SuggestionType.RAIN ->
+            stringResource(Res.string.suggestion_rain_message)
+
         SuggestionType.UV -> when (priority) {
-            SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_uv_high_message)
-            else -> stringResource(Res.string.suggestion_uv_medium_message)
+            SuggestionPriority.HIGH ->
+                stringResource(Res.string.suggestion_uv_high_message)
+
+            else ->
+                stringResource(Res.string.suggestion_uv_medium_message)
         }
 
-        SuggestionType.HEAT -> stringResource(Res.string.suggestion_heat_message)
-        SuggestionType.WIND -> stringResource(Res.string.suggestion_wind_message)
-        SuggestionType.HUMIDITY -> stringResource(Res.string.suggestion_humidity_message)
-        SuggestionType.TOMORROW_FORECAST -> when (priority) {
-            SuggestionPriority.HIGH -> stringResource(Res.string.suggestion_tomorrow_rain_message)
-            SuggestionPriority.MEDIUM -> stringResource(Res.string.suggestion_tomorrow_uv_message)
-            else -> stringResource(Res.string.suggestion_tomorrow_clear_message)
+        // 🌡️ HEAT por niveles
+        SuggestionType.HEAT -> when (priority) {
+            SuggestionPriority.HIGH ->
+                stringResource(Res.string.suggestion_heat_high_message)
+
+            SuggestionPriority.MEDIUM ->
+                stringResource(Res.string.suggestion_heat_medium_message)
+
+            else ->
+                stringResource(Res.string.suggestion_heat_low_message)
         }
 
-        SuggestionType.MORNING_SUMMARY -> when (priority) {
-            SuggestionPriority.HIGH -> when (icon) {
-                "🌂" -> stringResource(Res.string.suggestion_morning_rain_message)
-                else -> stringResource(Res.string.suggestion_morning_uv_message)
-            }
+        // ❄️ COLD
+        SuggestionType.COLD ->
+            stringResource(Res.string.suggestion_cold_message)
 
-            else -> stringResource(Res.string.suggestion_morning_heat_message)
+        SuggestionType.WIND ->
+            stringResource(Res.string.suggestion_wind_message)
+
+        SuggestionType.HUMIDITY ->
+            stringResource(Res.string.suggestion_humidity_message)
+
+        // 🌫️ VISIBILITY
+        SuggestionType.VISIBILITY ->
+            stringResource(Res.string.suggestion_visibility_message)
+
+        else ->  stringResource(Res.string.suggestion_visibility_title)
+    }
+
+    val resolvedArgs = args.map { arg ->
+        when (arg) {
+            is SuggestionArg.Temperature -> "${arg.value}"
+            is SuggestionArg.Percentage -> "${arg.value}"
+            is SuggestionArg.WindSpeed -> "${arg.value}"
+            is SuggestionArg.Distance -> "${arg.value}"
+            is SuggestionArg.Uv -> arg.level.toLocalizedString()
+            is SuggestionArg.Text -> arg.value
         }
     }
-    // Aplicar args en orden
-    return args.foldIndexed(template) { index, acc, arg ->
+
+    return resolvedArgs.foldIndexed(template) { index, acc, arg ->
         acc.replace("%${index + 1}\$s", arg)
     }
 }

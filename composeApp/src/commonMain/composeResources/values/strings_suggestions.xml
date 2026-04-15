@@ -2,7 +2,7 @@
 <resources>
     <!-- RAIN -->
     <string name="suggestion_rain_title">Bring an umbrella 🌂</string>
-    <string name="suggestion_rain_message">%1$s%% chance of rain in the next few hours</string>
+    <string name="suggestion_rain_message">%1$s% chance of rain in the next few hours</string>
 
     <!-- UV HIGH -->
     <string name="suggestion_uv_high_title">Very high UV index 🧴</string>
@@ -26,7 +26,7 @@
 
     <!-- TOMORROW_FORECAST — rain -->
     <string name="suggestion_tomorrow_rain_title">Rain tomorrow 🌧️</string>
-    <string name="suggestion_tomorrow_rain_message">%1$s%% chance of rain · %2$s° / %3$s°</string>
+    <string name="suggestion_tomorrow_rain_message">%1$s% chance of rain · %2$s° / %3$s°</string>
 
     <!-- TOMORROW_FORECAST — uv -->
     <string name="suggestion_tomorrow_uv_title">Sunny tomorrow ☀️</string>
@@ -38,7 +38,7 @@
 
     <!-- MORNING_SUMMARY — rain -->
     <string name="suggestion_morning_rain_title">Rain expected today 🌂</string>
-    <string name="suggestion_morning_rain_message">%1$s%% chance of rain. Don\'t forget your umbrella</string>
+    <string name="suggestion_morning_rain_message">%1$s% chance of rain. Don\'t forget your umbrella</string>
 
     <!-- MORNING_SUMMARY — uv -->
     <string name="suggestion_morning_uv_title">High UV today 🧴</string>
@@ -47,4 +47,18 @@
     <!-- MORNING_SUMMARY — heat -->
     <string name="suggestion_morning_heat_title">Hot day ahead 🌡️</string>
     <string name="suggestion_morning_heat_message">Max temperature of %1$s° today. Keep hydrated</string>
+
+    <string name="suggestion_heat_high_title">Extreme heat</string>
+    <string name="suggestion_heat_medium_title">Hot weather</string>
+    <string name="suggestion_heat_low_title">Warm day</string>
+
+    <string name="suggestion_heat_high_message">Feels like %1$s°. Stay hydrated.</string>
+    <string name="suggestion_heat_medium_message">Feels like %1$s°. It will be hot.</string>
+    <string name="suggestion_heat_low_message">Feels like %1$s°. Slightly warm.</string>
+
+    <string name="suggestion_cold_title">Cold weather</string>
+    <string name="suggestion_cold_message">Feels like %1$s°. Wear warm clothes.</string>
+
+    <string name="suggestion_visibility_title">Low visibility</string>
+    <string name="suggestion_visibility_message">Visibility is %1$s km. Be careful.</string>
 </resources>

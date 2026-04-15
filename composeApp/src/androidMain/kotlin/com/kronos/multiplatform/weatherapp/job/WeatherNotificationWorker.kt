@@ -21,6 +21,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import com.kronos.multiplatform.weatherapp.job.model.NotificationWeatherParams
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -77,7 +78,7 @@ class WeatherNotificationWorker(
                     fetchAndNotifyWeather(
                         queryLat = currentCity.lat,
                         queryLon = currentCity.lon,
-                        weatherParams = weatherParams,
+                        notificationWeatherParams = weatherParams,
                         locationType = "coordinates"
                     )
                 }
@@ -85,7 +86,7 @@ class WeatherNotificationWorker(
                 currentCity != null -> {
                     fetchAndNotifyWeather(
                         queryCity = currentCity.cityName,
-                        weatherParams = weatherParams,
+                        notificationWeatherParams = weatherParams,
                         locationType = "city"
                     )
                 }
@@ -93,7 +94,7 @@ class WeatherNotificationWorker(
                 else -> {
                     fetchAndNotifyWeather(
                         queryCity = applicationContext.getString(R.string.default_city_value),
-                        weatherParams = weatherParams,
+                        notificationWeatherParams = weatherParams,
                         locationType = "default city"
                     )
                 }
@@ -110,23 +111,23 @@ class WeatherNotificationWorker(
         queryLat: Double? = null,
         queryLon: Double? = null,
         queryCity: String? = null,
-        weatherParams: WeatherParams,
+        notificationWeatherParams: NotificationWeatherParams,
         locationType: String
     ) {
         val result = if (queryLat != null && queryLon != null) {
             weatherRemoteRepository.getWeatherDataForecast(
                 queryLat,
                 queryLon,
-                weatherParams.lang,
-                weatherParams.apiKey,
-                weatherParams.days
+                notificationWeatherParams.lang,
+                notificationWeatherParams.apiKey,
+                notificationWeatherParams.days
             )
         } else {
             weatherRemoteRepository.getWeatherDataForecast(
                 queryCity ?: "",
-                weatherParams.lang,
-                weatherParams.apiKey,
-                weatherParams.days
+                notificationWeatherParams.lang,
+                notificationWeatherParams.apiKey,
+                notificationWeatherParams.days
             )
         }
 
@@ -137,8 +138,8 @@ class WeatherNotificationWorker(
                     forecast
                 )
                 widgetUpdater.updateAllWeatherWidgets()
-                createWeatherNotification(forecast, weatherParams.measureUnit)
-                WeatherSuggestionScheduler.scheduleAll(applicationContext)
+                createWeatherNotification(forecast, notificationWeatherParams.measureUnit)
+                WeatherSuggestionScheduler.scheduleDailyPeriodic(applicationContext)
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }
             .onError { error ->
@@ -264,15 +265,8 @@ class WeatherNotificationWorker(
         )
     }
 
-    private data class WeatherParams(
-        val lang: String,
-        val apiKey: String,
-        val days: Int,
-        val measureUnit: MeasureUnit
-    )
-
-    private suspend fun getWeatherParams(): WeatherParams {
-        return WeatherParams(
+    private suspend fun getWeatherParams(): NotificationWeatherParams {
+        return NotificationWeatherParams(
             lang = preferenceRepository.getPreference(
                 applicationContext.getString(R.string.default_lang_key),
                 applicationContext.getString(R.string.default_language_value)
