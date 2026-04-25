@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.core.ui.components.maps.markers
+package com.kronos.multiplatform.weatherapp.components.maps.markers
 
 // GeoJsonMapper.kt
 import kotlinx.serialization.json.Json

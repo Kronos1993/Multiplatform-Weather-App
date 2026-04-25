@@ -18,6 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -43,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -348,4 +353,147 @@ fun VerificationCodeInput(
         focusRequesters[0].requestFocus()
         onDispose {}
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TextInput_Outlined_Default() {
+    var text by remember { mutableStateOf("Hello") }
+
+    TextInputView(
+        type = TextInputType.OUTLINED,
+        modifier = Modifier.padding(16.dp),
+        value = text,
+        onValueChange = { text = it },
+        placeholder = { BodyText("Enter text") }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TextInput_Filled_Default() {
+    var text by remember { mutableStateOf("") }
+
+    TextInputView(
+        type = TextInputType.FILLED,
+        modifier = Modifier.padding(16.dp),
+        value = text,
+        onValueChange = { text = it },
+        placeholder = { BodyText("Enter text") }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TextInput_Error() {
+    var text by remember { mutableStateOf("wrong input") }
+
+    TextInputView(
+        type = TextInputType.OUTLINED,
+        modifier = Modifier.padding(16.dp),
+        value = text,
+        onValueChange = { text = it },
+        isError = "Error",
+        supportingText = {
+            BodyText("This field is invalid")
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TextInput_WithIcons() {
+    var text by remember { mutableStateOf("") }
+
+    TextInputView(
+        type = TextInputType.OUTLINED,
+        modifier = Modifier.padding(16.dp),
+        value = text,
+        onValueChange = { text = it },
+        leadingIcon = {
+            Icon(Icons.Default.Search, contentDescription = null)
+        },
+        trailingIcon = {
+            Icon(Icons.Default.Clear, contentDescription = null)
+        },
+        placeholder = { BodyText("Search...") }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TextInput_ReadOnly() {
+    TextInputView(
+        type = TextInputType.FILLED,
+        modifier = Modifier.padding(16.dp),
+        value = "Read only text",
+        onValueChange = {},
+        readOnly = true
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TextInput_Disabled() {
+    TextInputView(
+        type = TextInputType.FILLED,
+        modifier = Modifier.padding(16.dp),
+        value = "Disabled",
+        onValueChange = {},
+        enabled = false
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TextInput_Sizes() {
+    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        TextInputView(
+            type = TextInputType.OUTLINED,
+            value = "Small",
+            onValueChange = {},
+            size = ComponentSize.SMALL,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        TextInputView(
+            type = TextInputType.OUTLINED,
+            value = "Medium",
+            onValueChange = {},
+            size = ComponentSize.MEDIUM,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        TextInputView(
+            type = TextInputType.OUTLINED,
+            value = "Large",
+            onValueChange = {},
+            size = ComponentSize.LARGE,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_VerificationCode_Default() {
+    VerificationCodeInput()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_VerificationCode_Error() {
+    VerificationCodeInput(
+        isError = true,
+        errorText = "Invalid code"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_VerificationCode_4Digits() {
+    VerificationCodeInput(
+        codeLength = 4
+    )
 }

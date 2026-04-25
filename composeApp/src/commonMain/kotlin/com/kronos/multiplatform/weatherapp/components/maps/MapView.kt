@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.core.ui.components.maps
+package com.kronos.multiplatform.weatherapp.components.maps
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import com.kronos.multiplatform.weatherapp.core.ui.components.maps.markers.GeoJsonMapper
-import com.kronos.multiplatform.weatherapp.core.ui.components.maps.markers.MapMarker
+import com.kronos.multiplatform.weatherapp.components.maps.markers.GeoJsonMapper
+import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.ui.components.theme.extendedDark
 import com.kronos.multiplatform.weatherapp.core.ui.components.theme.extendedLight
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel

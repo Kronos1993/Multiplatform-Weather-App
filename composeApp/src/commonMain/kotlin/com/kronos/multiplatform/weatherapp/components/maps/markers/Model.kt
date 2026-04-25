@@ -1,4 +1,4 @@
-package com.kronos.multiplatform.weatherapp.core.ui.components.maps.markers
+package com.kronos.multiplatform.weatherapp.components.maps.markers
 
 import kotlinx.serialization.Serializable
 

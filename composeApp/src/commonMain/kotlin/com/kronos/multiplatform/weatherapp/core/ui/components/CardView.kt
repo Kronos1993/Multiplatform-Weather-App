@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -34,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.core.ui.components.theme.primaryDark
@@ -215,6 +218,7 @@ fun CreditCardInfoView(
                         imageVector = Icons.Default.Delete,
                         modifier = Modifier.clickable { onDeleteClick() },
                         contentDescription = "Delete card",
+                        tint = Color.White
                     )
                 }
 
@@ -264,5 +268,74 @@ fun CreditCardInfoView(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BaseCardViewPreview() {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    MaterialTheme {
+        BaseCardView(
+            interactionSource = interactionSource,
+            onClick = {}
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                TitleText("Base Card")
+                Spacer(Modifier.height(8.dp))
+                BodyText("This is a simple card content")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BaseCardViewNoClickPreview() {
+    MaterialTheme {
+        BaseCardView {
+            Column(Modifier.padding(16.dp)) {
+                TitleText("Static Card")
+                BodyText("No interaction")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ExpressiveBaseCardViewPreview() {
+    MaterialTheme {
+        ExpressiveBaseCardView(
+            onClick = {}
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                TitleText("Expressive Card")
+                Spacer(Modifier.height(8.dp))
+                BodyText("Press me 👇")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CreditCardInfoViewLightPreview() {
+    val mockCard = CreditCardInfo(
+        brand = "visa",
+        last4 = "1234",
+        expMonth = "12",
+        expYear = "28",
+        holderName = "John Doe"
+    )
+
+    MaterialTheme {
+        CreditCardInfoView(
+            creditCardInfo = mockCard,
+            darkTheme = false,
+            onDeleteClick = {},
+            onAddCardClick = {}
+        )
     }
 }

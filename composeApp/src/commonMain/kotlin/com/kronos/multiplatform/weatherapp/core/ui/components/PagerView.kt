@@ -5,12 +5,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.carousel.CarouselState
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -66,5 +70,74 @@ fun MultiBrowseCarouselView(
         ) {
             pages[pageIndex].screen()
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 250)
+@Composable
+fun CarouselViewPreview() {
+
+    val pagerState = rememberPagerState(pageCount = { 3 })
+
+    val pages = listOf(
+        PageItem(1) {
+            LabelText("Page 1")
+        },
+        PageItem(2) {
+            LabelText("Page 2")
+        },
+        PageItem(3) {
+            LabelText("Page 3")
+        }
+    )
+
+    MaterialTheme {
+        CarouselView(
+            pages = pages,
+            pagerState = pagerState
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 250)
+@Composable
+fun CarouselViewNoSwipePreview() {
+
+    val pagerState = rememberPagerState(pageCount = { 3 })
+
+    val pages = listOf(
+        PageItem(1) { LabelText("Locked 1") },
+        PageItem(2) { LabelText("Locked 2") },
+        PageItem(3) { LabelText("Locked 3") }
+    )
+
+    MaterialTheme {
+        CarouselView(
+            pages = pages,
+            pagerState = pagerState,
+            enableSwipe = false
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, widthDp = 800, heightDp = 300)
+@Composable
+fun MultiBrowseCarouselViewPreview() {
+
+    val carouselState = rememberCarouselState { 5 }
+
+    val pages = List(5) { index ->
+        PageItem(index) {
+            LabelText("Item $index")
+        }
+    }
+
+    MaterialTheme {
+        MultiBrowseCarouselView(
+            pages = pages,
+            pagerState = carouselState,
+            itemPadding = 200.dp
+        )
     }
 }

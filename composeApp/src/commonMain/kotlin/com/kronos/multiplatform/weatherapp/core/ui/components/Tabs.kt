@@ -13,9 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Icon
@@ -34,9 +37,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import androidx.compose.ui.tooling.preview.Preview
 
 
 class TabItem(
@@ -263,6 +266,113 @@ fun PillTabsHeaderPreview() {
         PillTabPagerView(
             tabs = tabs,
             paddingValues = PaddingValues(8.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PillTabPagerViewPreview_Page1() {
+    val tabs = previewTabs()
+
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { tabs.size }
+    )
+
+    MaterialTheme {
+        PillTabPagerPreviewContent(tabs, pagerState)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PillTabPagerViewPreview_Page2() {
+    val tabs = previewTabs()
+
+    val pagerState = rememberPagerState(
+        initialPage = 1,
+        pageCount = { tabs.size }
+    )
+
+    MaterialTheme {
+        PillTabPagerPreviewContent(tabs, pagerState)
+    }
+}
+
+@Composable
+private fun PillTabPagerPreviewContent(
+    tabs: List<TabItem>,
+    pagerState: PagerState
+) {
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        PillTabsHeader(
+            tabs = tabs,
+            selectedIndex = pagerState.currentPage,
+            onTabSelected = { index ->
+                scope.launch {
+                    pagerState.scrollToPage(index)
+                }
+            }
+        )
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            tabs[page].screen()
+        }
+    }
+}
+
+private fun previewTabs(): List<TabItem> {
+    return listOf(
+        TabItem(
+            name = "Home",
+            iconSelected = Icons.Default.Home,
+            iconUnselected = Icons.Default.Home,
+            index = 0,
+            screen = {
+                PreviewPage("HOME PAGE")
+            }
+        ),
+        TabItem(
+            name = "Explore",
+            iconSelected = Icons.Default.Search,
+            iconUnselected = Icons.Default.Search,
+            index = 1,
+            screen = {
+                PreviewPage("EXPLORE PAGE")
+            }
+        )
+    )
+}
+
+@Composable
+fun PreviewPage(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                when (title) {
+                    "HOME PAGE" -> Color(0xFF1E88E5)
+                    "EXPLORE PAGE" -> Color(0xFF43A047)
+                    else -> Color(0xFF8E24AA)
+                }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        LabelText(
+            text = title,
+            textColor = Color.White,
         )
     }
 }

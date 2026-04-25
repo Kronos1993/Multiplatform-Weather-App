@@ -1,10 +1,17 @@
 package com.kronos.multiplatform.weatherapp.core.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -362,3 +370,147 @@ fun LabelText(
     textAlign = textAlign,
     isDarkTheme = isDarkTheme
 )
+
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_DisplayText_AllSizes() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        DisplayText("Display Small")
+        DisplayText("Display Medium", size = ComponentSize.MEDIUM)
+        DisplayText("Display Large", size = ComponentSize.LARGE)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_HeaderText_AllSizes() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        HeaderText("Header Small")
+        HeaderText("Header Medium", size = ComponentSize.MEDIUM)
+        HeaderText("Header Large", size = ComponentSize.LARGE)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_TitleText_AllSizes() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        TitleText("Title Small")
+        TitleText("Title Medium", size = ComponentSize.MEDIUM)
+        TitleText("Title Large", size = ComponentSize.LARGE)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_BodyText_AllSizes() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        BodyText("Body Small")
+        BodyText("Body Medium", size = ComponentSize.MEDIUM)
+        BodyText("Body Large", size = ComponentSize.LARGE)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_LabelText_AllSizes() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LabelText("Label Small")
+        LabelText("Label Medium", size = ComponentSize.MEDIUM)
+        LabelText("Label Large", size = ComponentSize.LARGE)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_Text_WithIcons() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+        BodyText(
+            text = "Start icon",
+            vector = Icons.Default.Info
+        )
+
+        BodyText(
+            text = "End icon",
+            vector = Icons.Default.ArrowForward,
+            iconPosition = IconPosition.END
+        )
+
+        BodyText(
+            text = "Custom tint",
+            vector = Icons.Default.Star,
+            iconTint = Color.Red
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_Text_Obfuscate() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        BodyText("Normal text")
+
+        BodyText(
+            text = "SensitiveData123",
+            obfuscate = true
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 250)
+@Composable
+fun Preview_Text_Overflow() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        BodyText(
+            text = "This is a very long text that should be truncated",
+            maxLines = 1,
+            textOverflow = TextOverflow.Ellipsis
+        )
+
+        BodyText(
+            text = "This is a very long text that wraps into multiple lines to test behavior",
+            maxLines = 2
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_Text_Styles() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        BodyText("Bold", fontWeight = FontWeight.Bold)
+
+        BodyText("Italic", fontStyle = FontStyle.Italic)
+
+        BodyText("Underline", textDecoration = TextDecoration.Underline)
+
+        BodyText("Letter spacing", letterSpacing = 2.sp)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview_Text_DarkLight() {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        BodyText(
+            text = "Light theme",
+            vector = Icons.Default.Face,
+            isDarkTheme = false
+        )
+
+        BodyText(
+            text = "Dark theme",
+            vector = Icons.Default.Face,
+            isDarkTheme = true
+        )
+    }
+}
