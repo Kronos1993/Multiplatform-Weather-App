@@ -117,7 +117,7 @@ kotlin {
             /*implementation(libs.file.kit.core)
             implementation(libs.file.kit.compose)*/
 
-            api(libs.kmpnotifier)
+            //api(libs.kmpnotifier)
 
             implementation(libs.maplibre.compose)
             implementation(libs.maplibre.composeMaterial3)

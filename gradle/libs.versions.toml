@@ -12,13 +12,13 @@ composeHotReload = "1.0.0"
 composeMultiplatform = "1.10.3"
 foundation = "1.10.3"
 glanceAppwidget = "1.1.1"
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 kotlinx-coroutines = "1.10.2"
 material = "1.10.3"
 material3 = "1.9.0"
 
 kermit = "2.1.0"
-kmpnotifier = "1.6.1"
+#kmpnotifier = "1.6.1"
 
 navigationCompose = "2.9.2"
 runtime = "1.10.3"
@@ -33,7 +33,7 @@ adaptive = "1.2.0"
 
 dateTimeVersion = "0.7.1-0.6.x-compat"
 
-ktor = "3.4.2"
+ktor = "3.4.3"
 
 composeMaterial = "1.7.3"
 
@@ -46,7 +46,7 @@ androidx-sqliteBundled = "2.6.2"
 android-location = "21.3.0"
 map-libre = "0.12.1"
 map-libre-composeMaterial3 = "0.12.1"
-swift-package-manager = "1.4.8"
+swift-package-manager = "1.9.0"
 
 #android worker
 uiToolingPreview = "1.10.3"
@@ -75,7 +75,7 @@ ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "uiToolingPreview" 
 ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
-kmpnotifier = { module = "io.github.mirzemehdi:kmpnotifier", version.ref = "kmpnotifier" }
+#kmpnotifier = { module = "io.github.mirzemehdi:kmpnotifier", version.ref = "kmpnotifier" }
 
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
