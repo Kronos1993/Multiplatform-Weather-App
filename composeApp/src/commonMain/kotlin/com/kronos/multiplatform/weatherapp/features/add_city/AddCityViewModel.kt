@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerState
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerType
 import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
@@ -11,7 +13,7 @@ import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
-import com.kronos.multiplatform.weatherapp.core.ui.components.maps.markers.MapMarker
+import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
@@ -21,6 +23,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
+import com.kronos.multiplatform.weatherapp.domain.repository.MapLayerRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
@@ -28,11 +31,13 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddCityViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
+    private val mapLayerRepository: MapLayerRepository,
     private val urlProvider: UrlProvider,
     private val locationRepository: LocationRepository,
     private var notifications: INotifications,
@@ -50,6 +55,16 @@ class AddCityViewModel(
 
     private val _forecast = MutableStateFlow<Forecast?>(null)
     val forecast: StateFlow<Forecast?> = _forecast.asStateFlow()
+
+    private val _mapLayers = MutableStateFlow(
+        MapLayerType.entries.map {
+            MapLayerState(
+                type = it,
+                enabled = it == MapLayerType.RAIN_RADAR
+            )
+        }
+    )
+    val mapLayers = _mapLayers.asStateFlow()
 
     var isCurrentLocation by mutableStateOf(false )
 
@@ -151,6 +166,7 @@ class AddCityViewModel(
                     _screenState.value = AddCityScreenState.NoCity
                     log(msg, isError = true)
                 }
+
             } catch (e: Exception) {
                 log("Error adding location: ${e.message}", isError = true)
                 _screenState.value = AddCityScreenState.NoCity
@@ -262,8 +278,29 @@ class AddCityViewModel(
                 )
                 list.add(marker)
             }
+            loadMapLayerTiles()
             _markers.value = list.toList()
             log("Loaded ${list.size} markers.",false)
+        }
+    }
+
+    private fun loadMapLayerTiles() {
+        viewModelScope.launch(Dispatchers.IO) {
+            mapLayerRepository.getLayerTiles()
+                .onSuccess { tiles ->
+                    _mapLayers.update { layers ->
+                        layers.map { layer ->
+                            when (layer.type) {
+                                MapLayerType.RAIN_RADAR -> layer.copy(tileUrl = tiles.radarUrl, enabled = tiles.radarUrl.isNotBlank())
+                                MapLayerType.NOWCAST -> layer.copy(tileUrl = tiles.nowcastUrl, enabled = tiles.nowcastUrl.isNotBlank())
+                                MapLayerType.SATELLITE -> layer.copy(tileUrl = tiles.satelliteUrl, enabled = tiles.satelliteUrl.isNotBlank())
+                            }
+                        }
+                    }
+                }
+                .onError {
+                    log("Error loading map tiles: ${it.errorMessage}", true)
+                }
         }
     }
 
@@ -284,6 +321,12 @@ class AddCityViewModel(
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun toggleLayer(type: MapLayerType) {
+        _mapLayers.update { layers ->
+            layers.map { if (it.type == type) it.copy(enabled = !it.enabled) else it }
+        }
     }
 
     private fun log(item: String, isError: Boolean = false) {

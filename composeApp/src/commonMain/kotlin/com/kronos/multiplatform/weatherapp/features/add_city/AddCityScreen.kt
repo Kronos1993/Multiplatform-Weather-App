@@ -31,7 +31,7 @@ import com.kronos.multiplatform.weatherapp.core.ui.components.ComponentSize
 import com.kronos.multiplatform.weatherapp.core.ui.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.core.ui.components.button.FabButton
 import com.kronos.multiplatform.weatherapp.core.ui.components.button.IconButton
-import com.kronos.multiplatform.weatherapp.core.ui.components.maps.MapView
+import com.kronos.multiplatform.weatherapp.components.maps.MapView
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowCityInfoDialog
@@ -66,6 +66,7 @@ fun AddCityScreen(
     val forecast by viewModel.forecast.collectAsStateWithLifecycle()
     val markers by viewModel.markers.collectAsStateWithLifecycle()
     val markerSelected by viewModel.markerSelected.collectAsStateWithLifecycle()
+    val mapLayers by viewModel.mapLayers.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
@@ -148,6 +149,10 @@ fun AddCityScreen(
                     MapView(
                         darkTheme = isDarkTheme,
                         markers = markers,
+                        mapLayers = mapLayers,
+                        onLayerToggled = {
+                            viewModel.toggleLayer(it)
+                        },
                         onMarkerClick = {
                             viewModel.setMarkerSelected(it)
                         },
