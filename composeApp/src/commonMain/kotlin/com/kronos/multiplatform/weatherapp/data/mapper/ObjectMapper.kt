@@ -32,6 +32,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentAlertsForecast
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
+import com.kronos.multiplatform.weatherapp.domain.model.getCurrentDayMoment
 import com.kronos.multiplatform.weatherapp.domain.model.uvIndexLevel
 
 fun AstroDto.toAstro() = Astro(
@@ -229,6 +230,8 @@ fun Forecast.mapCurrentSuggestions(
     val todayForecast = this.getCurrentDayForecast(timeZone)
     val upcomingHours = todayForecast?.getUpcomingHours(timeZone) ?: emptyList()
 
+    val moment = getCurrentDayMoment(timeZone)
+
     // 🌧️ Lluvia próxima
     val rainSoon = upcomingHours.take(3).any { it.precipMm > 0.5 || it.chanceOfRain > 50 }
     if (rainSoon) {
@@ -238,6 +241,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.RAIN,
                 priority = SuggestionPriority.HIGH,
                 icon = "🌂",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Percentage(maxChance.toInt())
                 )
@@ -252,6 +256,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.UV,
                 priority = SuggestionPriority.HIGH,
                 icon = "🧴",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Uv(uvIndexLevel(current.uv))
                 )
@@ -262,6 +267,7 @@ fun Forecast.mapCurrentSuggestions(
             WeatherSuggestionModel(
                 type = SuggestionType.UV,
                 priority = SuggestionPriority.MEDIUM,
+                moment = moment,
                 icon = "😎"
             )
         )
@@ -274,6 +280,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.HEAT,
                 priority = SuggestionPriority.HIGH,
                 icon = "💧",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Temperature(
                         formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
@@ -287,6 +294,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.HEAT,
                 priority = SuggestionPriority.MEDIUM,
                 icon = "🥵",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Temperature(
                         formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
@@ -300,6 +308,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.HEAT,
                 priority = SuggestionPriority.LOW,
                 icon = "😅",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Temperature(
                         formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
@@ -316,6 +325,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.COLD,
                 priority = SuggestionPriority.MEDIUM,
                 icon = "🧥",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Temperature(
                         formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
@@ -332,6 +342,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.WIND,
                 priority = SuggestionPriority.MEDIUM,
                 icon = "⚠️",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.WindSpeed(
                         formatWind(current.windSpeedKph, current.windSpeedMph, measureUnit).toInt()
@@ -347,7 +358,8 @@ fun Forecast.mapCurrentSuggestions(
             WeatherSuggestionModel(
                 type = SuggestionType.HUMIDITY,
                 priority = SuggestionPriority.LOW,
-                icon = "👕"
+                icon = "👕",
+                moment = moment
             )
         )
     }
@@ -359,6 +371,7 @@ fun Forecast.mapCurrentSuggestions(
                 type = SuggestionType.VISIBILITY,
                 priority = SuggestionPriority.MEDIUM,
                 icon = "🌫️",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Distance(current.visionKM.toInt())
                 )
@@ -371,9 +384,14 @@ fun Forecast.mapCurrentSuggestions(
         .take(MAX_SUGGESTIONS)
 }
 
-fun Forecast.mapTomorrowNotification(measureUnit: MeasureUnit): WeatherSuggestionModel? {
+fun Forecast.mapTomorrowNotification(
+    timeZone: String,
+    measureUnit: MeasureUnit
+): WeatherSuggestionModel? {
     val tomorrow = this.getFutureDays(1).firstOrNull() ?: return null
     val day = tomorrow.day
+
+    val moment = getCurrentDayMoment(timeZone)
 
     return when {
 
@@ -381,6 +399,7 @@ fun Forecast.mapTomorrowNotification(measureUnit: MeasureUnit): WeatherSuggestio
             type = SuggestionType.TOMORROW_FORECAST,
             priority = SuggestionPriority.HIGH,
             icon = "🌧️",
+            moment = moment,
             args = listOf(
                 SuggestionArg.Percentage(day.dailyChanceOfRain.toInt()),
                 SuggestionArg.Temperature(
@@ -404,6 +423,7 @@ fun Forecast.mapTomorrowNotification(measureUnit: MeasureUnit): WeatherSuggestio
             type = SuggestionType.TOMORROW_FORECAST,
             priority = SuggestionPriority.MEDIUM,
             icon = "🧴",
+            moment = moment,
             args = listOf(
                 SuggestionArg.Temperature(
                     formatTemp(
@@ -420,6 +440,7 @@ fun Forecast.mapTomorrowNotification(measureUnit: MeasureUnit): WeatherSuggestio
             type = SuggestionType.TOMORROW_FORECAST,
             priority = SuggestionPriority.MEDIUM,
             icon = "🥵",
+            moment = moment,
             args = listOf(
                 SuggestionArg.Temperature(
                     formatTemp(
@@ -442,6 +463,7 @@ fun Forecast.mapTomorrowNotification(measureUnit: MeasureUnit): WeatherSuggestio
             type = SuggestionType.TOMORROW_FORECAST,
             priority = SuggestionPriority.LOW,
             icon = "🌤️",
+            moment = moment,
             args = listOf(
                 SuggestionArg.Temperature(
                     formatTemp(
@@ -471,12 +493,15 @@ fun Forecast.mapMorningSuggestions(
     val today = this.getCurrentDayForecast(timeZone) ?: return emptyList()
     val day = today.day
 
+    val moment = getCurrentDayMoment(timeZone)
+
     if (day.dailyChanceOfRain > 50) {
         suggestions.add(
             WeatherSuggestionModel(
                 type = SuggestionType.MORNING_SUMMARY,
                 priority = SuggestionPriority.HIGH,
                 icon = "🌂",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Percentage(day.dailyChanceOfRain.toInt())
                 )
@@ -490,6 +515,7 @@ fun Forecast.mapMorningSuggestions(
                 type = SuggestionType.MORNING_SUMMARY,
                 priority = SuggestionPriority.HIGH,
                 icon = "🧴",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Uv(uvIndexLevel(day.uv))
                 )
@@ -500,7 +526,8 @@ fun Forecast.mapMorningSuggestions(
             WeatherSuggestionModel(
                 type = SuggestionType.MORNING_SUMMARY,
                 priority = SuggestionPriority.MEDIUM,
-                icon = "😎"
+                icon = "😎",
+                moment = moment
             )
         )
     }
@@ -511,6 +538,7 @@ fun Forecast.mapMorningSuggestions(
                 type = SuggestionType.MORNING_SUMMARY,
                 priority = SuggestionPriority.HIGH,
                 icon = "💧",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Temperature(
                         formatTemp(
@@ -528,6 +556,7 @@ fun Forecast.mapMorningSuggestions(
                 type = SuggestionType.MORNING_SUMMARY,
                 priority = SuggestionPriority.MEDIUM,
                 icon = "🥵",
+                moment = moment,
                 args = listOf(
                     SuggestionArg.Temperature(
                         formatTemp(

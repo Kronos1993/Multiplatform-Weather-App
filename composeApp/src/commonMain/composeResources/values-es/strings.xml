@@ -115,4 +115,8 @@
     <string name="alert_instructions">Recomendaciones:</string>
     <string name="alert_validity">Válido: desde %s hasta %s</string>
 
+    <string name="map_layer_rain">Radar lluvia</string>
+    <string name="map_layer_nowcast">Pronóstico</string>
+    <string name="map_layer_satellite">Satélite</string>
+
 </resources>

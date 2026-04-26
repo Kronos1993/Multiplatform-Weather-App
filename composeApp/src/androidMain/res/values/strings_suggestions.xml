@@ -1,75 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- RAIN -->
-    <string name="suggestion_rain_title">Bring an umbrella 🌂</string>
-    <string name="suggestion_rain_message">%1$s% chance of rain in the next few hours</string>
 
-    <!-- UV HIGH -->
-    <string name="suggestion_uv_high_title">Very high UV index 🧴</string>
-    <string name="suggestion_uv_high_message">UV index is %1$s. Apply sunscreen before going out</string>
+    <!-- ── RAIN ── -->
+    <string name="suggestion_rain_title_morning">Rain this morning 🌂</string>
+    <string name="suggestion_rain_title_afternoon">Rain later today 🌧️</string>
+    <string name="suggestion_rain_title_evening">Rain tonight 🌙</string>
+    <string name="suggestion_rain_title_night">Rain overnight 🌧️</string>
+    <string name="suggestion_rain_morning_message">%1$s% chance of rain. Take an umbrella before you leave</string>
+    <string name="suggestion_rain_afternoon_message">%1$s% chance of rain later. Keep an umbrella nearby</string>
+    <string name="suggestion_rain_evening_message">%1$s% chance of rain tonight. Bring an umbrella if heading out</string>
+    <string name="suggestion_rain_night_message">%1$s% chance of rain overnight. You’re fine if staying in</string>
 
-    <!-- UV MEDIUM -->
-    <string name="suggestion_uv_medium_title">Moderate UV index 😎</string>
-    <string name="suggestion_uv_medium_message">Consider wearing sunglasses and light clothing</string>
 
-    <!-- HEAT -->
-    <string name="suggestion_heat_title">Extreme heat 💧</string>
-    <string name="suggestion_heat_message">Feels like %1$s°. Stay hydrated and avoid direct sunlight</string>
+    <!-- ── UV ── -->
+    <string name="suggestion_uv_high_title">High UV ☀️</string>
+    <string name="suggestion_uv_medium_title">Moderate UV 😎</string>
 
-    <!-- WIND -->
+    <string name="suggestion_uv_high_morning_message">UV is already %1$s. Apply sunscreen before going out</string>
+    <string name="suggestion_uv_high_afternoon_message">UV %1$s — peak hours. Stay in the shade if possible</string>
+    <string name="suggestion_uv_high_evening_message">UV %1$s — still strong. Use protection outdoors</string>
+    <string name="suggestion_uv_high_night_message">UV %1$s. Low risk at night</string>
+
+    <string name="suggestion_uv_medium_morning_message">Moderate UV. Sunglasses recommended</string>
+    <string name="suggestion_uv_medium_afternoon_message">Moderate UV. A hat will help</string>
+    <string name="suggestion_uv_medium_evening_message">Moderate UV. Sunscreen is still useful</string>
+    <string name="suggestion_uv_medium_night_message">Low UV now. Safe to be outside</string>
+
+
+    <!-- ── HEAT ── -->
+    <string name="suggestion_heat_high_title">Extreme heat 🥵</string>
+    <string name="suggestion_heat_medium_title">Hot weather 🌡️</string>
+    <string name="suggestion_heat_low_title">Warm conditions 😅</string>
+
+    <string name="suggestion_heat_high_morning_message">Feels like %1$s°. Stay hydrated from early on</string>
+    <string name="suggestion_heat_high_afternoon_message">Feels like %1$s°. Avoid direct sun and take breaks</string>
+    <string name="suggestion_heat_high_evening_message">Still %1$s°. Wait a bit before going out</string>
+    <string name="suggestion_heat_high_night_message">%1$s° overnight. Keep your space cool</string>
+
+    <string name="suggestion_heat_medium_morning_message">%1$s° early. It’s going to be a hot day</string>
+    <string name="suggestion_heat_medium_afternoon_message">%1$s° now. Light clothes and water help</string>
+    <string name="suggestion_heat_medium_evening_message">%1$s° outside. Still warm for the evening</string>
+    <string name="suggestion_heat_medium_night_message">%1$s° overnight. Keep airflow if possible</string>
+
+    <string name="suggestion_heat_low_morning_message">%1$s° and rising. Dress light</string>
+    <string name="suggestion_heat_low_afternoon_message">%1$s° this afternoon. Stay comfortable</string>
+    <string name="suggestion_heat_low_evening_message">%1$s° outside. Slightly warm evening</string>
+    <string name="suggestion_heat_low_night_message">%1$s° overnight. Comfortable conditions</string>
+
+
+    <!-- ── COLD ── -->
+    <string name="suggestion_cold_title">Cold weather 🧥</string>
+
+    <string name="suggestion_cold_morning_message">%1$s° this morning. Dress warm before heading out</string>
+    <string name="suggestion_cold_afternoon_message">%1$s° later. You’ll need a jacket</string>
+    <string name="suggestion_cold_evening_message">%1$s° tonight. Wear something warm</string>
+    <string name="suggestion_cold_night_message">%1$s° overnight. Stay warm indoors</string>
+
+
+    <!-- ── WIND ── -->
     <string name="suggestion_wind_title">Strong winds ⚠️</string>
-    <string name="suggestion_wind_message">Wind speed of %1$s. Be careful outdoors</string>
 
-    <!-- HUMIDITY -->
-    <string name="suggestion_humidity_title">High humidity 👕</string>
-    <string name="suggestion_humidity_message">Wear light breathable clothing today</string>
+    <string name="suggestion_wind_morning_message">Winds at %1$s. Secure loose objects</string>
+    <string name="suggestion_wind_afternoon_message">%1$s winds. Be cautious outside</string>
+    <string name="suggestion_wind_evening_message">%1$s winds tonight. Watch for debris</string>
+    <string name="suggestion_wind_night_message">%1$s winds overnight. Keep windows closed</string>
 
-    <!-- TOMORROW_FORECAST — rain -->
+
+    <!-- ── HUMIDITY ── -->
+    <string name="suggestion_humidity_title">High humidity 💧</string>
+
+    <string name="suggestion_humidity_morning_message">Wear light clothing</string>
+    <string name="suggestion_humidity_afternoon_message">Very humid. It may feel hotter than it is</string>
+    <string name="suggestion_humidity_evening_message">Still humid. Stay hydrated</string>
+    <string name="suggestion_humidity_night_message">Humid overnight. Keep airflow if possible</string>
+
+
+    <!-- ── VISIBILITY ── -->
+    <string name="suggestion_visibility_title">Low visibility 🌫️</string>
+
+    <string name="suggestion_visibility_morning_message">Visibility: %1$s km. Drive carefully</string>
+    <string name="suggestion_visibility_afternoon_message">Visibility down to %1$s km. Stay alert</string>
+    <string name="suggestion_visibility_evening_message">%1$s km visibility. Use fog lights</string>
+    <string name="suggestion_visibility_night_message">%1$s km visibility. Avoid unnecessary travel</string>
+
+
+    <!-- ── TOMORROW ── -->
     <string name="suggestion_tomorrow_rain_title">Rain tomorrow 🌧️</string>
-    <string name="suggestion_tomorrow_rain_message">%1$s% chance of rain · %2$s° / %3$s°</string>
+    <string name="suggestion_tomorrow_heat_title">Hot tomorrow 🥵</string>
+    <string name="suggestion_tomorrow_uv_title">High UV tomorrow ☀️</string>
+    <string name="suggestion_tomorrow_clear_title">Nice weather tomorrow 🌤️</string>
 
-    <!-- TOMORROW_FORECAST — uv -->
-    <string name="suggestion_tomorrow_uv_title">Sunny tomorrow ☀️</string>
-    <string name="suggestion_tomorrow_uv_message">Up to %1$s° with UV index %2$s</string>
+    <string name="suggestion_tomorrow_rain_message">%1$s% rain · %2$s° / %3$s°. Plan ahead</string>
+    <string name="suggestion_tomorrow_heat_message">Up to %1$s° · Low %2$s°. Stay cool</string>
+    <string name="suggestion_tomorrow_uv_message">%2$s UV · High %1$s°. Use sunscreen</string>
+    <string name="suggestion_tomorrow_clear_message">%1$s° / %2$s°. Great day ahead</string>
 
-    <!-- TOMORROW_FORECAST — clear -->
-    <string name="suggestion_tomorrow_clear_title">Good weather tomorrow 🌤️</string>
-    <string name="suggestion_tomorrow_clear_message">%1$s° / %2$s° — a great day to be outside</string>
 
-    <!-- MORNING_SUMMARY — rain -->
-    <string name="suggestion_morning_rain_title">Rain expected today 🌂</string>
-    <string name="suggestion_morning_rain_message">%1$s% chance of rain. Don\'t forget your umbrella</string>
+    <!-- ── MORNING SUMMARY ── -->
+    <string name="suggestion_morning_rain_title">Rain today 🌧️</string>
+    <string name="suggestion_morning_uv_high_title">Strong sun today ☀️</string>
+    <string name="suggestion_morning_uv_medium_title">Moderate sun today 😎</string>
+    <string name="suggestion_morning_heat_high_title">Very hot today 🥵</string>
+    <string name="suggestion_morning_heat_medium_title">Warm day ahead 🌡️</string>
 
-    <!-- MORNING_SUMMARY — uv -->
-    <string name="suggestion_morning_uv_title">High UV today 🧴</string>
-    <string name="suggestion_morning_uv_message">UV index will reach %1$s. Use sunscreen</string>
+    <string name="suggestion_morning_rain_message">%1$s% chance of rain today. Bring an umbrella</string>
+    <string name="suggestion_morning_uv_high_message">UV up to %1$s. Protect your skin</string>
+    <string name="suggestion_morning_uv_medium_message">Moderate UV today. Sunglasses recommended</string>
+    <string name="suggestion_morning_heat_high_message">High of %1$s°. Stay hydrated early</string>
+    <string name="suggestion_morning_heat_medium_message">Up to %1$s°. Expect a warm day</string>
 
-    <!-- MORNING_SUMMARY — heat -->
-    <string name="suggestion_morning_heat_title">Hot day ahead 🌡️</string>
-    <string name="suggestion_morning_heat_message">Max temperature of %1$s° today. Keep hydrated</string>
 
-    <string name="suggestion_heat_high_title">Extreme heat</string>
-    <string name="suggestion_heat_medium_title">Hot weather</string>
-    <string name="suggestion_heat_low_title">Warm day</string>
-
-    <string name="suggestion_heat_high_message">Feels like %1$s°. Stay hydrated.</string>
-    <string name="suggestion_heat_medium_message">Feels like %1$s°. It will be hot.</string>
-    <string name="suggestion_heat_low_message">Feels like %1$s°. Slightly warm.</string>
-
-    <string name="suggestion_cold_title">Cold weather</string>
-    <string name="suggestion_cold_message">Feels like %1$s°. Wear warm clothes.</string>
-
-    <string name="suggestion_visibility_title">Low visibility</string>
-    <string name="suggestion_visibility_message">Visibility is %1$s km. Be careful.</string>
-
+    <!-- ── GENERIC HEADERS ── -->
     <string name="suggestion_tomorrow_alert_title">Tomorrow in %1$s</string>
-    <string name="suggestion_tomorrow_alert_message">Max %1$s°. Conditions may be intense.</string>
-
     <string name="suggestion_morning_alert_title">Important today</string>
     <string name="suggestion_morning_warning_title">Be prepared</string>
     <string name="suggestion_morning_normal_title">Today\'s overview</string>
 
-    <string name="suggestion_morning_alert_message">Conditions require attention. Please check weather overview.</string>
-    <string name="suggestion_morning_warning_message">Expect notable weather conditions. Please check weather overview.</string>
-    <string name="suggestion_morning_normal_message">Normal weather expected.</string>
 </resources>

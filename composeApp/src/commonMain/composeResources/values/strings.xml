@@ -114,5 +114,9 @@
     <string name="alert_description">Description:</string>
     <string name="alert_instructions">Instructions:</string>
     <string name="alert_validity">Valid: from %s until %s</string>
+    
+    <string name="map_layer_rain">Rain Radar</string>
+    <string name="map_layer_nowcast">Forecast</string>
+    <string name="map_layer_satellite">Satellite</string>
 
 </resources>

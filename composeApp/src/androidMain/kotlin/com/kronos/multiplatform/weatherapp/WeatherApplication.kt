@@ -16,8 +16,6 @@ import com.kronos.multiplatform.weatherapp.job.WeatherAlertNotificationWorker
 import com.kronos.multiplatform.weatherapp.job.WeatherNotificationWorker
 import com.kronos.multiplatform.weatherapp.job.WeatherSuggestionScheduler
 import com.kronos.multiplatform.weatherapp.job.WeatherWidgetUpdateWorker
-import com.mmk.kmpnotifier.notification.NotifierManager
-import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import java.util.Date
@@ -47,18 +45,6 @@ class WeatherApplication : Application() {
         scheduleWeatherAlertWorker(60 * 4)
         scheduleWeatherWidgetUpdateWorker()
         WeatherSuggestionScheduler.scheduleAll(this)
-
-        NotifierManager.initialize(
-            configuration = NotificationPlatformConfiguration.Android(
-                notificationIconResId = R.drawable.ic_weather_app_icon,
-                showPushNotification = true,
-                notificationChannelData = NotificationPlatformConfiguration.Android.NotificationChannelData(
-                    id = NOTIFICATION_CHANNEL,
-                    name = NOTIFICATION_CHANNEL,
-                    description = NOTIFICATION_CHANNEL
-                )
-            )
-        )
 
         try {
             exceptionHandler.init()

@@ -63,7 +63,8 @@ fun WeatherScreen(
 ) {
     val viewModel = koinViewModel<WeatherViewModel>()
     val weather by viewModel.weather.collectAsStateWithLifecycle()
-    val rainRadarTiles by viewModel.rainRadarTiles.collectAsStateWithLifecycle()
+    val mapLayers by viewModel.mapLayers.collectAsStateWithLifecycle()
+
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val selectedAlert by viewModel.selectedAlert.collectAsStateWithLifecycle()
@@ -209,7 +210,10 @@ fun WeatherScreen(
                                     if (weather != null) {
                                         WeatherContentPortrait(
                                             weather = weather!!,
-                                            rainRadarTiles = rainRadarTiles.orEmpty(),
+                                            mapLayers = mapLayers,
+                                            onLayerToggled = {
+                                                viewModel.toggleLayer(it)
+                                            },
                                             deviceScreenConfiguration = deviceScreenConfiguration,
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
@@ -276,7 +280,10 @@ fun WeatherScreen(
                                 if (weather != null) {
                                     WeatherContentLandscape(
                                         weather = weather!!,
-                                        rainRadarTiles = rainRadarTiles.orEmpty(),
+                                        mapLayers = mapLayers,
+                                        onLayerToggled = {
+                                            viewModel.toggleLayer(it)
+                                        },
                                         isDarkTheme = isDarkTheme,
                                         urlProvider = viewModel.urlProvider,
                                         imageQuality = imageQuality,
@@ -347,7 +354,10 @@ fun WeatherScreen(
                                     if (weather != null) {
                                         WeatherContentPortrait(
                                             weather = weather!!,
-                                            rainRadarTiles = rainRadarTiles.orEmpty(),
+                                            mapLayers = mapLayers,
+                                            onLayerToggled = {
+                                                viewModel.toggleLayer(it)
+                                            },
                                             deviceScreenConfiguration = deviceScreenConfiguration,
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
@@ -421,7 +431,10 @@ fun WeatherScreen(
                                     if (weather != null) {
                                         WeatherContentLandscape(
                                             weather = weather!!,
-                                            rainRadarTiles = rainRadarTiles.orEmpty(),
+                                            mapLayers = mapLayers,
+                                            onLayerToggled = {
+                                                viewModel.toggleLayer(it)
+                                            },
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
                                             imageQuality = imageQuality,

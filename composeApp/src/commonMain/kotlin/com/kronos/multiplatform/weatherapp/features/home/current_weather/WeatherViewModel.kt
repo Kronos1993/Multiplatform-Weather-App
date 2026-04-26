@@ -1,6 +1,8 @@
 package com.kronos.multiplatform.weatherapp.features.home.current_weather
 
 import androidx.lifecycle.viewModelScope
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerState
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerType
 import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
@@ -18,19 +20,20 @@ import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
-import com.kronos.multiplatform.weatherapp.domain.repository.RainRadarRepository
+import com.kronos.multiplatform.weatherapp.domain.repository.MapLayerRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
-    private val rainRadarRepository: RainRadarRepository,
+    private val mapLayerRepository: MapLayerRepository,
     private val locationRepository: LocationRepository,
     private var notifications: INotifications,
     private val loggerManager: ILogManager,
@@ -47,8 +50,15 @@ class WeatherViewModel(
     private val _selectedUserLocation = MutableStateFlow<UserCustomLocation?>(null)
     val selectedUserLocation = _selectedUserLocation.asStateFlow()
 
-    private val _rainRadarTiles = MutableStateFlow<String?>(null)
-    val rainRadarTiles = _rainRadarTiles.asStateFlow()
+    private val _mapLayers = MutableStateFlow(
+        MapLayerType.entries.map {
+            MapLayerState(
+                type = it,
+                enabled = it == MapLayerType.RAIN_RADAR
+            )
+        }
+    )
+    val mapLayers = _mapLayers.asStateFlow()
 
     private val _screenState = MutableStateFlow<WeatherScreenState>(WeatherScreenState.Idle)
     val screenState = _screenState.asStateFlow()
@@ -100,8 +110,6 @@ class WeatherViewModel(
                 _screenState.value = WeatherScreenState.Loading
                 _error.value = null
 
-                _rainRadarTiles.value = rainRadarRepository.getRadarTileUrl()
-
                 // 1. Buscar ubicación guardada del usuario
                 var userLocation = userCustomLocationLocalRepository.getSelectedLocation()
                 if (userLocation == null) {
@@ -147,6 +155,9 @@ class WeatherViewModel(
                         }
                     }
                 }
+
+                loadMapLayerTiles()
+
             } catch (e: Exception) {
                 handleError(e)
             }
@@ -430,6 +441,26 @@ class WeatherViewModel(
         }
     }
 
+    private fun loadMapLayerTiles() {
+        viewModelScope.launch(Dispatchers.IO) {
+            mapLayerRepository.getLayerTiles()
+                .onSuccess { tiles ->
+                    _mapLayers.update { layers ->
+                        layers.map { layer ->
+                            when (layer.type) {
+                                MapLayerType.RAIN_RADAR -> layer.copy(tileUrl = tiles.radarUrl, enabled = tiles.radarUrl.isNotBlank())
+                                MapLayerType.NOWCAST -> layer.copy(tileUrl = tiles.nowcastUrl, enabled = tiles.nowcastUrl.isNotBlank())
+                                MapLayerType.SATELLITE -> layer.copy(tileUrl = tiles.satelliteUrl, enabled = tiles.satelliteUrl.isNotBlank())
+                            }
+                        }
+                    }
+                }
+                .onError {
+                    log("Error loading map tiles: ${it.errorMessage}", true)
+                }
+        }
+    }
+
     private fun log(item: String, isError: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
             if (isError) {
@@ -512,6 +543,13 @@ class WeatherViewModel(
         _selectedAlert.value = alert
         _showAlertInfo.value = alert != null
     }
+
+    fun toggleLayer(type: MapLayerType) {
+        _mapLayers.update { layers ->
+            layers.map { if (it.type == type) it.copy(enabled = !it.enabled) else it }
+        }
+    }
+
 }
 
 sealed class WeatherScreenState {
