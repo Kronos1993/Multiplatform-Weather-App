@@ -30,7 +30,8 @@ class WeatherAlertsRemoteDataSourceImpl(
 ) : WeatherAlertsRemoteDataSource {
 
     override suspend fun getWeatherAlerts(
-        cityName: String,
+        lat: Double,
+        lon: Double,
         apiKey: String
     ): Result<CurrentAlertsForecast, Error> {
 
@@ -38,7 +39,7 @@ class WeatherAlertsRemoteDataSourceImpl(
             try {
                 httpClient.createKtorClient(httpEngine)
                     .get(urlProvider.getPrivateApiUrl() + AlertsApi.GET_WEATHER_ALERTS) {
-                        parameter("q", cityName)
+                        parameter("q", "${lat},${lon}")
                         parameter("key", apiKey)
                     }
             } catch (e: UnresolvedAddressException) {

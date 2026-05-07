@@ -18,9 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.kronos.multiplatform.weatherapp.components.BodyText
-import com.kronos.multiplatform.weatherapp.components.ComponentSize
-import com.kronos.multiplatform.weatherapp.components.TitleText
+import com.kronos.multiplatform.weatherapp.core.ui.components.BodyText
+import com.kronos.multiplatform.weatherapp.core.ui.components.ComponentSize
+import com.kronos.multiplatform.weatherapp.core.ui.components.TitleText
 import com.kronos.multiplatform.weatherapp.core.util.IExpectedIntents
 import com.kronos.multiplatform.weatherapp.core.util.format
 import org.jetbrains.compose.resources.stringResource

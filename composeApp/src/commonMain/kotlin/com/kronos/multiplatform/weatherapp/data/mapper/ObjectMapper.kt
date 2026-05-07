@@ -22,11 +22,18 @@ import com.kronos.multiplatform.weatherapp.domain.model.Day
 import com.kronos.multiplatform.weatherapp.domain.model.ForecastDay
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
 import com.kronos.multiplatform.weatherapp.domain.model.Location
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionArg
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionPriority
+import com.kronos.multiplatform.weatherapp.domain.model.SuggestionType
+import com.kronos.multiplatform.weatherapp.domain.model.WeatherSuggestionModel
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentAlertsForecast
 import com.kronos.multiplatform.weatherapp.domain.model.current.CurrentForecast
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
+import com.kronos.multiplatform.weatherapp.domain.model.getCurrentDayMoment
+import com.kronos.multiplatform.weatherapp.domain.model.uvIndexLevel
 
 fun AstroDto.toAstro() = Astro(
     sunrise = sunrise,
@@ -147,7 +154,7 @@ fun LocationDto.toLocation() = Location(
     localtime = localtime
 )
 
-fun ForecastDayDto.toForecastDay()= ForecastDay(
+fun ForecastDayDto.toForecastDay() = ForecastDay(
     forecastDay = forecastday.map { it.toDailyForecast() }
 )
 
@@ -195,3 +202,375 @@ fun CurrentAlertsForecastDto.toCurrentAlertsForecast() = CurrentAlertsForecast(
     location = location.toLocation(),
     alerts = alerts.alertList.map { it.toWeatherAlert() }
 )
+
+
+private const val MAX_SUGGESTIONS = 4
+
+fun formatTemp(valueC: Double, valueF: Double, unit: MeasureUnit): String {
+    return if (unit == MeasureUnit.INTERNATIONAL)
+        valueC.toInt().toString()
+    else
+        valueF.toInt().toString()
+}
+
+fun formatWind(kph: Double, mph: Double, unit: MeasureUnit): String {
+    return if (unit == MeasureUnit.INTERNATIONAL)
+        kph.toInt().toString()
+    else
+        mph.toInt().toString()
+}
+
+fun Forecast.mapCurrentSuggestions(
+    timeZone: String,
+    measureUnit: MeasureUnit
+): List<WeatherSuggestionModel> {
+
+    val suggestions = mutableListOf<WeatherSuggestionModel>()
+    val current = this.current
+    val todayForecast = this.getCurrentDayForecast(timeZone)
+    val upcomingHours = todayForecast?.getUpcomingHours(timeZone) ?: emptyList()
+
+    val moment = getCurrentDayMoment(timeZone)
+
+    // 🌧️ Lluvia próxima
+    val rainSoon = upcomingHours.take(3).any { it.precipMm > 0.5 || it.chanceOfRain > 50 }
+    if (rainSoon) {
+        val maxChance = upcomingHours.take(3).maxOfOrNull { it.chanceOfRain } ?: 0.0
+        suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.RAIN,
+                priority = SuggestionPriority.HIGH,
+                icon = "🌂",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Percentage(maxChance.toInt())
+                )
+            )
+        )
+    }
+
+    // ☀️ UV
+    when {
+        current.uv >= 8 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.UV,
+                priority = SuggestionPriority.HIGH,
+                icon = "🧴",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Uv(uvIndexLevel(current.uv))
+                )
+            )
+        )
+
+        current.uv >= 5 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.UV,
+                priority = SuggestionPriority.MEDIUM,
+                moment = moment,
+                icon = "😎"
+            )
+        )
+    }
+
+    // 🌡️ Sensación térmica
+    when {
+        current.feelslikeC >= 38 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.HEAT,
+                priority = SuggestionPriority.HIGH,
+                icon = "💧",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Temperature(
+                        formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
+                    )
+                )
+            )
+        )
+
+        current.feelslikeC >= 32 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.HEAT,
+                priority = SuggestionPriority.MEDIUM,
+                icon = "🥵",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Temperature(
+                        formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
+                    )
+                )
+            )
+        )
+
+        current.feelslikeC >= 28 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.HEAT,
+                priority = SuggestionPriority.LOW,
+                icon = "😅",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Temperature(
+                        formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
+                    )
+                )
+            )
+        )
+    }
+
+    // ❄️ Frío
+    if (current.feelslikeC <= 10) {
+        suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.COLD,
+                priority = SuggestionPriority.MEDIUM,
+                icon = "🧥",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Temperature(
+                        formatTemp(current.feelslikeC, current.feelslikeF, measureUnit).toInt()
+                    )
+                )
+            )
+        )
+    }
+
+    // 💨 Viento
+    if (current.windSpeedKph >= 40) {
+        suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.WIND,
+                priority = SuggestionPriority.MEDIUM,
+                icon = "⚠️",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.WindSpeed(
+                        formatWind(current.windSpeedKph, current.windSpeedMph, measureUnit).toInt()
+                    )
+                )
+            )
+        )
+    }
+
+    // 💦 Humedad
+    if (current.humidity >= 85) {
+        suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.HUMIDITY,
+                priority = SuggestionPriority.LOW,
+                icon = "👕",
+                moment = moment
+            )
+        )
+    }
+
+    // 🌫️ Visibilidad
+    if (current.visionKM <= 2) {
+        suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.VISIBILITY,
+                priority = SuggestionPriority.MEDIUM,
+                icon = "🌫️",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Distance(current.visionKM.toInt())
+                )
+            )
+        )
+    }
+
+    return suggestions
+        .sortedBy { it.priority.ordinal }
+        .take(MAX_SUGGESTIONS)
+}
+
+fun Forecast.mapTomorrowNotification(
+    timeZone: String,
+    measureUnit: MeasureUnit
+): WeatherSuggestionModel? {
+    val tomorrow = this.getFutureDays(1).firstOrNull() ?: return null
+    val day = tomorrow.day
+
+    val moment = getCurrentDayMoment(timeZone)
+
+    return when {
+
+        day.dailyChanceOfRain > 70 -> WeatherSuggestionModel(
+            type = SuggestionType.TOMORROW_FORECAST,
+            priority = SuggestionPriority.HIGH,
+            icon = "🌧️",
+            moment = moment,
+            args = listOf(
+                SuggestionArg.Percentage(day.dailyChanceOfRain.toInt()),
+                SuggestionArg.Temperature(
+                    formatTemp(
+                        day.maxtempC,
+                        day.maxtempF,
+                        measureUnit
+                    ).toInt()
+                ),
+                SuggestionArg.Temperature(
+                    formatTemp(
+                        day.mintempC,
+                        day.mintempF,
+                        measureUnit
+                    ).toInt()
+                )
+            )
+        )
+
+        day.uv >= 8 -> WeatherSuggestionModel(
+            type = SuggestionType.TOMORROW_FORECAST,
+            priority = SuggestionPriority.MEDIUM,
+            icon = "🧴",
+            moment = moment,
+            args = listOf(
+                SuggestionArg.Temperature(
+                    formatTemp(
+                        day.maxtempC,
+                        day.maxtempF,
+                        measureUnit
+                    ).toInt()
+                ),
+                SuggestionArg.Uv(uvIndexLevel(day.uv))
+            )
+        )
+
+        day.maxtempC >= 32 -> WeatherSuggestionModel(
+            type = SuggestionType.TOMORROW_FORECAST,
+            priority = SuggestionPriority.MEDIUM,
+            icon = "🥵",
+            moment = moment,
+            args = listOf(
+                SuggestionArg.Temperature(
+                    formatTemp(
+                        day.maxtempC,
+                        day.maxtempF,
+                        measureUnit
+                    ).toInt()
+                ),
+                SuggestionArg.Temperature(
+                    formatTemp(
+                        day.mintempC,
+                        day.mintempF,
+                        measureUnit
+                    ).toInt()
+                )
+            )
+        )
+
+        else -> WeatherSuggestionModel(
+            type = SuggestionType.TOMORROW_FORECAST,
+            priority = SuggestionPriority.LOW,
+            icon = "🌤️",
+            moment = moment,
+            args = listOf(
+                SuggestionArg.Temperature(
+                    formatTemp(
+                        day.maxtempC,
+                        day.maxtempF,
+                        measureUnit
+                    ).toInt()
+                ),
+                SuggestionArg.Temperature(
+                    formatTemp(
+                        day.mintempC,
+                        day.mintempF,
+                        measureUnit
+                    ).toInt()
+                )
+            )
+        )
+    }
+}
+
+fun Forecast.mapMorningSuggestions(
+    timeZone: String,
+    measureUnit: MeasureUnit
+): List<WeatherSuggestionModel> {
+
+    val suggestions = mutableListOf<WeatherSuggestionModel>()
+    val today = this.getCurrentDayForecast(timeZone) ?: return emptyList()
+    val day = today.day
+
+    val moment = getCurrentDayMoment(timeZone)
+
+    if (day.dailyChanceOfRain > 50) {
+        suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.MORNING_SUMMARY,
+                priority = SuggestionPriority.HIGH,
+                icon = "🌂",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Percentage(day.dailyChanceOfRain.toInt())
+                )
+            )
+        )
+    }
+
+    when {
+        day.uv >= 8 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.MORNING_SUMMARY,
+                priority = SuggestionPriority.HIGH,
+                icon = "🧴",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Uv(uvIndexLevel(day.uv))
+                )
+            )
+        )
+
+        day.uv >= 5 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.MORNING_SUMMARY,
+                priority = SuggestionPriority.MEDIUM,
+                icon = "😎",
+                moment = moment
+            )
+        )
+    }
+
+    when {
+        day.maxtempC >= 38 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.MORNING_SUMMARY,
+                priority = SuggestionPriority.HIGH,
+                icon = "💧",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Temperature(
+                        formatTemp(
+                            day.maxtempC,
+                            day.maxtempF,
+                            measureUnit
+                        ).toInt()
+                    )
+                )
+            )
+        )
+
+        day.maxtempC >= 32 -> suggestions.add(
+            WeatherSuggestionModel(
+                type = SuggestionType.MORNING_SUMMARY,
+                priority = SuggestionPriority.MEDIUM,
+                icon = "🥵",
+                moment = moment,
+                args = listOf(
+                    SuggestionArg.Temperature(
+                        formatTemp(
+                            day.maxtempC,
+                            day.maxtempF,
+                            measureUnit
+                        ).toInt()
+                    )
+                )
+            )
+        )
+    }
+
+    return suggestions
+        .sortedBy { it.priority.ordinal }
+        .take(MAX_SUGGESTIONS)
+}

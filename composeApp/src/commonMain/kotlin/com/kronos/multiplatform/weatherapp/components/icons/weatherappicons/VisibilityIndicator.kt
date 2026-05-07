@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.VisibilityIndicator: ImageVector
     get() {
-        if (_visibilityIndicator != null) {
-            return _visibilityIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._visibilityIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._visibilityIndicator!!
         }
-        _visibilityIndicator = Builder(name = "VisibilityIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._visibilityIndicator = Builder(name = "VisibilityIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 512.0f, viewportHeight = 512.0f).apply {
             path(fill = SolidColor(Color(0xFFE6F3FF)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -92,7 +92,7 @@ public val WeatherAppIcons.VisibilityIndicator: ImageVector
             }
         }
         .build()
-        return _visibilityIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._visibilityIndicator!!
     }
 
 private var _visibilityIndicator: ImageVector? = null

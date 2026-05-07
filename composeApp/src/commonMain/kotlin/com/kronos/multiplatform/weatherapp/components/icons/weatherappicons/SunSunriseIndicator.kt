@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.SunSunriseIndicator: ImageVector
     get() {
-        if (_sunSunriseIndicator != null) {
-            return _sunSunriseIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunSunriseIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunSunriseIndicator!!
         }
-        _sunSunriseIndicator = Builder(name = "SunSunriseIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunSunriseIndicator = Builder(name = "SunSunriseIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 32.0f, viewportHeight = 32.0f).apply {
             path(fill = SolidColor(Color(0xFFFE5723)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -112,7 +112,7 @@ public val WeatherAppIcons.SunSunriseIndicator: ImageVector
             }
         }
         .build()
-        return _sunSunriseIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._sunSunriseIndicator!!
     }
 
 private var _sunSunriseIndicator: ImageVector? = null

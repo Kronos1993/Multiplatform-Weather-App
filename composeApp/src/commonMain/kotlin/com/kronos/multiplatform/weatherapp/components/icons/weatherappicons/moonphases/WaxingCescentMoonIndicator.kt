@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhasesGroup
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 public val MoonPhasesGroup.WaxingCescentMoonIndicator: ImageVector
     get() {
-        if (_waxingCescentMoonIndicator != null) {
-            return _waxingCescentMoonIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingCescentMoonIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingCescentMoonIndicator!!
         }
-        _waxingCescentMoonIndicator = Builder(name = "WaxingCescentMoonIndicator", defaultWidth =
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingCescentMoonIndicator = Builder(name = "WaxingCescentMoonIndicator", defaultWidth =
                 32.0.dp, defaultHeight = 32.0.dp, viewportWidth = 32.0f, viewportHeight =
                 32.0f).apply {
             path(fill = SolidColor(Color(0xFFD9D9D9)), stroke = null, strokeLineWidth = 0.0f,
@@ -75,7 +75,7 @@ public val MoonPhasesGroup.WaxingCescentMoonIndicator: ImageVector
             }
         }
         .build()
-        return _waxingCescentMoonIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingCescentMoonIndicator!!
     }
 
 private var _waxingCescentMoonIndicator: ImageVector? = null

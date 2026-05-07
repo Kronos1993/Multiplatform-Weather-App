@@ -21,6 +21,7 @@ import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import com.kronos.multiplatform.weatherapp.job.model.NotificationWeatherParams
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -77,7 +78,7 @@ class WeatherNotificationWorker(
                     fetchAndNotifyWeather(
                         queryLat = currentCity.lat,
                         queryLon = currentCity.lon,
-                        weatherParams = weatherParams,
+                        notificationWeatherParams = weatherParams,
                         locationType = "coordinates"
                     )
                 }
@@ -85,7 +86,7 @@ class WeatherNotificationWorker(
                 currentCity != null -> {
                     fetchAndNotifyWeather(
                         queryCity = currentCity.cityName,
-                        weatherParams = weatherParams,
+                        notificationWeatherParams = weatherParams,
                         locationType = "city"
                     )
                 }
@@ -93,7 +94,7 @@ class WeatherNotificationWorker(
                 else -> {
                     fetchAndNotifyWeather(
                         queryCity = applicationContext.getString(R.string.default_city_value),
-                        weatherParams = weatherParams,
+                        notificationWeatherParams = weatherParams,
                         locationType = "default city"
                     )
                 }
@@ -110,23 +111,23 @@ class WeatherNotificationWorker(
         queryLat: Double? = null,
         queryLon: Double? = null,
         queryCity: String? = null,
-        weatherParams: WeatherParams,
+        notificationWeatherParams: NotificationWeatherParams,
         locationType: String
     ) {
         val result = if (queryLat != null && queryLon != null) {
             weatherRemoteRepository.getWeatherDataForecast(
                 queryLat,
                 queryLon,
-                weatherParams.lang,
-                weatherParams.apiKey,
-                weatherParams.days
+                notificationWeatherParams.lang,
+                notificationWeatherParams.apiKey,
+                notificationWeatherParams.days
             )
         } else {
             weatherRemoteRepository.getWeatherDataForecast(
                 queryCity ?: "",
-                weatherParams.lang,
-                weatherParams.apiKey,
-                weatherParams.days
+                notificationWeatherParams.lang,
+                notificationWeatherParams.apiKey,
+                notificationWeatherParams.days
             )
         }
 
@@ -137,7 +138,8 @@ class WeatherNotificationWorker(
                     forecast
                 )
                 widgetUpdater.updateAllWeatherWidgets()
-                createWeatherNotification(forecast, weatherParams.measureUnit)
+                createWeatherNotification(forecast, notificationWeatherParams.measureUnit)
+                WeatherSuggestionScheduler.scheduleDailyPeriodic(applicationContext)
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
             }
             .onError { error ->
@@ -215,37 +217,56 @@ class WeatherNotificationWorker(
 
     private fun createWeatherNotification(forecast: Forecast, measureUnit: MeasureUnit) {
         notifications.createNotification(
-            applicationContext.getString(R.string.notification_title).format(
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.tempC else forecast.current.tempF,
-                forecast.location.region.orEmpty()
-            ),
-            applicationContext.getString(R.string.notification_short_details)
-                .format(
+            title =
+                if (measureUnit == MeasureUnit.INTERNATIONAL)
+                    applicationContext.getString(R.string.notification_title).format(
+                        forecast.current.tempC,
+                        forecast.location.region.orEmpty()
+                    )
+                else
+                    applicationContext.getString(R.string.notification_title_fahrenheit).format(
+                        forecast.current.tempF,
+                        forecast.location.region.orEmpty()
+                    ),
+
+            shortDescription = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                applicationContext.getString(R.string.notification_short_details)
+                    .format(
+                        forecast.current.condition.description,
+                        forecast.current.feelslikeC
+                    )
+            else
+                applicationContext.getString(R.string.notification_short_details_fahrenheit)
+                    .format(
+                        forecast.current.condition.description,
+                        forecast.current.feelslikeF
+                    ),
+
+            description = if (measureUnit == MeasureUnit.INTERNATIONAL)
+                applicationContext.getString(R.string.notification_long_details).format(
                     forecast.current.condition.description,
-                    forecast.current.feelslikeC
-                ),
-            applicationContext.getString(R.string.notification_long_details).format(
-                forecast.current.condition.description,
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF,
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.mintempC.toString() else forecast.forecast.forecastDay[0].day.mintempF.toString(),
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.maxtempC.toString() else forecast.forecast.forecastDay[0].day.maxtempF.toString(),
-                forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
-            ),
-            "https:${forecast.current.condition.icon}",
-            NotificationGroup.GENERAL,
-            NotificationType.FROM_APP
+                    forecast.current.feelslikeC,
+                    forecast.forecast.forecastDay[0].day.mintempC.toString(),
+                    forecast.forecast.forecastDay[0].day.maxtempC.toString(),
+                    forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+                )
+            else
+                applicationContext.getString(R.string.notification_long_details_fahrenheit)
+                    .format(
+                        forecast.current.condition.description,
+                        forecast.current.feelslikeF,
+                        forecast.forecast.forecastDay[0].day.mintempF.toString(),
+                        forecast.forecast.forecastDay[0].day.maxtempF.toString(),
+                        forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+                    ),
+            notificationImageUrl = "https:${forecast.current.condition.icon}",
+            group = NotificationGroup.GENERAL,
+            notificationsId = NotificationType.WEATHER_UPDATED
         )
     }
 
-    private data class WeatherParams(
-        val lang: String,
-        val apiKey: String,
-        val days: Int,
-        val measureUnit: MeasureUnit
-    )
-
-    private suspend fun getWeatherParams(): WeatherParams {
-        return WeatherParams(
+    private suspend fun getWeatherParams(): NotificationWeatherParams {
+        return NotificationWeatherParams(
             lang = preferenceRepository.getPreference(
                 applicationContext.getString(R.string.default_lang_key),
                 applicationContext.getString(R.string.default_language_value)

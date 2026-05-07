@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.SnowflakeWeatherIndicator: ImageVector
     get() {
-        if (_snowflakeWeatherIndicator != null) {
-            return _snowflakeWeatherIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._snowflakeWeatherIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._snowflakeWeatherIndicator!!
         }
-        _snowflakeWeatherIndicator = Builder(name = "SnowflakeWeatherIndicator", defaultWidth =
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._snowflakeWeatherIndicator = Builder(name = "SnowflakeWeatherIndicator", defaultWidth =
                 800.0.dp, defaultHeight = 800.0.dp, viewportWidth = 512.0f, viewportHeight =
                 512.0f).apply {
             path(fill = SolidColor(Color(0xFFCCF7F5)), stroke = null, strokeLineWidth = 0.0f,
@@ -156,7 +156,7 @@ public val WeatherAppIcons.SnowflakeWeatherIndicator: ImageVector
             }
         }
         .build()
-        return _snowflakeWeatherIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._snowflakeWeatherIndicator!!
     }
 
 private var _snowflakeWeatherIndicator: ImageVector? = null

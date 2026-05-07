@@ -27,9 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.kronos.multiplatform.weatherapp.components.ConfirmDialog
-import com.kronos.multiplatform.weatherapp.components.ScrollableTabView
-import com.kronos.multiplatform.weatherapp.components.TabItem
+import com.kronos.multiplatform.weatherapp.core.ui.components.ConfirmDialog
+import com.kronos.multiplatform.weatherapp.core.ui.components.ScrollableTabView
+import com.kronos.multiplatform.weatherapp.core.ui.components.TabItem
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit

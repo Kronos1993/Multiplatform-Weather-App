@@ -29,8 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.kronos.multiplatform.weatherapp.components.SettingRadioOptions
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
+import com.kronos.multiplatform.weatherapp.core.ui.components.SettingRadioOptions
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import kotlinx.coroutines.launch

@@ -4,7 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerState
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerType
 import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
@@ -12,14 +13,17 @@ import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
+import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.LocationRepository
+import com.kronos.multiplatform.weatherapp.domain.repository.MapLayerRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
@@ -27,11 +31,13 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddCityViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
+    private val mapLayerRepository: MapLayerRepository,
     private val urlProvider: UrlProvider,
     private val locationRepository: LocationRepository,
     private var notifications: INotifications,
@@ -49,6 +55,16 @@ class AddCityViewModel(
 
     private val _forecast = MutableStateFlow<Forecast?>(null)
     val forecast: StateFlow<Forecast?> = _forecast.asStateFlow()
+
+    private val _mapLayers = MutableStateFlow(
+        MapLayerType.entries.map {
+            MapLayerState(
+                type = it,
+                enabled = it == MapLayerType.RAIN_RADAR
+            )
+        }
+    )
+    val mapLayers = _mapLayers.asStateFlow()
 
     var isCurrentLocation by mutableStateOf(false )
 
@@ -150,6 +166,7 @@ class AddCityViewModel(
                     _screenState.value = AddCityScreenState.NoCity
                     log(msg, isError = true)
                 }
+
             } catch (e: Exception) {
                 log("Error adding location: ${e.message}", isError = true)
                 _screenState.value = AddCityScreenState.NoCity
@@ -157,7 +174,7 @@ class AddCityViewModel(
         }
     }
 
-    fun addLocation() {
+    fun addLocation(measureUnit: MeasureUnit) {
         viewModelScope.launch(Dispatchers.IO) {
             val forecast = _forecast.value ?: run {
                 log("No forecast available to add location.", isError = true)
@@ -223,7 +240,7 @@ class AddCityViewModel(
                     forecast
                 )
 
-                createWeatherNotification()
+                createWeatherNotification(measureUnit)
                 widgetUpdater.updateAllWeatherWidgets()
 
                 _screenState.value = AddCityScreenState.CityAdded
@@ -261,8 +278,29 @@ class AddCityViewModel(
                 )
                 list.add(marker)
             }
+            loadMapLayerTiles()
             _markers.value = list.toList()
             log("Loaded ${list.size} markers.",false)
+        }
+    }
+
+    private fun loadMapLayerTiles() {
+        viewModelScope.launch(Dispatchers.IO) {
+            mapLayerRepository.getLayerTiles()
+                .onSuccess { tiles ->
+                    _mapLayers.update { layers ->
+                        layers.map { layer ->
+                            when (layer.type) {
+                                MapLayerType.RAIN_RADAR -> layer.copy(tileUrl = tiles.radarUrl, enabled = tiles.radarUrl.isNotBlank())
+                                MapLayerType.NOWCAST -> layer.copy(tileUrl = tiles.nowcastUrl, enabled = tiles.nowcastUrl.isNotBlank())
+                                MapLayerType.SATELLITE -> layer.copy(tileUrl = tiles.satelliteUrl, enabled = tiles.satelliteUrl.isNotBlank())
+                            }
+                        }
+                    }
+                }
+                .onError {
+                    log("Error loading map tiles: ${it.errorMessage}", true)
+                }
         }
     }
 
@@ -285,6 +323,12 @@ class AddCityViewModel(
         _error.value = null
     }
 
+    fun toggleLayer(type: MapLayerType) {
+        _mapLayers.update { layers ->
+            layers.map { if (it.type == type) it.copy(enabled = !it.enabled) else it }
+        }
+    }
+
     private fun log(item: String, isError: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
             if (isError) {
@@ -297,27 +341,29 @@ class AddCityViewModel(
         }
     }
 
-    private fun createWeatherNotification() {
+    private fun createWeatherNotification(
+        measureUnit: MeasureUnit
+    ) {
         if (_forecast.value != null) {
             notifications.createNotification(
                 notificationTitle.format(
-                    _forecast.value!!.current.tempC,
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.current.tempC else _forecast.value!!.current.tempF,
                     _forecast.value!!.location.region.orEmpty()
                 ),
                 notificationShortDetails.format(
                     _forecast.value!!.current.condition.description,
-                    _forecast.value!!.current.feelslikeC
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.current.feelslikeC else _forecast.value!!.current.feelslikeF
                 ),
                 notificationLongDetails.format(
                     _forecast.value!!.current.condition.description,
-                    _forecast.value!!.current.feelslikeC,
-                    _forecast.value!!.forecast.forecastDay[0].day.mintempC.toString(),
-                    _forecast.value!!.forecast.forecastDay[0].day.maxtempC.toString(),
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.current.feelslikeC else _forecast.value!!.current.feelslikeF,
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.forecast.forecastDay[0].day.mintempC.toString() else _forecast.value!!.forecast.forecastDay[0].day.mintempF.toString(),
+                    if (measureUnit == MeasureUnit.INTERNATIONAL) _forecast.value!!.forecast.forecastDay[0].day.maxtempC.toString() else _forecast.value!!.forecast.forecastDay[0].day.maxtempF.toString(),
                     _forecast.value!!.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
                 ),
                 "https:${_forecast.value!!.current.condition.icon}",
                 NotificationGroup.GENERAL,
-                NotificationType.FROM_APP
+                NotificationType.WEATHER_UPDATED
             )
         }
     }

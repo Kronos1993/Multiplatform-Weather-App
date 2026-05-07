@@ -14,8 +14,8 @@ import com.kronos.multiplatform.weatherapp.core.exception.ExceptionHandler
 import com.kronos.multiplatform.weatherapp.di.initKoin
 import com.kronos.multiplatform.weatherapp.job.WeatherAlertNotificationWorker
 import com.kronos.multiplatform.weatherapp.job.WeatherNotificationWorker
-import com.mmk.kmpnotifier.notification.NotifierManager
-import com.mmk.kmpnotifier.notification.configuration.NotificationPlatformConfiguration
+import com.kronos.multiplatform.weatherapp.job.WeatherSuggestionScheduler
+import com.kronos.multiplatform.weatherapp.job.WeatherWidgetUpdateWorker
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import java.util.Date
@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit
 
 
 const val NOTIFICATION_CHANNEL = "KMP_WEATHER_NOTIFICATION_CHANNEL"
+const val WEATHER_ALERT_NOTIFICATION_CHANNEL = "KMP_WEATHER_ALERT_NOTIFICATION_CHANNEL"
+const val SUGGESTION_NOTIFICATION_CHANNEL = "KMP_WEATHER_SUGGESTION_CHANNEL"
 const val TAG = "WeatherApp"
 
 
@@ -36,21 +38,13 @@ class WeatherApplication : Application() {
             androidContext(this@WeatherApplication)
         }
         createNotificationChanel()
+        createWeatherAlertNotificationChanel()
+        createSuggestionNotificationChannel()
 
         scheduleWeatherWorker(60)
-        scheduleWeatherAlertWorker(60*4)
-
-        NotifierManager.initialize(
-            configuration = NotificationPlatformConfiguration.Android(
-                notificationIconResId = R.drawable.ic_weather_app_icon,
-                showPushNotification = true,
-                notificationChannelData = NotificationPlatformConfiguration.Android.NotificationChannelData(
-                    id = NOTIFICATION_CHANNEL,
-                    name = NOTIFICATION_CHANNEL,
-                    description = NOTIFICATION_CHANNEL
-                )
-            )
-        )
+        scheduleWeatherAlertWorker(60 * 4)
+        scheduleWeatherWidgetUpdateWorker()
+        WeatherSuggestionScheduler.scheduleAll(this)
 
         try {
             exceptionHandler.init()
@@ -73,6 +67,37 @@ class WeatherApplication : Application() {
         }
     }
 
+
+    private fun createWeatherAlertNotificationChanel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                WEATHER_ALERT_NOTIFICATION_CHANNEL,
+                WEATHER_ALERT_NOTIFICATION_CHANNEL,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationChannel.description = WEATHER_ALERT_NOTIFICATION_CHANNEL
+            val notificationManager = getSystemService(
+                NotificationManager::class.java
+            )
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
+    private fun createSuggestionNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                SUGGESTION_NOTIFICATION_CHANNEL,
+                SUGGESTION_NOTIFICATION_CHANNEL,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = SUGGESTION_NOTIFICATION_CHANNEL
+            }
+            getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(channel)
+        }
+    }
+
+
     private fun scheduleWeatherWorker(minutes: Long) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -89,7 +114,7 @@ class WeatherApplication : Application() {
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             WeatherNotificationWorker::class.java.simpleName,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
     }
@@ -110,8 +135,12 @@ class WeatherApplication : Application() {
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             WeatherAlertNotificationWorker::class.java.simpleName,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
+    }
+
+    private fun scheduleWeatherWidgetUpdateWorker() {
+        WeatherWidgetUpdateWorker.schedule(this)
     }
 }

@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat
 import com.kronos.multiplatform.weatherapp.MainActivity
 import com.kronos.multiplatform.weatherapp.NOTIFICATION_CHANNEL
 import com.kronos.multiplatform.weatherapp.R
+import com.kronos.multiplatform.weatherapp.SUGGESTION_NOTIFICATION_CHANNEL
+import com.kronos.multiplatform.weatherapp.WEATHER_ALERT_NOTIFICATION_CHANNEL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.net.URL
@@ -95,7 +97,56 @@ actual class AppNotification(
                 PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
 
             val notification: Notification =
-                NotificationCompat.Builder(context, NOTIFICATION_CHANNEL)
+                NotificationCompat.Builder(context, WEATHER_ALERT_NOTIFICATION_CHANNEL)
+                    .setSmallIcon(R.drawable.ic_weather_app_icon)
+                    .setContentTitle(title)
+                    .setStyle(
+                        NotificationCompat.BigTextStyle()
+                            .bigText(description)
+                            .setBigContentTitle(title)
+                    )
+                    .setContentText(
+                        shortDescription
+                    )
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    .setGroup(group.name)
+                    .setGroupSummary(true)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .build()
+
+
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationManager.notify(notificationsId.ordinal, notification)
+            }
+        }
+
+    }
+
+    override fun createNotificationSuggestion(
+        title: String,
+        shortDescription: String,
+        description: String,
+        group: NotificationGroup,
+        notificationsId: NotificationType
+    ) {
+
+        runBlocking(Dispatchers.IO) {
+            val notificationManager: NotificationManagerCompat =
+                NotificationManagerCompat.from(context)
+
+            val intent = Intent(context, MainActivity::class.java)
+            intent.action = "notificaciones"
+            val pendingIntent: PendingIntent? =
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
+
+            val notification: Notification =
+                NotificationCompat.Builder(context, SUGGESTION_NOTIFICATION_CHANNEL)
                     .setSmallIcon(R.drawable.ic_weather_app_icon)
                     .setContentTitle(title)
                     .setStyle(

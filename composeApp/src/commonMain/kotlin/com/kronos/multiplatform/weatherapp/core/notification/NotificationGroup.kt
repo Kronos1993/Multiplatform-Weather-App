@@ -1,5 +1,5 @@
 package com.kronos.multiplatform.weatherapp.core.notification
 
 enum class NotificationGroup {
-    GENERAL
+    GENERAL,WEATHER_ALERT,SUGGESTION
 }

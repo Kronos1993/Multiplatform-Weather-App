@@ -22,9 +22,11 @@ import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationL
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 class UserCustomLocationViewModel(
@@ -58,6 +60,8 @@ class UserCustomLocationViewModel(
     private var notificationShortDetails = ""
     private var notificationLongDetails = ""
 
+    private var weatherUpdateJob: Job? = null
+
     fun initString(
         weatherPrefKey: String,
         notificationTitle: String,
@@ -75,7 +79,7 @@ class UserCustomLocationViewModel(
         _resetSwipe.value = resetSwipe
     }
 
-    fun initLocations(lang: String, apiKey: String, days: Int,measureUnit: MeasureUnit) {
+    fun initLocations(lang: String, apiKey: String, days: Int, measureUnit: MeasureUnit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _screenState.value = UserCustomLocationScreenState.Loading
@@ -84,23 +88,17 @@ class UserCustomLocationViewModel(
                 val locationsFromDb = userCustomLocationLocalRepository.listAll()
                 log("Custom location: ${locationsFromDb.size}", false)
 
-                val updatedLocations = updateWeatherDataForLocations(
-                    locationsFromDb,
-                    lang,
-                    apiKey,
-                    days,
-                    measureUnit
-                )
-
-                _locations.value = updatedLocations.sortedWith(
+                _locations.value = locationsFromDb.sortedWith(
                     compareByDescending<UserCustomLocation> { it.isCurrent }
                         .thenByDescending { it.isSelected }
                 )
-                _screenState.value = if (updatedLocations.isNotEmpty()) {
+                _screenState.value = if (locationsFromDb.isNotEmpty()) {
                     UserCustomLocationScreenState.LocationsObtained
                 } else {
                     UserCustomLocationScreenState.NoLocations
                 }
+
+                launchWeatherUpdates(locationsFromDb, lang, apiKey, days, measureUnit)
 
             } catch (e: Exception) {
                 handleError(e)
@@ -108,51 +106,83 @@ class UserCustomLocationViewModel(
         }
     }
 
-    private suspend fun updateWeatherDataForLocations(
+    private fun launchWeatherUpdates(
         locations: List<UserCustomLocation>,
         lang: String,
         apiKey: String,
         days: Int,
         measureUnit: MeasureUnit
-    ): List<UserCustomLocation> {
-        return locations.map { location ->
-            try {
-                val weatherResult = if (location.lat != null && location.lon != null) {
-                    weatherRemoteRepository.getWeatherDataForecast(
-                        location.lat!!,
-                        location.lon!!,
-                        lang,
-                        apiKey,
-                        days
-                    )
-                } else {
-                    weatherRemoteRepository.getWeatherDataForecast(
-                        location.cityName,
-                        lang,
-                        apiKey,
-                        days
-                    )
+    ) {
+        weatherUpdateJob?.cancel()
+        weatherUpdateJob = viewModelScope.launch(Dispatchers.IO) {
+            val jobs = locations.map { location ->
+                log("Refreshing weather for: ${location.cityName}", false)
+                launch {
+                    fetchAndUpdateWeatherForLocation(location, lang, apiKey, days, measureUnit)
                 }
+            }
+            jobs.joinAll()
+        }
+    }
 
-                weatherResult
-                    .onSuccess { forecast ->
-                        location.icon = forecast.current.condition.icon
-                        location.tempC = forecast.current.tempC
-                        location.tempF = forecast.current.tempF
-                        location.cityName = "${forecast.location.name}/${forecast.location.region}"
-                        log("Location from coordinates acquired: ${forecast.location.name}", false)
-                        if (location.isSelected) {
-                            createWeatherNotification(forecast, measureUnit)
-                            widgetUpdater.updateAllWeatherWidgets()
+    /**
+     * Fetch del clima para una sola location.
+     * Cuando llega la respuesta, actualiza solo esa location en el StateFlow
+     * sin tocar las demás.
+     */
+    private suspend fun fetchAndUpdateWeatherForLocation(
+        location: UserCustomLocation,
+        lang: String,
+        apiKey: String,
+        days: Int,
+        measureUnit: MeasureUnit
+    ) {
+        try {
+            val weatherResult = if (location.lat != null && location.lon != null) {
+                weatherRemoteRepository.getWeatherDataForecast(
+                    location.lat!!,
+                    location.lon!!,
+                    lang,
+                    apiKey,
+                    days
+                )
+            } else {
+                weatherRemoteRepository.getWeatherDataForecast(
+                    location.cityName,
+                    lang,
+                    apiKey,
+                    days
+                )
+            }
+
+            weatherResult
+                .onSuccess { forecast ->
+                    _locations.value = _locations.value.map { current ->
+                        if (current.id == location.id) {
+                            current.copy(
+                                icon = forecast.current.condition.icon,
+                                tempC = forecast.current.tempC,
+                                tempF = forecast.current.tempF,
+                                cityName = "${forecast.location.name}/${forecast.location.region}"
+                            )
+                        } else {
+                            current
                         }
                     }
-                    .onError { error ->
-                        log("Location error for ${location.cityName}: $error", isError = true)
+
+                    log("Weather refreshed for: ${forecast.location.name}", false)
+
+                    if (location.isSelected) {
+                        createWeatherNotification(forecast, measureUnit)
+                        widgetUpdater.updateAllWeatherWidgets()
                     }
-            } catch (e: Exception) {
-                log("Error updating weather for ${location.cityName}: ${e.message}", isError = true)
-            }
-            location
+                }
+                .onError { error ->
+                    log("Weather error for ${location.cityName}: $error", isError = true)
+                }
+
+        } catch (e: Exception) {
+            log("Exception fetching weather for ${location.cityName}: ${e.message}", isError = true)
         }
     }
 
@@ -242,20 +272,17 @@ class UserCustomLocationViewModel(
                 _screenState.value = UserCustomLocationScreenState.Loading
 
                 val locationsFromDb = userCustomLocationLocalRepository.listAll()
-                val updatedLocations = updateWeatherDataForLocations(
-                    locationsFromDb,
-                    lang,
-                    apiKey,
-                    days,
-                    measureUnit
-                )
 
-                _locations.value = updatedLocations
-                _screenState.value = if (updatedLocations.isNotEmpty()) {
-                    UserCustomLocationScreenState.LocationsObtained
-                } else {
-                    UserCustomLocationScreenState.NoLocations
+                if (locationsFromDb.isEmpty()) {
+                    _locations.value = emptyList()
+                    _screenState.value = UserCustomLocationScreenState.NoLocations
+                    return@launch
                 }
+
+                _locations.value = locationsFromDb
+                _screenState.value = UserCustomLocationScreenState.LocationsObtained
+
+                launchWeatherUpdates(locationsFromDb, lang, apiKey, days, measureUnit)
 
             } catch (e: Exception) {
                 handleError(e)
@@ -305,7 +332,7 @@ class UserCustomLocationViewModel(
             ),
             notificationShortDetails.format(
                 forecast.current.condition.description,
-                forecast.current.feelslikeC
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF
             ),
             notificationLongDetails.format(
                 forecast.current.condition.description,
@@ -316,8 +343,14 @@ class UserCustomLocationViewModel(
             ),
             "https:${forecast.current.condition.icon}",
             NotificationGroup.GENERAL,
-            NotificationType.FROM_APP
+            NotificationType.WEATHER_UPDATED
         )
+    }
+
+    fun onLeavingScreen() {
+        weatherUpdateJob?.cancel()
+        weatherUpdateJob = null
+        log("Weather update job cancelled — left screen.", false)
     }
 }
 

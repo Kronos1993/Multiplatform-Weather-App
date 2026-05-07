@@ -44,7 +44,7 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-            implementation(compose.preview)
+            implementation(libs.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
@@ -67,13 +67,13 @@ kotlin {
             implementation(libs.androidx.work.runtime.ktx)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.runtime)
+            implementation(libs.foundation)
+            implementation(libs.material)
+            implementation(libs.material3)
+            implementation(libs.ui)
+            implementation(libs.components.resources)
+            implementation(libs.ui.tooling.preview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
@@ -117,10 +117,13 @@ kotlin {
             /*implementation(libs.file.kit.core)
             implementation(libs.file.kit.compose)*/
 
-            api(libs.kmpnotifier)
+            //api(libs.kmpnotifier)
 
             implementation(libs.maplibre.compose)
             implementation(libs.maplibre.composeMaterial3)
+
+            //charts
+            implementation (libs.compose.charts)
         }
 
         iosMain.dependencies {

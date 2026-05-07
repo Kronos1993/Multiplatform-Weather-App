@@ -23,6 +23,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,13 +36,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.Destinations
-import com.kronos.multiplatform.weatherapp.components.ConfirmDialog
-import com.kronos.multiplatform.weatherapp.components.LoadingDialog
-import com.kronos.multiplatform.weatherapp.components.NoUserCustomLocationItem
-import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.UserCustomLocationIdleState
 import com.kronos.multiplatform.weatherapp.components.UserCustomLocationLoadingState
-import com.kronos.multiplatform.weatherapp.components.button.FabButton
+import com.kronos.multiplatform.weatherapp.core.ui.components.ConfirmDialog
+import com.kronos.multiplatform.weatherapp.core.ui.components.LoadingDialog
+import com.kronos.multiplatform.weatherapp.core.ui.components.NoUserCustomLocationItem
+import com.kronos.multiplatform.weatherapp.core.ui.components.PullToRefreshContainer
+import com.kronos.multiplatform.weatherapp.core.ui.components.button.FabButton
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.user_location.content.GridList
@@ -61,6 +62,7 @@ import weather_app.composeapp.generated.resources.notification_long_details_fahr
 import weather_app.composeapp.generated.resources.notification_short_details
 import weather_app.composeapp.generated.resources.notification_short_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_title
+import weather_app.composeapp.generated.resources.notification_title_fahrenheit
 
 @Composable
 fun UserCustomLocationScreen(
@@ -82,7 +84,10 @@ fun UserCustomLocationScreen(
 
     viewModel.initString(
         stringResource(Res.string.current_weather_key),
-        stringResource(Res.string.notification_title),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_title)
+        else
+            stringResource(Res.string.notification_title_fahrenheit),
         if (measureUnit == MeasureUnit.INTERNATIONAL)
             stringResource(Res.string.notification_short_details)
         else
@@ -112,7 +117,7 @@ fun UserCustomLocationScreen(
     var showConfirmDialog by mutableStateOf(false)
 
     LaunchedEffect(Unit) {
-        viewModel.initLocations(currentLang, apiKey, amountOfDays,measureUnit)
+        viewModel.initLocations(currentLang, apiKey, amountOfDays, measureUnit)
     }
 
     // Manejo de errores
@@ -137,6 +142,10 @@ fun UserCustomLocationScreen(
                 )
             }
         }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.onLeavingScreen() }
     }
 
     Surface(
@@ -187,7 +196,7 @@ fun UserCustomLocationScreen(
                 innerPadding = paddingValues,
                 isRefreshing = screenState == UserCustomLocationScreenState.Loading,
                 onRefresh = {
-                    viewModel.refreshLocations(currentLang, apiKey, amountOfDays,measureUnit)
+                    viewModel.refreshLocations(currentLang, apiKey, amountOfDays, measureUnit)
                 }
             ) {
                 val rootModifier = Modifier

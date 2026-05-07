@@ -27,10 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.kronos.multiplatform.weatherapp.components.ComponentSize
-import com.kronos.multiplatform.weatherapp.components.LoadingDialog
-import com.kronos.multiplatform.weatherapp.components.button.FabButton
-import com.kronos.multiplatform.weatherapp.components.button.IconButton
+import com.kronos.multiplatform.weatherapp.core.ui.components.ComponentSize
+import com.kronos.multiplatform.weatherapp.core.ui.components.LoadingDialog
+import com.kronos.multiplatform.weatherapp.core.ui.components.button.FabButton
+import com.kronos.multiplatform.weatherapp.core.ui.components.button.IconButton
 import com.kronos.multiplatform.weatherapp.components.maps.MapView
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
@@ -46,8 +46,11 @@ import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.marker_to_close
 import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_long_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_short_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_title
+import weather_app.composeapp.generated.resources.notification_title_fahrenheit
 import weather_app.composeapp.generated.resources.temp_celsius
 import weather_app.composeapp.generated.resources.temp_fahrenheit
 
@@ -63,6 +66,7 @@ fun AddCityScreen(
     val forecast by viewModel.forecast.collectAsStateWithLifecycle()
     val markers by viewModel.markers.collectAsStateWithLifecycle()
     val markerSelected by viewModel.markerSelected.collectAsStateWithLifecycle()
+    val mapLayers by viewModel.mapLayers.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
@@ -74,9 +78,18 @@ fun AddCityScreen(
 
     viewModel.initString(
         stringResource(Res.string.current_weather_key),
-        stringResource(Res.string.notification_title),
-        stringResource(Res.string.notification_short_details),
-        stringResource(Res.string.notification_long_details),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_title)
+        else
+            stringResource(Res.string.notification_title_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_short_details)
+        else
+            stringResource(Res.string.notification_short_details_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_long_details)
+        else
+            stringResource(Res.string.notification_long_details_fahrenheit),
     )
 
     LaunchedEffect(error) {
@@ -136,6 +149,10 @@ fun AddCityScreen(
                     MapView(
                         darkTheme = isDarkTheme,
                         markers = markers,
+                        mapLayers = mapLayers,
+                        onLayerToggled = {
+                            viewModel.toggleLayer(it)
+                        },
                         onMarkerClick = {
                             viewModel.setMarkerSelected(it)
                         },
@@ -204,7 +221,7 @@ fun AddCityScreen(
                         ),
                 showDialog = screenState == AddCityScreenState.CityObtained,
                 confirmText = stringResource(Res.string.add_city),
-                onConfirm = { viewModel.addLocation() },
+                onConfirm = { viewModel.addLocation(measureUnit) },
                 cancelText = stringResource(Res.string.close),
                 onCancel = { viewModel.dismissCityInfo() },
                 onClose = { viewModel.dismissCityInfo() }

@@ -1,5 +1,6 @@
 package com.kronos.multiplatform.weatherapp.core.util
 
+import androidx.compose.runtime.Composable
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
@@ -8,6 +9,20 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
+import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.month_apr
+import weather_app.composeapp.generated.resources.month_aug
+import weather_app.composeapp.generated.resources.month_dec
+import weather_app.composeapp.generated.resources.month_feb
+import weather_app.composeapp.generated.resources.month_jan
+import weather_app.composeapp.generated.resources.month_jul
+import weather_app.composeapp.generated.resources.month_jun
+import weather_app.composeapp.generated.resources.month_mar
+import weather_app.composeapp.generated.resources.month_may
+import weather_app.composeapp.generated.resources.month_nov
+import weather_app.composeapp.generated.resources.month_oct
+import weather_app.composeapp.generated.resources.month_sep
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -259,4 +274,39 @@ fun Instant.getHour(
 fun Instant.toDayOfWeekText(timeZone: TimeZone = TimeZone.currentSystemDefault()): DayOfWeek {
     val localDateTime = this.toLocalDateTime(timeZone)
     return localDateTime.dayOfWeek
+}
+
+@OptIn(ExperimentalTime::class)
+fun Instant.format(
+    pattern: String,
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val dt = toLocalDateTime(timeZone)
+
+    return pattern
+        .replace("MM", dt.monthNumber.toString().padStart(2, '0'))
+        .replace("dd", dt.dayOfMonth.toString().padStart(2, '0'))
+        .replace("yyyy", dt.year.toString())
+        .replace("hh", ((dt.hour % 12).takeIf { it != 0 } ?: 12).toString().padStart(2, '0'))
+        .replace("mm", dt.minute.toString().padStart(2, '0'))
+        .replace("a", if (dt.hour < 12) "AM" else "PM")
+}
+
+
+@Composable
+fun monthLabel(month: Int): String {
+    return stringResource(when (month) {
+        1  -> Res.string.month_jan
+        2  -> Res.string.month_feb
+        3  -> Res.string.month_mar
+        4  -> Res.string.month_apr
+        5  -> Res.string.month_may
+        6  -> Res.string.month_jun
+        7  -> Res.string.month_jul
+        8  -> Res.string.month_aug
+        9  -> Res.string.month_sep
+        10 -> Res.string.month_oct
+        11 -> Res.string.month_nov
+        else -> Res.string.month_dec
+    })
 }

@@ -23,14 +23,14 @@ public object WeatherAppIcons
 
 private var __AllIcons: ____KtList<ImageVector>? = null
 
-public val WeatherAppIcons.AllIcons: ____KtList<ImageVector>
+public val com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons.AllIcons: ____KtList<ImageVector>
   get() {
-    if (__AllIcons != null) {
-      return __AllIcons!!
+    if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.__AllIcons != null) {
+      return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.__AllIcons!!
     }
-    __AllIcons= MoonPhases.AllIcons + listOf(CloudsIndicator, CompassIndicator, MoonFallIndicator,
+    _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.__AllIcons = MoonPhases.AllIcons + listOf(CloudsIndicator, CompassIndicator, MoonFallIndicator,
         NoWeatherIndicator, PressionIndicator, RainyIndicator, SnowflakeIndicator,
         SnowflakeWeatherIndicator, SunIndicator, SunSunriseIndicator, TempIndicator,
         VisibilityIndicator, WaterDropsIndicator, WindIndicator)
-    return __AllIcons!!
+    return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.__AllIcons!!
   }

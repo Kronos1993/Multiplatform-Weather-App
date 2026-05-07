@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhasesGroup
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 public val MoonPhasesGroup.FullMoonIndicator: ImageVector
     get() {
-        if (_fullMoonIndicator != null) {
-            return _fullMoonIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._fullMoonIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._fullMoonIndicator!!
         }
-        _fullMoonIndicator = Builder(name = "FullMoonIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._fullMoonIndicator = Builder(name = "FullMoonIndicator", defaultWidth = 800.0.dp,
             defaultHeight = 800.0.dp, viewportWidth = 32.0f, viewportHeight = 32.0f).apply {
             path(fill = SolidColor(Color(0xFFFFC10A)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -70,7 +70,7 @@ public val MoonPhasesGroup.FullMoonIndicator: ImageVector
             }
         }
         .build()
-        return _fullMoonIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._fullMoonIndicator!!
     }
 
 private var _fullMoonIndicator: ImageVector? = null

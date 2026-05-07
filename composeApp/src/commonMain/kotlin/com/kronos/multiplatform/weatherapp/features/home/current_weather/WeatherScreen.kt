@@ -25,11 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kronos.multiplatform.weatherapp.components.LoadingDialog
-import com.kronos.multiplatform.weatherapp.components.NoWeatherItem
-import com.kronos.multiplatform.weatherapp.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
+import com.kronos.multiplatform.weatherapp.core.ui.components.LoadingDialog
+import com.kronos.multiplatform.weatherapp.core.ui.components.NoWeatherItem
+import com.kronos.multiplatform.weatherapp.core.ui.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.features.home.current_weather.content.ShowAlertInfoDialog
@@ -44,8 +44,11 @@ import weather_app.composeapp.generated.resources.gps_disable_message
 import weather_app.composeapp.generated.resources.loading_dialog_text
 import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.notification_long_details
+import weather_app.composeapp.generated.resources.notification_long_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_short_details
+import weather_app.composeapp.generated.resources.notification_short_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_title
+import weather_app.composeapp.generated.resources.notification_title_fahrenheit
 
 @Composable
 fun WeatherScreen(
@@ -60,6 +63,8 @@ fun WeatherScreen(
 ) {
     val viewModel = koinViewModel<WeatherViewModel>()
     val weather by viewModel.weather.collectAsStateWithLifecycle()
+    val mapLayers by viewModel.mapLayers.collectAsStateWithLifecycle()
+
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val selectedAlert by viewModel.selectedAlert.collectAsStateWithLifecycle()
@@ -71,16 +76,25 @@ fun WeatherScreen(
 
     viewModel.initNotificationsString(
         stringResource(Res.string.current_weather_key),
-        stringResource(Res.string.notification_title),
-        stringResource(Res.string.notification_short_details),
-        stringResource(Res.string.notification_long_details),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_title)
+        else
+            stringResource(Res.string.notification_title_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_short_details)
+        else
+            stringResource(Res.string.notification_short_details_fahrenheit),
+        if (measureUnit == MeasureUnit.INTERNATIONAL)
+            stringResource(Res.string.notification_long_details)
+        else
+            stringResource(Res.string.notification_long_details_fahrenheit),
         stringResource(Res.string.gps_disable_message),
         stringResource(Res.string.gps_cant_get_location_error_message),
     )
 
     LaunchedEffect(currentLang) {
         if (currentLang.isNotBlank()) {
-            viewModel.initLocations(currentLang, apiKey, amountOfDays, imageQuality, defaultCity)
+            viewModel.initLocations(currentLang, apiKey, amountOfDays, imageQuality, defaultCity,measureUnit)
         }
     }
 
@@ -148,7 +162,8 @@ fun WeatherScreen(
                         apiKey,
                         amountOfDays,
                         imageQuality,
-                        defaultCity
+                        defaultCity,
+                        measureUnit
                     )
                 }
             ) {
@@ -184,7 +199,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -194,6 +210,10 @@ fun WeatherScreen(
                                     if (weather != null) {
                                         WeatherContentPortrait(
                                             weather = weather!!,
+                                            mapLayers = mapLayers,
+                                            onLayerToggled = {
+                                                viewModel.toggleLayer(it)
+                                            },
                                             deviceScreenConfiguration = deviceScreenConfiguration,
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
@@ -215,7 +235,8 @@ fun WeatherScreen(
                                                     apiKey,
                                                     amountOfDays,
                                                     imageQuality,
-                                                    defaultCity
+                                                    defaultCity,
+                                                    measureUnit
                                                 )
                                             }
                                         )
@@ -248,7 +269,8 @@ fun WeatherScreen(
                                             apiKey,
                                             amountOfDays,
                                             imageQuality,
-                                            defaultCity
+                                            defaultCity,
+                                            measureUnit
                                         )
                                     }
                                 )
@@ -258,6 +280,10 @@ fun WeatherScreen(
                                 if (weather != null) {
                                     WeatherContentLandscape(
                                         weather = weather!!,
+                                        mapLayers = mapLayers,
+                                        onLayerToggled = {
+                                            viewModel.toggleLayer(it)
+                                        },
                                         isDarkTheme = isDarkTheme,
                                         urlProvider = viewModel.urlProvider,
                                         imageQuality = imageQuality,
@@ -280,7 +306,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -316,7 +343,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -326,6 +354,10 @@ fun WeatherScreen(
                                     if (weather != null) {
                                         WeatherContentPortrait(
                                             weather = weather!!,
+                                            mapLayers = mapLayers,
+                                            onLayerToggled = {
+                                                viewModel.toggleLayer(it)
+                                            },
                                             deviceScreenConfiguration = deviceScreenConfiguration,
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
@@ -347,7 +379,8 @@ fun WeatherScreen(
                                                     apiKey,
                                                     amountOfDays,
                                                     imageQuality,
-                                                    defaultCity
+                                                    defaultCity,
+                                                    measureUnit
                                                 )
                                             }
                                         )
@@ -387,7 +420,8 @@ fun WeatherScreen(
                                                 apiKey,
                                                 amountOfDays,
                                                 imageQuality,
-                                                defaultCity
+                                                defaultCity,
+                                                measureUnit
                                             )
                                         }
                                     )
@@ -397,6 +431,10 @@ fun WeatherScreen(
                                     if (weather != null) {
                                         WeatherContentLandscape(
                                             weather = weather!!,
+                                            mapLayers = mapLayers,
+                                            onLayerToggled = {
+                                                viewModel.toggleLayer(it)
+                                            },
                                             isDarkTheme = isDarkTheme,
                                             urlProvider = viewModel.urlProvider,
                                             imageQuality = imageQuality,
@@ -418,7 +456,8 @@ fun WeatherScreen(
                                                     apiKey,
                                                     amountOfDays,
                                                     imageQuality,
-                                                    defaultCity
+                                                    defaultCity,
+                                                    measureUnit
                                                 )
                                             }
                                         )

@@ -14,18 +14,18 @@ import kotlin.collections.List as ____KtList
 
 public object MoonPhasesGroup
 
-public val WeatherAppIcons.MoonPhases: MoonPhasesGroup
-  get() = MoonPhasesGroup
+public val WeatherAppIcons.MoonPhases: com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhasesGroup
+  get() = _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhasesGroup
 
 private var __AllIcons: ____KtList<ImageVector>? = null
 
-public val MoonPhasesGroup.AllIcons: ____KtList<ImageVector>
+public val com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhasesGroup.AllIcons: ____KtList<ImageVector>
   get() {
-    if (__AllIcons != null) {
-      return __AllIcons!!
+    if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.__AllIcons != null) {
+      return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.__AllIcons!!
     }
-    __AllIcons= listOf(FirstQuarterMoonIndicator, FullMoonIndicator, NewMoonIndicator,
+    _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.__AllIcons = listOf(FirstQuarterMoonIndicator, FullMoonIndicator, NewMoonIndicator,
         ThirdQuarterMoonIndicator, WaningCrescentMoonIndicator, WaningGibbousMoonIndicator,
         WaxingCescentMoonIndicator, WaxingGibbousMoonIndicator)
-    return __AllIcons!!
+    return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.__AllIcons!!
   }

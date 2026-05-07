@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.MoonPhasesGroup
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 public val MoonPhasesGroup.WaxingGibbousMoonIndicator: ImageVector
     get() {
-        if (_waxingGibbousMoonIndicator != null) {
-            return _waxingGibbousMoonIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingGibbousMoonIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingGibbousMoonIndicator!!
         }
-        _waxingGibbousMoonIndicator = Builder(name = "WaxingGibbousMoonIndicator", defaultWidth =
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingGibbousMoonIndicator = Builder(name = "WaxingGibbousMoonIndicator", defaultWidth =
                 32.0.dp, defaultHeight = 32.0.dp, viewportWidth = 32.0f, viewportHeight =
                 32.0f).apply {
             path(fill = SolidColor(Color(0xFFFFC10A)), stroke = null, strokeLineWidth = 0.0f,
@@ -75,7 +75,7 @@ public val MoonPhasesGroup.WaxingGibbousMoonIndicator: ImageVector
             }
         }
         .build()
-        return _waxingGibbousMoonIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons.moonphases._waxingGibbousMoonIndicator!!
     }
 
 private var _waxingGibbousMoonIndicator: ImageVector? = null

@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.CompassIndicator: ImageVector
     get() {
-        if (_compassIndicator != null) {
-            return _compassIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._compassIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._compassIndicator!!
         }
-        _compassIndicator = Builder(name = "CompassIndicator", defaultWidth = 800.0.dp,
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._compassIndicator = Builder(name = "CompassIndicator", defaultWidth = 800.0.dp,
                 defaultHeight = 800.0.dp, viewportWidth = 36.0f, viewportHeight = 36.0f).apply {
             path(fill = SolidColor(Color(0xFFF4900C)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -103,7 +103,7 @@ public val WeatherAppIcons.CompassIndicator: ImageVector
             }
         }
         .build()
-        return _compassIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._compassIndicator!!
     }
 
 private var _compassIndicator: ImageVector? = null

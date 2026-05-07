@@ -31,7 +31,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
     private var notificationTitle: String = "Weather: %.1f°C in %s"
     private var notificationShortDetails: String = "%s, feels like %.1f°C"
     private var notificationLongDetails: String =
-        "%s, feels like %.1f°C. Min %.1f°C / Max %.1f°C, Rain %d%%"
+        "%s, feels like %.1f°C. Min %.1f°C / Max %.1f°C, Rain %d%"
 
     fun initNotificationStrings() {
         this.currentWeatherKey = "7e068f83abce49b58b2142037230910"
@@ -162,7 +162,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
             description = longDetails,
             notificationImageUrl = "https:${forecast.current.condition.icon}",
             group = NotificationGroup.GENERAL,
-            notificationsId = NotificationType.FROM_APP
+            notificationsId = NotificationType.WEATHER_UPDATED
         )
     }
 

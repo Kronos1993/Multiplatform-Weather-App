@@ -1,20 +1,33 @@
 package com.kronos.multiplatform.weatherapp.components.maps
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerState
+import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerType
 import com.kronos.multiplatform.weatherapp.components.maps.markers.GeoJsonMapper
 import com.kronos.multiplatform.weatherapp.components.maps.markers.MapMarker
-import com.kronos.multiplatform.weatherapp.components.theme.extendedDark
-import com.kronos.multiplatform.weatherapp.components.theme.extendedLight
+import com.kronos.multiplatform.weatherapp.core.ui.components.BodyText
+import com.kronos.multiplatform.weatherapp.core.ui.components.ExpressiveBaseCardView
+import com.kronos.multiplatform.weatherapp.core.ui.components.theme.extendedDark
+import com.kronos.multiplatform.weatherapp.core.ui.components.theme.extendedLight
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.painterResource
@@ -27,20 +40,22 @@ import org.maplibre.compose.expressions.dsl.format
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.offset
 import org.maplibre.compose.expressions.dsl.span
+import org.maplibre.compose.layers.RasterLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.TileSetOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.maplibre.compose.sources.rememberRasterSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.Position
-import org.maplibre.spatialk.geojson.toJson
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.ic_locations
 import kotlin.math.PI
@@ -53,94 +68,140 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun FixMapView(
     markers: List<MapMarker> = listOf(),
+    mapLayers: List<MapLayerState> = emptyList(),
+    onLayerToggled: ((MapLayerType) -> Unit)? = null,
     darkTheme: Boolean,
     onMapClick: (Position) -> Unit,
     onMapLongClick: (Position) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     val marker = painterResource(Res.drawable.ic_locations)
 
-    val cardBackgroundColor = if (darkTheme) {
+    val cardBackgroundColor = if (darkTheme)
         extendedDark.backgroundCardColor.color
-    } else {
+    else
         extendedLight.backgroundCardColor.color
-    }
 
-    val camera =
-        rememberCameraState(
-            firstPosition = CameraPosition(
-                target = Position(markers[0].longitude, markers[0].latitude), zoom = 5.5
-            )
-        )
+    val initialPosition = markers.firstOrNull()?.let {
+        Position(it.longitude, it.latitude)
+    } ?: Position(-79.5199, 8.9824)
 
+    val camera = rememberCameraState(
+        firstPosition = CameraPosition(target = initialPosition, zoom = 5.5)
+    )
     val styleState = rememberStyleState()
 
     LaunchedEffect(Unit) {
         camera.animateTo(
-            finalPosition =
-                camera.position.copy(),
+            finalPosition = camera.position.copy(),
             duration = 3.seconds,
         )
     }
 
     Card(
-        modifier =
-            Modifier.padding(4.dp),
+        modifier = Modifier.padding(4.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        MaplibreMap(
-            baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
-            styleState = styleState,
-            modifier = modifier,
-            cameraState = camera,
-            options = MapOptions(
-                gestureOptions = GestureOptions.AllDisabled,
-                ornamentOptions = OrnamentOptions.AllDisabled,
-            ),
-            onMapClick = { pos, offset ->
-                val features = camera.projection?.queryRenderedFeatures(offset)
-                if (!features.isNullOrEmpty()) {
-                    println("Clicked on ${features[0].toJson()} at $pos")
-                    onMapClick(pos)
-                    ClickResult.Consume
-                } else {
-                    onMapClick(pos)
+        Box(modifier = modifier) {
+
+            MaplibreMap(
+                baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
+                styleState = styleState,
+                modifier = modifier,
+                cameraState = camera,
+                options = MapOptions(
+                    gestureOptions = GestureOptions.AllDisabled,
+                    ornamentOptions = OrnamentOptions.AllDisabled,
+                ),
+                onMapClick = { pos, offset ->
+                    val features = camera.projection?.queryRenderedFeatures(offset)
+                    if (!features.isNullOrEmpty()) {
+                        onMapClick(pos)
+                        ClickResult.Consume
+                    } else {
+                        onMapClick(pos)
+                        ClickResult.Pass
+                    }
+                },
+                onMapLongClick = { pos, _ ->
+                    onMapLongClick(pos)
                     ClickResult.Pass
+                },
+            ) {
+                mapLayers.find {
+                    it.type == MapLayerType.SATELLITE && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 256,
+                    )
+                    RasterLayer(
+                        id = "satellite-layer",
+                        source = source,
+                        opacity = const(0.5f),
+                    )
                 }
-            },
-            onMapLongClick = { pos, offset ->
-                println("Long click at $pos")
-                onMapLongClick(pos)
-                ClickResult.Pass
-            },
-        ) {
-            val myMarkerGeoJson = remember(markers) {
-                GeoJsonMapper.markersToJsonString(markers)
+
+                mapLayers.find {
+                    it.type == MapLayerType.NOWCAST && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 256,
+                    )
+                    RasterLayer(
+                        id = "nowcast-layer",
+                        source = source,
+                        opacity = const(0.5f),
+                    )
+                }
+
+                mapLayers.find {
+                    it.type == MapLayerType.RAIN_RADAR && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 256,
+                    )
+                    RasterLayer(
+                        id = "rainviewer-layer",
+                        source = source,
+                        opacity = const(0.4f),
+                    )
+                }
+
+                val myMarkerGeoJson = remember(markers) {
+                    GeoJsonMapper.markersToJsonString(markers)
+                }
+                val myMarkerSource = rememberGeoJsonSource(
+                    data = GeoJsonData.JsonString(myMarkerGeoJson)
+                )
+                SymbolLayer(
+                    id = "current-location",
+                    source = myMarkerSource,
+                    onClick = { ClickResult.Consume },
+                    iconImage = image(marker),
+                    iconSize = const(.5f),
+                    iconColor = const(Color.Black),
+                    textField = format(
+                        span(feature["title"].asString(), textSize = const(1f.em))
+                    ),
+                    textFont = const(listOf("Noto Sans Regular")),
+                    textColor = const(Color.Black),
+                    textOffset = offset(0.em, 0.6.em),
+                )
             }
 
-            val myMarkerSource = rememberGeoJsonSource(
-                data = GeoJsonData.JsonString(myMarkerGeoJson)
-            )
-
-            SymbolLayer(
-                id = "current-location",
-                source = myMarkerSource,
-                onClick = { features ->
-                    features.firstOrNull()
-                    ClickResult.Consume
-                },
-                iconImage = image(marker),
-                iconSize = const(.5f),
-                iconColor = const(Color.Black),
-                textField =
-                    format(
-                        span(feature["title"].asString(), textSize = const(1f.em)),
-                    ),
-                textFont = const(listOf("Noto Sans Regular")),
-                textColor = const(Color.Black),
-                textOffset = offset(0.em, 0.6.em),
+            MapLayerToggleButtons(
+                layers = mapLayers,
+                onToggle = onLayerToggled,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
             )
         }
     }
@@ -150,6 +211,8 @@ fun FixMapView(
 fun MapView(
     markers: List<MapMarker> = listOf(),
     darkTheme: Boolean,
+    mapLayers: List<MapLayerState> = emptyList(),
+    onLayerToggled: ((MapLayerType) -> Unit)? = null,
     onMarkerClick: (MapMarker) -> Unit,
     onMapClick: (Position) -> Unit,
     onMapLongClick: (Position) -> Unit,
@@ -158,124 +221,240 @@ fun MapView(
     minDistanceBetweenMarkers: Double = 100.0,
     currentLocation: LocationModel? = null
 ) {
-
     val camera = rememberCameraState()
     val styleState = rememberStyleState()
     val marker = painterResource(Res.drawable.ic_locations)
 
+    val currentZoom by remember { derivedStateOf { camera.position.zoom } }
+    val radarLayersVisible = currentZoom <= 7.5
+
     LaunchedEffect(currentLocation) {
-        if (currentLocation == null){
+        if (currentLocation == null) {
             camera.animateTo(
                 finalPosition = camera.position.copy(),
                 duration = 3.seconds,
             )
-        }else{
-            val position = CameraPosition(
-                target = Position(currentLocation.longitude, currentLocation.latitude),
-                zoom = 15.0
-            )
+        } else {
             camera.animateTo(
-                finalPosition = position.copy(),
+                finalPosition = CameraPosition(
+                    target = Position(currentLocation.longitude, currentLocation.latitude),
+                    zoom = 15.0
+                ).copy(),
                 duration = 3.seconds,
             )
         }
-
     }
 
-    MaplibreMap(
-        baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
-        styleState = styleState,
-        modifier = modifier,
-        cameraState = camera,
-        options = MapOptions(
-            gestureOptions = GestureOptions.Standard,
-            ornamentOptions = OrnamentOptions(
-                isLogoEnabled = true,
-                logoAlignment = Alignment.BottomStart,
-                isCompassEnabled = true,
-                compassAlignment = Alignment.BottomEnd,
-                isScaleBarEnabled = false,
-                isAttributionEnabled = false
-            )
-        ),
-        onMapClick = { pos, offset ->
-            val features = camera.projection?.queryRenderedFeatures(offset)
+    Box(modifier = modifier) {
 
-            val clickedMarker = getMarkerFromFeatures(features.orEmpty(), markers)
-            if (clickedMarker != null) {
-                println("Clicked on existing marker: ${clickedMarker.title} at $pos")
-                onMarkerClick(clickedMarker)
-                ClickResult.Consume
-            } else if (!features.isNullOrEmpty()) {
-                val isTooClose =
-                    isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
-                if (!isTooClose) {
-                    println("Click at $pos - Marker created")
-                    onMapClick(pos)
-                    ClickResult.Consume
-                } else {
-                    println("Click at $pos - Too close to existing marker, ignoring")
-                    onMapToCloseTap()
-                    ClickResult.Pass
+        MaplibreMap(
+            baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
+            styleState = styleState,
+            modifier = modifier,
+            cameraState = camera,
+            options = MapOptions(
+                gestureOptions = GestureOptions.Standard,
+                ornamentOptions = OrnamentOptions(
+                    isLogoEnabled = true,
+                    logoAlignment = Alignment.BottomStart,
+                    isCompassEnabled = true,
+                    compassAlignment = Alignment.BottomEnd,
+                    isScaleBarEnabled = false,
+                    isAttributionEnabled = false
+                )
+            ),
+            onMapClick = { pos, offset ->
+                val features = camera.projection?.queryRenderedFeatures(offset)
+                val clickedMarker = getMarkerFromFeatures(features.orEmpty(), markers)
+                when {
+                    clickedMarker != null -> {
+                        onMarkerClick(clickedMarker)
+                        ClickResult.Consume
+                    }
+
+                    !features.isNullOrEmpty() -> {
+                        if (!isPositionTooCloseToExistingMarkers(
+                                pos,
+                                markers,
+                                minDistanceBetweenMarkers
+                            )
+                        ) {
+                            onMapClick(pos)
+                            ClickResult.Consume
+                        } else {
+                            onMapToCloseTap()
+                            ClickResult.Pass
+                        }
+                    }
+
+                    else -> {
+                        if (!isPositionTooCloseToExistingMarkers(
+                                pos,
+                                markers,
+                                minDistanceBetweenMarkers
+                            )
+                        ) {
+                            onMapClick(pos)
+                            ClickResult.Consume
+                        } else {
+                            onMapToCloseTap()
+                            ClickResult.Pass
+                        }
+                    }
                 }
-            } else {
-                val isTooClose =
-                    isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
-                if (!isTooClose) {
-                    println("Click at empty space at $pos - Marker created")
-                    onMapClick(pos)
-                    ClickResult.Consume
+            },
+            onMapLongClick = { pos, _ ->
+                if (!isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)) {
+                    onMapLongClick(pos)
                 } else {
-                    println("Click at empty space at $pos - Too close to existing marker, ignoring")
                     onMapToCloseTap()
-                    ClickResult.Pass
+                }
+                ClickResult.Pass
+            },
+        ) {
+
+            if (radarLayersVisible) {
+                mapLayers.find {
+                    it.type == MapLayerType.SATELLITE && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 512,
+                    )
+                    RasterLayer(
+                        id = "satellite-layer",
+                        source = source,
+                        opacity = const(0.5f),
+                    )
+                }
+
+                mapLayers.find {
+                    it.type == MapLayerType.NOWCAST && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 512,
+                    )
+                    RasterLayer(
+                        id = "nowcast-layer",
+                        source = source,
+                        opacity = const(0.5f),
+                    )
+                }
+
+                mapLayers.find {
+                    it.type == MapLayerType.RAIN_RADAR && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 512,
+                    )
+                    RasterLayer(
+                        id = "rainviewer-layer",
+                        source = source,
+                        opacity = const(0.4f),
+                    )
                 }
             }
-        },
-        onMapLongClick = { pos, offset ->
-            val isTooClose =
-                isPositionTooCloseToExistingMarkers(pos, markers, minDistanceBetweenMarkers)
-            if (!isTooClose) {
-                println("Long click at $pos - Marker created")
-                onMapLongClick(pos)
-            } else {
-                onMapToCloseTap()
-                println("Long click at $pos - Too close to existing marker, ignoring")
+
+            val myMarkerGeoJson = remember(markers) {
+                GeoJsonMapper.markersToJsonString(markers)
             }
-            ClickResult.Pass
-        },
-    ) {
-        val myMarkerGeoJson = remember(markers) {
-            GeoJsonMapper.markersToJsonString(markers)
+            val myMarkerSource = rememberGeoJsonSource(
+                data = GeoJsonData.JsonString(myMarkerGeoJson)
+            )
+            SymbolLayer(
+                id = "current-locations",
+                source = myMarkerSource,
+                onClick = { features ->
+                    val clickedMarker = getMarkerFromFeatures(features, markers)
+                    if (clickedMarker != null) {
+                        onMarkerClick(clickedMarker)
+                    }
+                    ClickResult.Consume
+                },
+                iconImage = image(marker),
+                iconSize = const(.8f),
+                iconColor = const(Color.Black),
+                textField = format(
+                    span(feature["title"].asString(), textSize = const(1f.em))
+                ),
+                textFont = const(listOf("Noto Sans Regular")),
+                textColor = const(Color.Black),
+                textOffset = offset(0.em, 0.6.em),
+            )
         }
 
-        val myMarkerSource = rememberGeoJsonSource(
-            data = GeoJsonData.JsonString(myMarkerGeoJson)
-        )
-
-        SymbolLayer(
-            id = "current-locations",
-            source = myMarkerSource,
-            onClick = { features ->
-                val clickedMarker = getMarkerFromFeatures(features, markers)
-                if (clickedMarker != null) {
-                    println("SymbolLayer click on marker: ${clickedMarker.title}")
-                    onMarkerClick(clickedMarker)
-                }
-                ClickResult.Consume
-            },
-            iconImage = image(marker),
-            iconSize = const(.8f),
-            iconColor = const(Color.Black),
-            textField = format(
-                span(feature["title"].asString(), textSize = const(1f.em)),
-            ),
-            textFont = const(listOf("Noto Sans Regular")),
-            textColor = const(Color.Black),
-            textOffset = offset(0.em, 0.6.em),
+        MapLayerToggleButtons(
+            layers = mapLayers,
+            onToggle = onLayerToggled,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
         )
     }
 }
+
+@Composable
+fun MapLayerToggleButtons(
+    layers: List<MapLayerState> = emptyList(),
+    onToggle: ((MapLayerType) -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.End
+    ) {
+        layers.forEach { layer ->
+            MapLayerButton(
+                layer = layer,
+                onClick = {
+                    onToggle?.invoke(layer.type)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun MapLayerButton(
+    layer: MapLayerState,
+    onClick: () -> Unit
+) {
+    val backgroundColor by animateColorAsState(
+        targetValue = if (layer.enabled) Color(0xFF1565C0) else Color.Black.copy(alpha = 0.55f),
+        animationSpec = tween(200),
+        label = "layer_bg_${layer.type.name}"
+    )
+
+    ExpressiveBaseCardView(
+        cardBackgroundColor = backgroundColor,
+        elevation = 2.dp,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            BodyText(text = layer.type.icon)
+            AnimatedVisibility(visible = layer.enabled) {
+                BodyText(
+                    text = layer.type.name
+                        .lowercase()
+                        .replaceFirstChar { it.uppercase() }
+                        .replace("_", " "),
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
 
 /**
  * Encuentra el marker correspondiente a las features clickeadas

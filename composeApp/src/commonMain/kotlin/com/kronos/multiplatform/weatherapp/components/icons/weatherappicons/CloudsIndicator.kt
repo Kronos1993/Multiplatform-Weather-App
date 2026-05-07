@@ -13,16 +13,16 @@ import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kronos.multiplatform.weatherapp.components.icons.WeatherAppIcons
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 public val WeatherAppIcons.CloudsIndicator: ImageVector
     get() {
-        if (_cloudsIndicator != null) {
-            return _cloudsIndicator!!
+        if (_root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._cloudsIndicator != null) {
+            return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._cloudsIndicator!!
         }
-        _cloudsIndicator = Builder(name = "CloudsIndicator", defaultWidth = 800.0.dp, defaultHeight
+        _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._cloudsIndicator = Builder(name = "CloudsIndicator", defaultWidth = 800.0.dp, defaultHeight
                 = 800.0.dp, viewportWidth = 36.0f, viewportHeight = 36.0f).apply {
             path(fill = SolidColor(Color(0xFFFFAC33)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
@@ -104,7 +104,7 @@ public val WeatherAppIcons.CloudsIndicator: ImageVector
             }
         }
         .build()
-        return _cloudsIndicator!!
+        return _root_ide_package_.com.kronos.multiplatform.weatherapp.components.icons.weatherappicons._cloudsIndicator!!
     }
 
 private var _cloudsIndicator: ImageVector? = null
