@@ -80,7 +80,7 @@ fun AboutInfoSection(
     modifier: Modifier = Modifier
 ) {
     val description = stringResource(Res.string.about_app_description)
-    val githubUrl = "https://github.com/Kronos1993/"
+    val githubUrl = "https://github.com/Kronos1993/Multiplatform-Weather-App"
     val copyright = stringResource(Res.string.about_copyright)
     val featuresTitle = stringResource(Res.string.about_features_title)
     val technologiesTitle = stringResource(Res.string.about_technologies)

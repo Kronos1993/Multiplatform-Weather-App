@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -31,6 +32,7 @@ import com.kronos.multiplatform.weatherapp.core.ui.components.theme.extendedLigh
 import com.kronos.multiplatform.weatherapp.data.local.location.LocationModel
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.asString
@@ -58,6 +60,9 @@ import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.Position
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.ic_locations
+import weather_app.composeapp.generated.resources.map_layer_nowcast
+import weather_app.composeapp.generated.resources.map_layer_rain
+import weather_app.composeapp.generated.resources.map_layer_satellite
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -87,9 +92,12 @@ fun FixMapView(
     } ?: Position(-79.5199, 8.9824)
 
     val camera = rememberCameraState(
-        firstPosition = CameraPosition(target = initialPosition, zoom = 5.5)
+        firstPosition = CameraPosition(target = initialPosition, zoom = 6.0)
     )
     val styleState = rememberStyleState()
+
+    val currentZoom by remember { derivedStateOf { camera.position.zoom } }
+    val radarLayersVisible = currentZoom <= 7.5
 
     LaunchedEffect(Unit) {
         camera.animateTo(
@@ -129,49 +137,52 @@ fun FixMapView(
                     ClickResult.Pass
                 },
             ) {
-                mapLayers.find {
-                    it.type == MapLayerType.SATELLITE && it.enabled && it.tileUrl.isNotBlank()
-                }?.let { layer ->
-                    val source = rememberRasterSource(
-                        tiles = listOf(layer.tileUrl),
-                        options = TileSetOptions(),
-                        tileSize = 256,
-                    )
-                    RasterLayer(
-                        id = "satellite-layer",
-                        source = source,
-                        opacity = const(0.5f),
-                    )
-                }
 
-                mapLayers.find {
-                    it.type == MapLayerType.NOWCAST && it.enabled && it.tileUrl.isNotBlank()
-                }?.let { layer ->
-                    val source = rememberRasterSource(
-                        tiles = listOf(layer.tileUrl),
-                        options = TileSetOptions(),
-                        tileSize = 256,
-                    )
-                    RasterLayer(
-                        id = "nowcast-layer",
-                        source = source,
-                        opacity = const(0.5f),
-                    )
-                }
+                if (radarLayersVisible) {
+                    mapLayers.find {
+                        it.type == MapLayerType.SATELLITE && it.enabled && it.tileUrl.isNotBlank()
+                    }?.let { layer ->
+                        val source = rememberRasterSource(
+                            tiles = listOf(layer.tileUrl),
+                            options = TileSetOptions(),
+                            tileSize = 512,
+                        )
+                        RasterLayer(
+                            id = "satellite-layer",
+                            source = source,
+                            opacity = const(0.5f),
+                        )
+                    }
 
-                mapLayers.find {
-                    it.type == MapLayerType.RAIN_RADAR && it.enabled && it.tileUrl.isNotBlank()
-                }?.let { layer ->
-                    val source = rememberRasterSource(
-                        tiles = listOf(layer.tileUrl),
-                        options = TileSetOptions(),
-                        tileSize = 256,
-                    )
-                    RasterLayer(
-                        id = "rainviewer-layer",
-                        source = source,
-                        opacity = const(0.4f),
-                    )
+                    mapLayers.find {
+                        it.type == MapLayerType.NOWCAST && it.enabled && it.tileUrl.isNotBlank()
+                    }?.let { layer ->
+                        val source = rememberRasterSource(
+                            tiles = listOf(layer.tileUrl),
+                            options = TileSetOptions(),
+                            tileSize = 512,
+                        )
+                        RasterLayer(
+                            id = "nowcast-layer",
+                            source = source,
+                            opacity = const(0.5f),
+                        )
+                    }
+
+                    mapLayers.find {
+                        it.type == MapLayerType.RAIN_RADAR && it.enabled && it.tileUrl.isNotBlank()
+                    }?.let { layer ->
+                        val source = rememberRasterSource(
+                            tiles = listOf(layer.tileUrl),
+                            options = TileSetOptions(),
+                            tileSize = 512,
+                        )
+                        RasterLayer(
+                            id = "rainviewer-layer",
+                            source = source,
+                            opacity = const(0.4f),
+                        )
+                    }
                 }
 
                 val myMarkerGeoJson = remember(markers) {
@@ -426,7 +437,7 @@ fun MapLayerButton(
     onClick: () -> Unit
 ) {
     val backgroundColor by animateColorAsState(
-        targetValue = if (layer.enabled) Color(0xFF1565C0) else Color.Black.copy(alpha = 0.55f),
+        targetValue = if (layer.enabled) MaterialTheme.colorScheme.primary else Color.Black.copy(alpha = 0.55f),
         animationSpec = tween(200),
         label = "layer_bg_${layer.type.name}"
     )
@@ -444,10 +455,11 @@ fun MapLayerButton(
             BodyText(text = layer.type.icon)
             AnimatedVisibility(visible = layer.enabled) {
                 BodyText(
-                    text = layer.type.name
-                        .lowercase()
-                        .replaceFirstChar { it.uppercase() }
-                        .replace("_", " "),
+                    text = when(layer.type){
+                        MapLayerType.RAIN_RADAR -> stringResource(Res.string.map_layer_rain)
+                        MapLayerType.NOWCAST -> stringResource(Res.string.map_layer_nowcast)
+                        MapLayerType.SATELLITE -> stringResource(Res.string.map_layer_satellite)
+                    },
                     maxLines = 1
                 )
             }
