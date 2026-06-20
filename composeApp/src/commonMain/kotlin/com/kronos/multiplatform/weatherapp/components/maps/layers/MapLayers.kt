@@ -4,9 +4,9 @@ enum class MapLayerType(
     val icon: String,
     val labelKey: String
 ) {
-    RAIN_RADAR(    icon = "🌧️", labelKey = "map_layer_rain"),
-    NOWCAST(       icon = "🔮", labelKey = "map_layer_nowcast"),
-    SATELLITE(     icon = "🛰️", labelKey = "map_layer_satellite"),
+    RAIN_RADAR(icon = "🌧️", labelKey = "map_layer_rain"),
+    NOWCAST(icon = "🔮", labelKey = "map_layer_nowcast"),
+    SATELLITE(icon = "🛰️", labelKey = "map_layer_satellite"),
 }
 
 data class MapLayerState(

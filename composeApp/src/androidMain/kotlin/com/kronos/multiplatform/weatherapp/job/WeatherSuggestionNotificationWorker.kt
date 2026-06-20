@@ -19,6 +19,7 @@ import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.data.mapper.mapCurrentSuggestions
 import com.kronos.multiplatform.weatherapp.data.mapper.mapMorningSuggestions
 import com.kronos.multiplatform.weatherapp.data.mapper.mapTomorrowNotification
+import com.kronos.multiplatform.weatherapp.domain.model.DayMoment
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.SuggestionArg
 import com.kronos.multiplatform.weatherapp.domain.model.SuggestionPriority
@@ -265,34 +266,17 @@ class WeatherSuggestionNotificationWorker(
         if (suggestions.isEmpty()) return
 
         val top = suggestions.first()
+
         notifications.createNotificationSuggestion(
-            title = resolveTitle(top,forecast.location.name),
+            title = "${top.icon} ${resolveTitle(top, forecast.location.name)}",
+
             shortDescription = resolveMessage(top),
-            description = suggestions.joinToString(" • ") { resolveMessage(it) },
+
+            description = suggestions
+                .joinToString(" • ") { resolveMessage(it) },
+
             group = NotificationGroup.SUGGESTION,
             notificationsId = NotificationType.WEATHER_SUGGESTION_MORNING
-        )
-    }
-
-    // ── Noche: pronóstico de mañana ────────────────────────────────────────
-    private fun handleEveningSuggestion(
-        forecast: Forecast,
-        measureUnit: MeasureUnit
-    ) {
-        val suggestion = forecast.mapTomorrowNotification(measureUnit) ?: return
-
-        val extra = buildList {
-            if (suggestion.args.size > 1) {
-                add(resolveMessage(suggestion))
-            }
-        }
-
-        notifications.createNotificationSuggestion(
-            title = resolveTitle(suggestion,forecast.location.name),
-            shortDescription = resolveMessage(suggestion),
-            description = extra.joinToString(" • "),
-            group = NotificationGroup.SUGGESTION,
-            notificationsId = NotificationType.WEATHER_SUGGESTION_EVENING
         )
     }
 
@@ -304,65 +288,112 @@ class WeatherSuggestionNotificationWorker(
         val suggestions = forecast.mapCurrentSuggestions(timeZone, measureUnit)
         if (suggestions.isEmpty()) return
 
-        val top = suggestions.take(2)
+        val top = suggestions.first()
 
         notifications.createNotificationSuggestion(
-            title = resolveTitle(top.first(),forecast.location.name),
-            shortDescription = resolveMessage(top.first()),
-            description = top.joinToString(" • ") { resolveMessage(it) },
+            title = "${top.icon} ${resolveTitle(top, forecast.location.name)}",
+
+            shortDescription = resolveMessage(top),
+
+            description = suggestions
+                .joinToString(" • ") { resolveMessage(it) },
+
             group = NotificationGroup.SUGGESTION,
             notificationsId = NotificationType.WEATHER_SUGGESTION_MIDDAY
         )
     }
 
-    private fun resolveTitle(suggestion: WeatherSuggestionModel,locationName:String): String {
+    private fun handleEveningSuggestion(
+        forecast: Forecast,
+        measureUnit: MeasureUnit
+    ) {
+        val suggestion = forecast.mapTomorrowNotification(
+            forecast.location.tzId,
+            measureUnit
+        ) ?: return
+
+        notifications.createNotificationSuggestion(
+            title = resolveTitle(suggestion, forecast.location.name),
+
+            shortDescription = resolveMessage(suggestion),
+
+            description = "",
+
+            group = NotificationGroup.SUGGESTION,
+            notificationsId = NotificationType.WEATHER_SUGGESTION_EVENING
+        )
+    }
+
+
+
+    private fun resolveTitle(
+        suggestion: WeatherSuggestionModel,
+        locationName: String
+    ): String {
+
         val res = applicationContext.resources
 
         return when (suggestion.type) {
 
-            SuggestionType.RAIN ->
-                res.getString(R.string.suggestion_rain_title)
+            // 🌧️ RAIN
+            SuggestionType.RAIN -> when (suggestion.moment) {
+                DayMoment.MORNING   -> res.getString(R.string.suggestion_rain_title_morning)
+                DayMoment.AFTERNOON -> res.getString(R.string.suggestion_rain_title_afternoon)
+                DayMoment.EVENING   -> res.getString(R.string.suggestion_rain_title_evening)
+                DayMoment.NIGHT     -> res.getString(R.string.suggestion_rain_title_night)
+            }
 
+            // ☀️ UV
             SuggestionType.UV -> when (suggestion.priority) {
                 SuggestionPriority.HIGH -> res.getString(R.string.suggestion_uv_high_title)
                 else -> res.getString(R.string.suggestion_uv_medium_title)
             }
 
-            // 🌡️ HEAT ahora por nivel
+            // 🌡️ HEAT
             SuggestionType.HEAT -> when (suggestion.priority) {
-                SuggestionPriority.HIGH -> res.getString(R.string.suggestion_heat_high_title)
-                SuggestionPriority.MEDIUM -> res.getString(R.string.suggestion_heat_medium_title)
-                else -> res.getString(R.string.suggestion_heat_low_title)
+                SuggestionPriority.HIGH ->
+                    res.getString(R.string.suggestion_heat_high_title)
+
+                SuggestionPriority.MEDIUM ->
+                    res.getString(R.string.suggestion_heat_medium_title)
+
+                else ->
+                    res.getString(R.string.suggestion_heat_low_title)
             }
 
-            // ❄️ NUEVO
+            // ❄️ COLD
             SuggestionType.COLD ->
                 res.getString(R.string.suggestion_cold_title)
 
+            // 💨 WIND
             SuggestionType.WIND ->
                 res.getString(R.string.suggestion_wind_title)
 
+            // 💧 HUMIDITY
             SuggestionType.HUMIDITY ->
                 res.getString(R.string.suggestion_humidity_title)
 
-            // 🌫️ NUEVO
+            // 🌫️ VISIBILITY
             SuggestionType.VISIBILITY ->
                 res.getString(R.string.suggestion_visibility_title)
 
-            // 🌤️ TOMORROW mejorado
+            // 🌤️ TOMORROW
             SuggestionType.TOMORROW_FORECAST -> when (suggestion.priority) {
+
                 SuggestionPriority.HIGH ->
                     res.getString(R.string.suggestion_tomorrow_rain_title)
 
                 SuggestionPriority.MEDIUM ->
-                    res.getString(R.string.suggestion_tomorrow_alert_title).format(locationName)
+                    res.getString(R.string.suggestion_tomorrow_alert_title)
+                        .format(locationName)
 
                 else ->
                     res.getString(R.string.suggestion_tomorrow_clear_title)
             }
 
-            // 🌅 MORNING sin depender de icon
+            // 🌅 MORNING SUMMARY
             SuggestionType.MORNING_SUMMARY -> when (suggestion.priority) {
+
                 SuggestionPriority.HIGH ->
                     res.getString(R.string.suggestion_morning_alert_title)
 
@@ -375,80 +406,107 @@ class WeatherSuggestionNotificationWorker(
         }
     }
 
-    private fun resolveMessage(suggestion: WeatherSuggestionModel): String {
+    fun resolveMessage(suggestion: WeatherSuggestionModel): String {
         val res = applicationContext.resources
         val template = when (suggestion.type) {
 
-            SuggestionType.RAIN ->
-                res.getString(R.string.suggestion_rain_message)
+            SuggestionType.RAIN -> when (suggestion.moment) {
+                DayMoment.MORNING   -> res.getString(R.string.suggestion_rain_morning_message)
+                DayMoment.AFTERNOON -> res.getString(R.string.suggestion_rain_afternoon_message)
+                DayMoment.EVENING   -> res.getString(R.string.suggestion_rain_evening_message)
+                DayMoment.NIGHT     -> res.getString(R.string.suggestion_rain_night_message)
+            }
 
             SuggestionType.UV -> when (suggestion.priority) {
-                SuggestionPriority.HIGH ->
-                    res.getString(R.string.suggestion_uv_high_message)
-
-                else ->
-                    res.getString(R.string.suggestion_uv_medium_message)
+                SuggestionPriority.HIGH -> when (suggestion.moment) {
+                    DayMoment.MORNING   -> res.getString(R.string.suggestion_uv_high_morning_message)
+                    DayMoment.AFTERNOON -> res.getString(R.string.suggestion_uv_high_afternoon_message)
+                    DayMoment.EVENING   -> res.getString(R.string.suggestion_uv_high_evening_message)
+                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_uv_high_night_message)
+                }
+                else -> when (suggestion.moment) {
+                    DayMoment.MORNING   -> res.getString(R.string.suggestion_uv_medium_morning_message)
+                    DayMoment.AFTERNOON -> res.getString(R.string.suggestion_uv_medium_afternoon_message)
+                    DayMoment.EVENING   -> res.getString(R.string.suggestion_uv_medium_evening_message)
+                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_uv_medium_night_message)
+                }
             }
 
-            // 🌡️ HEAT por niveles
             SuggestionType.HEAT -> when (suggestion.priority) {
-                SuggestionPriority.HIGH ->
-                    res.getString(R.string.suggestion_heat_high_message)
-
-                SuggestionPriority.MEDIUM ->
-                    res.getString(R.string.suggestion_heat_medium_message)
-
-                else ->
-                    res.getString(R.string.suggestion_heat_low_message)
+                SuggestionPriority.HIGH -> when (suggestion.moment) {
+                    DayMoment.MORNING   -> res.getString(R.string.suggestion_heat_high_morning_message)
+                    DayMoment.AFTERNOON -> res.getString(R.string.suggestion_heat_high_afternoon_message)
+                    DayMoment.EVENING   -> res.getString(R.string.suggestion_heat_high_evening_message)
+                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_heat_high_night_message)
+                }
+                SuggestionPriority.MEDIUM -> when (suggestion.moment) {
+                    DayMoment.MORNING   -> res.getString(R.string.suggestion_heat_medium_morning_message)
+                    DayMoment.AFTERNOON -> res.getString(R.string.suggestion_heat_medium_afternoon_message)
+                    DayMoment.EVENING   -> res.getString(R.string.suggestion_heat_medium_evening_message)
+                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_heat_medium_night_message)
+                }
+                else -> when (suggestion.moment) {
+                    DayMoment.MORNING   -> res.getString(R.string.suggestion_heat_low_morning_message)
+                    DayMoment.AFTERNOON -> res.getString(R.string.suggestion_heat_low_afternoon_message)
+                    DayMoment.EVENING   -> res.getString(R.string.suggestion_heat_low_evening_message)
+                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_heat_low_night_message)
+                }
             }
 
-            // ❄️ NUEVO
-            SuggestionType.COLD ->
-                res.getString(R.string.suggestion_cold_message)
+            SuggestionType.COLD -> when (suggestion.moment) {
+                DayMoment.MORNING   -> res.getString(R.string.suggestion_cold_morning_message)
+                DayMoment.AFTERNOON -> res.getString(R.string.suggestion_cold_afternoon_message)
+                DayMoment.EVENING   -> res.getString(R.string.suggestion_cold_evening_message)
+                DayMoment.NIGHT     -> res.getString(R.string.suggestion_cold_night_message)
+            }
 
-            SuggestionType.WIND ->
-                res.getString(R.string.suggestion_wind_message)
+            SuggestionType.WIND -> when (suggestion.moment) {
+                DayMoment.MORNING   -> res.getString(R.string.suggestion_wind_morning_message)
+                DayMoment.AFTERNOON -> res.getString(R.string.suggestion_wind_afternoon_message)
+                DayMoment.EVENING   -> res.getString(R.string.suggestion_wind_evening_message)
+                DayMoment.NIGHT     -> res.getString(R.string.suggestion_wind_night_message)
+            }
 
-            SuggestionType.HUMIDITY ->
-                res.getString(R.string.suggestion_humidity_message)
+            SuggestionType.HUMIDITY -> when (suggestion.moment) {
+                DayMoment.MORNING   -> res.getString(R.string.suggestion_humidity_morning_message)
+                DayMoment.AFTERNOON -> res.getString(R.string.suggestion_humidity_afternoon_message)
+                DayMoment.EVENING   -> res.getString(R.string.suggestion_humidity_evening_message)
+                DayMoment.NIGHT     -> res.getString(R.string.suggestion_humidity_night_message)
+            }
 
-            // 🌫️ NUEVO
-            SuggestionType.VISIBILITY ->
-                res.getString(R.string.suggestion_visibility_message)
+            SuggestionType.VISIBILITY -> when (suggestion.moment) {
+                DayMoment.MORNING   -> res.getString(R.string.suggestion_visibility_morning_message)
+                DayMoment.AFTERNOON -> res.getString(R.string.suggestion_visibility_afternoon_message)
+                DayMoment.EVENING   -> res.getString(R.string.suggestion_visibility_evening_message)
+                DayMoment.NIGHT     -> res.getString(R.string.suggestion_visibility_night_message)
+            }
 
-            // 🌤️ TOMORROW mejorado
             SuggestionType.TOMORROW_FORECAST -> when (suggestion.priority) {
-                SuggestionPriority.HIGH ->
-                    res.getString(R.string.suggestion_tomorrow_rain_message)
-
-                SuggestionPriority.MEDIUM ->
-                    res.getString(R.string.suggestion_tomorrow_alert_message)
-
-                else ->
-                    res.getString(R.string.suggestion_tomorrow_clear_message)
+                SuggestionPriority.HIGH   -> res.getString(R.string.suggestion_tomorrow_rain_message)
+                SuggestionPriority.MEDIUM -> when (suggestion.icon) {
+                    "🧴" -> res.getString(R.string.suggestion_tomorrow_uv_message)
+                    else -> res.getString(R.string.suggestion_tomorrow_heat_message)
+                }
+                else -> res.getString(R.string.suggestion_tomorrow_clear_message)
             }
 
-            // 🌅 MORNING simplificado
-            SuggestionType.MORNING_SUMMARY -> when (suggestion.priority) {
-                SuggestionPriority.HIGH ->
-                    res.getString(R.string.suggestion_morning_alert_message)
-
-                SuggestionPriority.MEDIUM ->
-                    res.getString(R.string.suggestion_morning_warning_message)
-
-                else ->
-                    res.getString(R.string.suggestion_morning_normal_message)
+            SuggestionType.MORNING_SUMMARY -> when (suggestion.icon) {
+                "🌂" -> res.getString(R.string.suggestion_morning_rain_message)
+                "🧴" -> res.getString(R.string.suggestion_morning_uv_high_message)
+                "😎" -> res.getString(R.string.suggestion_morning_uv_medium_message)
+                "💧" -> res.getString(R.string.suggestion_morning_heat_high_message)
+                else -> res.getString(R.string.suggestion_morning_heat_medium_message)
             }
         }
 
         val resolvedArgs = suggestion.args.map { arg ->
             when (arg) {
                 is SuggestionArg.Temperature -> "${arg.value}"
-                is SuggestionArg.Percentage -> "${arg.value}"
-                is SuggestionArg.WindSpeed -> "${arg.value}"
-                is SuggestionArg.Distance -> "${arg.value}"
-                is SuggestionArg.Uv -> uvIndexDescription(arg.level,res)
-                is SuggestionArg.Text -> arg.value
+                is SuggestionArg.Percentage  -> "${arg.value}"
+                is SuggestionArg.WindSpeed   -> "${arg.value}"
+                is SuggestionArg.Distance    -> "${arg.value}"
+                is SuggestionArg.Text        -> arg.value
+                is SuggestionArg.Uv         -> uvIndexDescription(arg.level,res)
             }
         }
 
