@@ -27,13 +27,13 @@ datastore = "1.2.1"
 
 moko = "0.20.1"
 coil3 = "3.4.0"
-koin = "4.2.0"
-koin-annotations = "4.2.0"
+koin = "4.2.1"
+koin-annotations = "4.2.1"
 adaptive = "1.2.0"
 
 dateTimeVersion = "0.7.1-0.6.x-compat"
 
-ktor = "3.4.3"
+ktor = "3.5.0"
 
 composeMaterial = "1.7.3"
 
