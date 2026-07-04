@@ -15,4 +15,5 @@
     <string name="about_tech_2">• Clean Architecture</string>
     <string name="about_tech_3">• Material Design 3</string>
     <string name="about_tech_4">• APIs meteorológicas</string>
+    <string name="about_links_title">Enlaces</string>
 </resources>

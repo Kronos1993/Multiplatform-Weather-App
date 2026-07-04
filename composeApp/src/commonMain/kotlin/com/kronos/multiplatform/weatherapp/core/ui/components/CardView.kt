@@ -8,7 +8,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -21,6 +20,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kronos.multiplatform.weatherapp.core.ui.components.theme.AppTheme
 import com.kronos.multiplatform.weatherapp.core.ui.components.theme.primaryDark
 import com.kronos.multiplatform.weatherapp.core.ui.components.theme.primaryLight
 import org.jetbrains.compose.resources.painterResource
@@ -54,47 +56,57 @@ import weather_app.composeapp.generated.resources.ic_credit_card_visa
 @Composable
 fun BaseCardView(
     modifier: Modifier = Modifier,
-    cardBackgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    cardBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     elevation: Dp = 4.dp,
+    pressedElevation: Dp = elevation / 2,
     borderStroke: BorderStroke? = null,
+    enabled: Boolean = true,
     onClick: (() -> Unit)? = null,
-    interactionSource: MutableInteractionSource? = null,
+    shape: CornerBasedShape = RoundedCornerShape(8.dp),
     content: @Composable () -> Unit,
 ) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val isPressed by interactionSource.collectIsPressedAsState()
+
     val animatedElevation by animateDpAsState(
-        targetValue = if (interactionSource != null && onClick != null) {
-            val isPressed by interactionSource.collectIsPressedAsState()
-            if (isPressed) elevation / 2 else elevation
-        } else elevation,
+        targetValue = when {
+            onClick != null && isPressed -> pressedElevation
+            else -> elevation
+        },
         animationSpec = tween(
-            durationMillis = 200,
+            durationMillis = 150,
             easing = FastOutSlowInEasing
         ),
         label = "card_elevation"
     )
 
-    Card(
-        modifier = modifier
-            .padding(4.dp)
-            .then(
-                if (onClick != null && interactionSource != null) {
-                    Modifier.clickable(
-                        interactionSource = interactionSource,
-                        indication = LocalIndication.current
-                    ) { onClick() }
-                } else {
-                    Modifier
-                }
+    if (onClick != null) {
+        Card(
+            modifier = modifier,
+            interactionSource = interactionSource,
+            enabled = enabled,
+            onClick = onClick,
+            colors = CardDefaults.cardColors(
+                containerColor = cardBackgroundColor,
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ),
-        colors = CardDefaults.cardColors(
-            containerColor = cardBackgroundColor
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = animatedElevation
-        ),
-        border = borderStroke
-    ) {
-        content()
+            elevation = CardDefaults.cardElevation(defaultElevation = animatedElevation),
+            border = borderStroke,
+            shape = shape,
+        ) { content() }
+    } else {
+        Card(
+            modifier = modifier,
+            colors = CardDefaults.cardColors(
+                containerColor = cardBackgroundColor,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = animatedElevation),
+            border = borderStroke,
+            shape = shape,
+        ) { content() }
     }
 }
 
@@ -273,27 +285,8 @@ fun CreditCardInfoView(
 
 @Preview(showBackground = true)
 @Composable
-fun BaseCardViewPreview() {
-    val interactionSource = remember { MutableInteractionSource() }
-
-    MaterialTheme {
-        BaseCardView(
-            interactionSource = interactionSource,
-            onClick = {}
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                TitleText("Base Card")
-                Spacer(Modifier.height(8.dp))
-                BodyText("This is a simple card content")
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
 fun BaseCardViewNoClickPreview() {
-    MaterialTheme {
+    AppTheme {
         BaseCardView {
             Column(Modifier.padding(16.dp)) {
                 TitleText("Static Card")
