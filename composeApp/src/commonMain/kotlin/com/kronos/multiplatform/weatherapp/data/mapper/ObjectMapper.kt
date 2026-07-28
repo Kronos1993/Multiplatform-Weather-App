@@ -250,8 +250,8 @@ fun Forecast.mapCurrentSuggestions(
     }
 
     // ☀️ UV
-    when (current.uv) {
-        in 6.0..10.9 -> suggestions.add(
+    when {
+        current.uv >= 6.0 -> suggestions.add(
             WeatherSuggestionModel(
                 type = SuggestionType.UV,
                 priority = SuggestionPriority.HIGH,
@@ -262,7 +262,7 @@ fun Forecast.mapCurrentSuggestions(
                 )
             )
         )
-        in 3.0..5.9 -> suggestions.add(
+        current.uv in 3.0..5.9 -> suggestions.add(
             WeatherSuggestionModel(
                 type = SuggestionType.UV,
                 priority = SuggestionPriority.MEDIUM,
@@ -508,8 +508,8 @@ fun Forecast.mapMorningSuggestions(
         )
     }
 
-    when (current.uv) {
-        in 6.0..10.9 -> suggestions.add(
+    when {
+        current.uv >= 6.0 -> suggestions.add(
             WeatherSuggestionModel(
                 type = SuggestionType.UV,
                 priority = SuggestionPriority.HIGH,
@@ -520,7 +520,7 @@ fun Forecast.mapMorningSuggestions(
                 )
             )
         )
-        in 3.0..5.9 -> suggestions.add(
+        current.uv in 3.0..5.9 -> suggestions.add(
             WeatherSuggestionModel(
                 type = SuggestionType.UV,
                 priority = SuggestionPriority.MEDIUM,
