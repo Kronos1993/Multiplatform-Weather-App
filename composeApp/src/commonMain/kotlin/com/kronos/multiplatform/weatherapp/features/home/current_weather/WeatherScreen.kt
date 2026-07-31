@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kronos.multiplatform.weatherapp.components.WeatherIdleState
 import com.kronos.multiplatform.weatherapp.components.WeatherLoadingState
-import com.kronos.multiplatform.weatherapp.core.ui.components.LoadingDialog
 import com.kronos.multiplatform.weatherapp.core.ui.components.NoWeatherItem
 import com.kronos.multiplatform.weatherapp.core.ui.components.PullToRefreshContainer
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
@@ -41,8 +40,6 @@ import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.current_weather_key
 import weather_app.composeapp.generated.resources.gps_cant_get_location_error_message
 import weather_app.composeapp.generated.resources.gps_disable_message
-import weather_app.composeapp.generated.resources.loading_dialog_text
-import weather_app.composeapp.generated.resources.loading_dialog_title
 import weather_app.composeapp.generated.resources.notification_long_details
 import weather_app.composeapp.generated.resources.notification_long_details_fahrenheit
 import weather_app.composeapp.generated.resources.notification_short_details

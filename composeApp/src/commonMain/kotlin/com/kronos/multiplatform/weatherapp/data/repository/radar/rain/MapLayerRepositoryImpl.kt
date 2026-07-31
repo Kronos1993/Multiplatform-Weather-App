@@ -3,7 +3,6 @@ package com.kronos.multiplatform.weatherapp.data.repository.radar.rain
 import com.kronos.multiplatform.weatherapp.components.maps.layers.MapLayerTiles
 import com.kronos.multiplatform.weatherapp.core.result.Error
 import com.kronos.multiplatform.weatherapp.core.result.Result
-import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.KtorClientFactory
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.KtorEngineFactory
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.util.FullNetworkError
