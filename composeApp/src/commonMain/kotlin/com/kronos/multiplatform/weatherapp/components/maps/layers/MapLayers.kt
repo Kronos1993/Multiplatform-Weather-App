@@ -7,6 +7,9 @@ enum class MapLayerType(
     RAIN_RADAR(icon = "🌧️", labelKey = "map_layer_rain"),
     NOWCAST(icon = "🔮", labelKey = "map_layer_nowcast"),
     SATELLITE(icon = "🛰️", labelKey = "map_layer_satellite"),
+    TEMPERATURE(icon = "🌡️", labelKey = "map_layer_temperature"),
+    WIND(icon = "💨", labelKey = "map_layer_wind"),
+    PRESSURE(icon = "🧭", labelKey = "map_layer_pressure"),
 }
 
 data class MapLayerState(
@@ -18,5 +21,8 @@ data class MapLayerState(
 data class MapLayerTiles(
     val radarUrl: String,
     val nowcastUrl: String,
-    val satelliteUrl: String
+    val satelliteUrl: String,
+    val temperatureUrl: String,
+    val windUrl: String,
+    val pressureUrl: String
 )

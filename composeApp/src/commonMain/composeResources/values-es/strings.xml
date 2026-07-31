@@ -118,5 +118,8 @@
     <string name="map_layer_rain">Radar lluvia</string>
     <string name="map_layer_nowcast">Pronóstico</string>
     <string name="map_layer_satellite">Satélite</string>
+    <string name="map_layer_pressure">Presión atmosférica</string>
+    <string name="map_layer_temperature">Temperatura</string>
+    <string name="map_layer_wind">Vientos</string>
 
 </resources>

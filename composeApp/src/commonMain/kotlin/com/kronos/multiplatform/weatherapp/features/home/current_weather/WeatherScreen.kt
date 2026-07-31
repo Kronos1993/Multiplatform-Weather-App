@@ -65,6 +65,7 @@ fun WeatherScreen(
     val weather by viewModel.weather.collectAsStateWithLifecycle()
     val mapLayers by viewModel.mapLayers.collectAsStateWithLifecycle()
 
+    val isBackgroundRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val selectedAlert by viewModel.selectedAlert.collectAsStateWithLifecycle()
@@ -155,7 +156,7 @@ fun WeatherScreen(
         ) { paddingValues ->
             PullToRefreshContainer(
                 innerPadding = paddingValues,
-                isRefreshing = screenState == WeatherScreenState.Loading,
+                isRefreshing = screenState == WeatherScreenState.Loading || isBackgroundRefreshing,
                 onRefresh = {
                     viewModel.refreshWeather(
                         currentLang,
@@ -468,12 +469,6 @@ fun WeatherScreen(
                     }
                 }
             }
-
-            LoadingDialog(
-                title = Res.string.loading_dialog_title,
-                message = Res.string.loading_dialog_text,
-                showDialog = screenState == WeatherScreenState.Loading
-            )
 
             ShowAlertInfoDialog(
                 alert = selectedAlert,

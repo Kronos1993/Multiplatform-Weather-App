@@ -118,5 +118,8 @@
     <string name="map_layer_rain">Rain Radar</string>
     <string name="map_layer_nowcast">Forecast</string>
     <string name="map_layer_satellite">Satellite</string>
+    <string name="map_layer_pressure">Pressure</string>
+    <string name="map_layer_temperature">Temperature</string>
+    <string name="map_layer_wind">Wind</string>
 
 </resources>

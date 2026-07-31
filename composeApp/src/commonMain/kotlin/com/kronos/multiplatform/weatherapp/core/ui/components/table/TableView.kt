@@ -707,6 +707,7 @@ fun SearchBar(
 }
 
 
+/*
 @Preview(showBackground = true, widthDp = 900, heightDp = 600)
 @Composable
 fun TableViewPreview() {
@@ -820,4 +821,4 @@ fun TableViewPreview() {
             onPreviousPage = {}
         )
     }
-}
+}*/

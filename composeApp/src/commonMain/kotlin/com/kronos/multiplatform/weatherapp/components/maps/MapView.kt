@@ -61,8 +61,11 @@ import org.maplibre.spatialk.geojson.Position
 import weather_app.composeapp.generated.resources.Res
 import weather_app.composeapp.generated.resources.ic_locations
 import weather_app.composeapp.generated.resources.map_layer_nowcast
+import weather_app.composeapp.generated.resources.map_layer_pressure
 import weather_app.composeapp.generated.resources.map_layer_rain
 import weather_app.composeapp.generated.resources.map_layer_satellite
+import weather_app.composeapp.generated.resources.map_layer_temperature
+import weather_app.composeapp.generated.resources.map_layer_wind
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -181,6 +184,51 @@ fun FixMapView(
                             id = "rainviewer-layer",
                             source = source,
                             opacity = const(0.4f),
+                        )
+                    }
+
+                    mapLayers.find {
+                        it.type == MapLayerType.TEMPERATURE && it.enabled && it.tileUrl.isNotBlank()
+                    }?.let { layer ->
+                        val source = rememberRasterSource(
+                            tiles = listOf(layer.tileUrl),
+                            options = TileSetOptions(),
+                            tileSize = 512,
+                        )
+                        RasterLayer(
+                            id = "temperature-layer",
+                            source = source,
+                            opacity = const(0.3f),
+                        )
+                    }
+
+                    mapLayers.find {
+                        it.type == MapLayerType.WIND && it.enabled && it.tileUrl.isNotBlank()
+                    }?.let { layer ->
+                        val source = rememberRasterSource(
+                            tiles = listOf(layer.tileUrl),
+                            options = TileSetOptions(),
+                            tileSize = 512,
+                        )
+                        RasterLayer(
+                            id = "wind-layer",
+                            source = source,
+                            opacity = const(0.3f),
+                        )
+                    }
+
+                    mapLayers.find {
+                        it.type == MapLayerType.PRESSURE && it.enabled && it.tileUrl.isNotBlank()
+                    }?.let { layer ->
+                        val source = rememberRasterSource(
+                            tiles = listOf(layer.tileUrl),
+                            options = TileSetOptions(),
+                            tileSize = 512,
+                        )
+                        RasterLayer(
+                            id = "pressure-layer",
+                            source = source,
+                            opacity = const(0.3f),
                         )
                     }
                 }
@@ -369,6 +417,51 @@ fun MapView(
                         opacity = const(0.4f),
                     )
                 }
+
+                mapLayers.find {
+                    it.type == MapLayerType.TEMPERATURE && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 512,
+                    )
+                    RasterLayer(
+                        id = "temperature-layer",
+                        source = source,
+                        opacity = const(0.3f),
+                    )
+                }
+
+                mapLayers.find {
+                    it.type == MapLayerType.WIND && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 512,
+                    )
+                    RasterLayer(
+                        id = "wind-layer",
+                        source = source,
+                        opacity = const(0.3f),
+                    )
+                }
+
+                mapLayers.find {
+                    it.type == MapLayerType.PRESSURE && it.enabled && it.tileUrl.isNotBlank()
+                }?.let { layer ->
+                    val source = rememberRasterSource(
+                        tiles = listOf(layer.tileUrl),
+                        options = TileSetOptions(),
+                        tileSize = 512,
+                    )
+                    RasterLayer(
+                        id = "pressure-layer",
+                        source = source,
+                        opacity = const(0.3f),
+                    )
+                }
             }
 
             val myMarkerGeoJson = remember(markers) {
@@ -421,12 +514,14 @@ fun MapLayerToggleButtons(
         horizontalAlignment = Alignment.End
     ) {
         layers.forEach { layer ->
-            MapLayerButton(
-                layer = layer,
-                onClick = {
-                    onToggle?.invoke(layer.type)
-                }
-            )
+            if (layer.tileUrl.isNotBlank()){
+                MapLayerButton(
+                    layer = layer,
+                    onClick = {
+                        onToggle?.invoke(layer.type)
+                    }
+                )
+            }
         }
     }
 }
@@ -459,6 +554,10 @@ fun MapLayerButton(
                         MapLayerType.RAIN_RADAR -> stringResource(Res.string.map_layer_rain)
                         MapLayerType.NOWCAST -> stringResource(Res.string.map_layer_nowcast)
                         MapLayerType.SATELLITE -> stringResource(Res.string.map_layer_satellite)
+                        MapLayerType.PRESSURE -> stringResource(Res.string.map_layer_pressure)
+                        MapLayerType.TEMPERATURE -> stringResource(Res.string.map_layer_temperature)
+                        MapLayerType.WIND -> stringResource(Res.string.map_layer_wind)
+
                     },
                     maxLines = 1
                 )

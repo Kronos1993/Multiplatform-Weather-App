@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 class WeatherViewModel(
     private val weatherRemoteRepository: WeatherRemoteRepository,
@@ -63,6 +64,10 @@ class WeatherViewModel(
     private val _screenState = MutableStateFlow<WeatherScreenState>(WeatherScreenState.Idle)
     val screenState = _screenState.asStateFlow()
 
+    // Nuevo: refresco en segundo plano (no tapa pantalla, solo alimenta el pull-to-refresh)
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
@@ -87,7 +92,6 @@ class WeatherViewModel(
         gpsDisableMessage: String,
         getLocationErrorMessage: String
     ) {
-
         this.weatherPrefKey = weatherPrefKey
         this.notificationTitle = notificationTitle
         this.notificationShortDetails = notificationShortDetails
@@ -107,8 +111,34 @@ class WeatherViewModel(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _screenState.value = WeatherScreenState.Loading
                 _error.value = null
+
+                val hasPreviousContent = _weather.value != null ||
+                        _screenState.value == WeatherScreenState.NoWeather ||
+                        _screenState.value == WeatherScreenState.WeatherObtained
+
+                var hasCache = _weather.value != null
+
+                if (hasPreviousContent) {
+                    _isRefreshing.value = true
+                } else {
+                    _screenState.value = WeatherScreenState.Loading
+                }
+
+                // 0. Si hay un clima en caché y todavía no lo teníamos en memoria, lo mostramos ya
+                if (_weather.value == null) {
+                    weatherRemoteRepository.getLastWeatherForecast(weatherPrefKey)
+                        .onSuccess { cachedForecast ->
+                            _weather.value = cachedForecast
+                            _screenState.value = WeatherScreenState.WeatherObtained
+                            hasCache = true
+                        }
+                        .onError {
+                            if (!hasPreviousContent) {
+                                _screenState.value = WeatherScreenState.NoWeather
+                            }
+                        }
+                }
 
                 // 1. Buscar ubicación guardada del usuario
                 var userLocation = userCustomLocationLocalRepository.getSelectedLocation()
@@ -121,7 +151,6 @@ class WeatherViewModel(
                 // 2. Decidir estrategia basada en la ubicación
                 when {
                     userLocation != null && userLocation.isCurrent && userLocation.isSelected -> {
-                        // Usar GPS para ubicación actual
                         getGpsLocation(
                             userLocation,
                             lang,
@@ -129,18 +158,25 @@ class WeatherViewModel(
                             days,
                             imageQuality,
                             defaultCity,
-                            measureUnit
+                            measureUnit,
+                            isBackgroundRefresh = hasCache || hasPreviousContent
                         )
                     }
 
                     userLocation != null -> {
-                        // Usar ciudad guardada
-                        getWeather(userLocation, lang, apiKey, days, imageQuality, measureUnit)
+                        getWeather(
+                            userLocation,
+                            lang,
+                            apiKey,
+                            days,
+                            imageQuality,
+                            measureUnit,
+                            isBackgroundRefresh = hasCache || hasPreviousContent
+                        )
                     }
 
                     else -> {
                         if (locationRepository.isLocationEnabled()) {
-                            // Intentar usar GPS o fallback
                             getGpsLocation(
                                 null,
                                 lang,
@@ -148,9 +184,10 @@ class WeatherViewModel(
                                 days,
                                 imageQuality,
                                 defaultCity,
-                                measureUnit
+                                measureUnit,
+                                isBackgroundRefresh = hasCache || hasPreviousContent
                             )
-                        } else {
+                        } else if (!hasCache && !hasPreviousContent) {
                             _screenState.value = WeatherScreenState.NoWeather
                         }
                     }
@@ -160,6 +197,8 @@ class WeatherViewModel(
 
             } catch (e: Exception) {
                 handleError(e)
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }
@@ -171,10 +210,10 @@ class WeatherViewModel(
         days: Int,
         imageQuality: String,
         defaultCity: String = "",
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
+        isBackgroundRefresh: Boolean = false
     ) {
         try {
-            // Verificar si el GPS está activado
             if (!locationRepository.isLocationEnabled()) {
                 handleGpsDisabled(
                     userLocation,
@@ -183,26 +222,27 @@ class WeatherViewModel(
                     days,
                     imageQuality,
                     defaultCity,
-                    measureUnit
+                    measureUnit,
+                    isBackgroundRefresh
                 )
                 return
             }
 
-            // Obtener ubicación actual
-            val currentLocation = locationRepository.getCurrentLocation()
+            val currentLocation = withTimeoutOrNull(10_000L) {
+                locationRepository.getCurrentLocation()
+            }
 
             if (currentLocation != null) {
-                // Usar ubicación GPS obtenida
                 getWeather(
                     currentLocation,
                     lang,
                     apiKey,
                     days,
                     imageQuality,
-                    measureUnit
+                    measureUnit,
+                    isBackgroundRefresh
                 )
             } else {
-                // Fallback si no se pudo obtener ubicación GPS
                 handleLocationFallback(
                     userLocation,
                     lang,
@@ -210,7 +250,8 @@ class WeatherViewModel(
                     days,
                     imageQuality,
                     defaultCity,
-                    measureUnit
+                    measureUnit,
+                    isBackgroundRefresh
                 )
             }
         } catch (e: Exception) {
@@ -221,7 +262,8 @@ class WeatherViewModel(
                 days,
                 imageQuality,
                 defaultCity,
-                measureUnit
+                measureUnit,
+                isBackgroundRefresh
             )
         }
     }
@@ -233,18 +275,18 @@ class WeatherViewModel(
         days: Int,
         imageQuality: String,
         defaultCity: String = "",
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
+        isBackgroundRefresh: Boolean = false
     ) {
         message = hashMapOf("warning" to gpsDisableMessage)
 
         if (userLocation != null) {
             if (userLocation.lat != null && userLocation.lon != null) {
-                getWeather(userLocation, lang, apiKey, days, imageQuality, measureUnit)
+                getWeather(userLocation, lang, apiKey, days, imageQuality, measureUnit, isBackgroundRefresh)
             } else {
-                getWeather(userLocation.cityName, lang, apiKey, days, imageQuality, measureUnit)
+                getWeather(userLocation.cityName, lang, apiKey, days, imageQuality, measureUnit, isBackgroundRefresh)
             }
-        } else {
-            // Ciudad por defecto
+        } else if (!isBackgroundRefresh) {
             _screenState.value = WeatherScreenState.NoWeather
         }
     }
@@ -256,17 +298,18 @@ class WeatherViewModel(
         days: Int,
         imageQuality: String,
         defaultCity: String = "",
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
+        isBackgroundRefresh: Boolean = false
     ) {
         message = hashMapOf("warning" to getLocationErrorMessage)
 
         if (userLocation != null) {
             if (userLocation.lat != null && userLocation.lon != null) {
-                getWeather(userLocation, lang, apiKey, days, imageQuality, measureUnit)
+                getWeather(userLocation, lang, apiKey, days, imageQuality, measureUnit, isBackgroundRefresh)
             } else {
-                getWeather(userLocation.cityName, lang, apiKey, days, imageQuality, measureUnit)
+                getWeather(userLocation.cityName, lang, apiKey, days, imageQuality, measureUnit, isBackgroundRefresh)
             }
-        } else {
+        } else if (!isBackgroundRefresh) {
             _screenState.value = WeatherScreenState.NoWeather
         }
     }
@@ -277,10 +320,15 @@ class WeatherViewModel(
         apiKey: String,
         days: Int,
         imageQuality: String,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
+        isBackgroundRefresh: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            _screenState.value = WeatherScreenState.Loading
+            if (isBackgroundRefresh) {
+                _isRefreshing.value = true
+            } else {
+                _screenState.value = WeatherScreenState.Loading
+            }
 
             weatherRemoteRepository.getWeatherDataForecast(
                 location.latitude,
@@ -310,12 +358,16 @@ class WeatherViewModel(
                     widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
+                    _isRefreshing.value = false
                     log("Weather from coordinates acquired: ${forecast.location.name}", false)
                 }
                 .onError { error ->
                     _error.value = "Error getting weather: ${error.errorMessage}"
-                    _screenState.value = WeatherScreenState.NoWeather
-                    _weather.value = null
+                    _isRefreshing.value = false
+                    if (!isBackgroundRefresh) {
+                        _screenState.value = WeatherScreenState.NoWeather
+                        _weather.value = null
+                    }
                     log("Weather error: ${error.errorMessage}", isError = true)
                 }
         }
@@ -327,10 +379,15 @@ class WeatherViewModel(
         apiKey: String,
         days: Int,
         imageQuality: String,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
+        isBackgroundRefresh: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            _screenState.value = WeatherScreenState.Loading
+            if (isBackgroundRefresh) {
+                _isRefreshing.value = true
+            } else {
+                _screenState.value = WeatherScreenState.Loading
+            }
 
             weatherRemoteRepository.getWeatherDataForecast(city, lang, apiKey, days)
                 .onSuccess { forecast ->
@@ -354,12 +411,16 @@ class WeatherViewModel(
                     widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
+                    _isRefreshing.value = false
                     log("Weather from city acquired: ${forecast.location.name}", false)
                 }
                 .onError { error ->
                     _error.value = "Error getting weather: ${error.errorMessage}"
-                    _screenState.value = WeatherScreenState.NoWeather
-                    _weather.value = null
+                    _isRefreshing.value = false
+                    if (!isBackgroundRefresh) {
+                        _screenState.value = WeatherScreenState.NoWeather
+                        _weather.value = null
+                    }
                     log("Weather error: ${error.errorMessage}", isError = true)
                 }
         }
@@ -371,10 +432,15 @@ class WeatherViewModel(
         apiKey: String,
         days: Int,
         imageQuality: String,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
+        isBackgroundRefresh: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            _screenState.value = WeatherScreenState.Loading
+            if (isBackgroundRefresh) {
+                _isRefreshing.value = true
+            } else {
+                _screenState.value = WeatherScreenState.Loading
+            }
 
             weatherRemoteRepository.getWeatherDataForecast(
                 userLocation.lat ?: 0.0,
@@ -404,12 +470,16 @@ class WeatherViewModel(
                     widgetUpdater.updateAllWeatherWidgets()
                     _screenState.value = WeatherScreenState.WeatherObtained
                     _error.value = null
+                    _isRefreshing.value = false
                     log("Weather from city acquired: ${forecast.location.name}", false)
                 }
                 .onError { error ->
                     _error.value = "Error getting weather: ${error.errorMessage}"
-                    _screenState.value = WeatherScreenState.NoWeather
-                    _weather.value = null
+                    _isRefreshing.value = false
+                    if (!isBackgroundRefresh) {
+                        _screenState.value = WeatherScreenState.NoWeather
+                        _weather.value = null
+                    }
                     log("Weather error: ${error.errorMessage}", isError = true)
                 }
         }
@@ -448,9 +518,12 @@ class WeatherViewModel(
                     _mapLayers.update { layers ->
                         layers.map { layer ->
                             when (layer.type) {
-                                MapLayerType.RAIN_RADAR -> layer.copy(tileUrl = tiles.radarUrl, enabled = tiles.radarUrl.isNotBlank())
-                                MapLayerType.NOWCAST -> layer.copy(tileUrl = tiles.nowcastUrl, enabled = tiles.nowcastUrl.isNotBlank())
-                                MapLayerType.SATELLITE -> layer.copy(tileUrl = tiles.satelliteUrl, enabled = tiles.satelliteUrl.isNotBlank())
+                                MapLayerType.RAIN_RADAR -> layer.copy(tileUrl = tiles.radarUrl, enabled = layer.enabled && tiles.radarUrl.isNotBlank())
+                                MapLayerType.NOWCAST -> layer.copy(tileUrl = tiles.nowcastUrl, enabled = layer.enabled && tiles.nowcastUrl.isNotBlank())
+                                MapLayerType.SATELLITE -> layer.copy(tileUrl = tiles.satelliteUrl, enabled = layer.enabled && tiles.satelliteUrl.isNotBlank())
+                                MapLayerType.TEMPERATURE -> layer.copy(tileUrl = tiles.temperatureUrl, enabled = layer.enabled && tiles.temperatureUrl.isNotBlank())
+                                MapLayerType.WIND -> layer.copy(tileUrl = tiles.windUrl, enabled = layer.enabled && tiles.windUrl.isNotBlank())
+                                MapLayerType.PRESSURE -> layer.copy(tileUrl = tiles.pressureUrl, enabled = layer.enabled && tiles.pressureUrl.isNotBlank())
                             }
                         }
                     }
@@ -506,9 +579,12 @@ class WeatherViewModel(
     }
 
     private fun handleError(e: Exception) {
-        _weather.value = null
         _error.value = "Error: ${e.message}"
-        _screenState.value = WeatherScreenState.NoWeather
+        _isRefreshing.value = false
+        // Si ya había clima mostrándose (caché), no lo borramos por un error puntual
+        if (_weather.value == null) {
+            _screenState.value = WeatherScreenState.NoWeather
+        }
         log("General error: ${e.message}", isError = true)
     }
 
@@ -549,7 +625,6 @@ class WeatherViewModel(
             layers.map { if (it.type == type) it.copy(enabled = !it.enabled) else it }
         }
     }
-
 }
 
 sealed class WeatherScreenState {
