@@ -1,0 +1,107 @@
+{
+  "_comment": "Spec-driven workflow configuration. Read by /spec-new, /spec-plan, /spec-implement, /spec-review, /spec-handoff, /spec-finalize, /spec-ship, /create-pr, /spec-status. Key catalog + per-skill reader map: .specs/config.schema.md. Edit-as-needed; do not commit secrets — use env-var indirection. Adapted from a Smartmatic-internal .specs/ workflow lineage (smart-poll-mobile-android -> esbu_ccos_windows -> an installer-framework repo) for this repo's shape: a single-module Kotlin Multiplatform app (Android/iOS/Desktop), solo-maintained, GitHub-hosted, with NO issue tracker (no Jira, no GitHub Issues in active use) and NO automated test suite.",
+
+  "version": 1,
+
+  "paths": {
+    "specs_root": "specs",
+    "archive_root": "specs/_archive",
+    "templates_root": ".specs/templates",
+    "improvements_log": ".specs/IMPROVEMENTS.md"
+  },
+
+  "intake": {
+    "_comment": "Replaces the source lineage's jira.* block. This repo has no issue tracker of any kind — /spec-new only ever reads a local file or takes a manual/typed description. There is no key-pattern detection, no MCP/API fetch tier, nothing to auto-detect beyond 'is this an existing file path or not'.",
+    "sources": ["file", "manual", "url"],
+    "_sources_doc": "'file': a local markdown/text note (e.g. specs/_inbox/*.md) — read verbatim. 'manual': the user describes the work directly in chat; /spec-new transcribes it into story.md. 'url': a plain link (a GitHub issue on ANOTHER repo, a design doc, a Notion page) pasted as the whole input — fetched with WebFetch if reachable, else treated as a manual paste with the URL recorded in source_ref. No project-key concept exists — spec_id is chosen by the user or slugged from the title (see /spec-new)."
+  },
+
+  "branch": {
+    "naming": {
+      "bug": "bugfix/{key}",
+      "story": "feature/{key}",
+      "refactor": "refactor/{key}",
+      "chore": "chore/{key}",
+      "hotfix": "hotfix/{key}"
+    },
+    "_naming_doc": "This repo's git history uses feat:/fix: commit-type prefixes loosely and has no enforced branch-naming convention today (solo-maintained, commits often pushed straight to develop). This table is this workflow's own going-forward convention, not a retrofit of history."
+  },
+
+  "plan": {
+    "_comment": "Used by /spec-plan. Split-heuristic thresholds.",
+    "split_thresholds": {
+      "modules": 3,
+      "risks": 4,
+      "subsystems": 2
+    },
+    "_split_thresholds_doc": "modules: proposal.md §4 affected-modules table spanning this many DISTINCT capability areas (domain, data, features/<x>, core, di, device, components, validator — see architecture.modules below) triggers a split suggestion. Set to 3 (not 2) because this is a single Gradle module with fairly fine-grained internal packages — touching e.g. both a feature package and its own data/repository counterpart is normal, expected, single-feature work, not cross-cutting. risks/subsystems unchanged from the lineage's smaller-repo tuning."
+  },
+
+  "ship": {
+    "_comment": "Used by /spec-ship. Controls eager-archive behavior.",
+    "open_archive_pr": true
+  },
+
+  "pr": {
+    "_comment": "Used by /create-pr, /spec-finalize, and /spec-ship. This repo is hosted on GitHub; pull requests are opened via gh (NOT glab — the Smartmatic lineage repos this workflow is adapted from are GitLab-hosted, this one is not).",
+    "cli": "gh",
+    "host": "github.com",
+    "repo_slug": "Kronos1993/Multiplatform-Weather-App",
+    "default_target": "develop",
+    "_default_target_doc": "This repo currently has THREE long-lived branches on origin: develop (the actively-worked branch), main, and master (origin/HEAD points at master, but all recent commits in history are on develop with no merge commits found — i.e. no PR flow has been used yet). develop is the default target because it's where active work happens; confirm with the user before the first real /create-pr run whether master or main is the intended upstream integration branch, and update this value once confirmed.",
+    "create_args": [],
+    "_create_args_doc": "GitLab's --squash-before-merge/--remove-source-branch are MR-creation-time settings; GitHub has no equivalent gh pr create flags — squash-merge and branch deletion on GitHub are chosen by whoever clicks merge (gh pr merge --squash --delete-branch) or fixed by a repo setting, not by the creator. Left empty; /create-pr documents the equivalent merge-time invocation instead.",
+    "first_push_strict_host_checking": "accept-new"
+  },
+
+  "reviewers": {
+    "default": [],
+    "_default_doc": "Solo-maintained repo (GitHub user Kronos1993) — no default reviewer today. Add a GitHub username here if/when a second maintainer joins; /spec-finalize and /spec-ship treat an empty list as 'no --reviewer flag passed', not an error."
+  },
+
+  "notifications": {
+    "_comment": "All channels disabled by default. No issue tracker to comment on, no webhook configured.",
+    "events": {
+      "pr_open": { "enabled": false, "channels": [] },
+      "spec_archived": { "enabled": false, "channels": [] }
+    },
+    "channels": {}
+  },
+
+  "review": {
+    "_comment": "Used by /spec-review.",
+    "default_mode": "quick",
+    "confidence_critical": 80,
+    "confidence_important": 50,
+    "findings_file": "specs/{key}/.review-findings.md"
+  },
+
+  "verification": {
+    "_comment": "Controls build invocations in /spec-implement. No wrapper /build skill exists — build directly via the commands below.",
+    "build_per_implement_step": false,
+    "build_matrix_at_pre_handoff": true,
+    "_build_matrix_at_pre_handoff_doc": "Single Gradle module (:composeApp) — 'matrix' just means: run the Android debug assemble once at pre-handoff. Run './gradlew build' instead when the step touched iosMain or jvmMain (see build_commands below).",
+    "build_commands": {
+      "android": "./gradlew :composeApp:assembleDebug",
+      "desktop": "./gradlew :composeApp:run",
+      "full": "./gradlew build",
+      "ios": "no Gradle target — build via Xcode (iosApp/iosApp.xcodeproj) or the IDE run configuration; not automatable headlessly from this skill chain, surface as an out-of-band manual check when a step touches iosMain or iosApp/"
+    },
+    "skip_all_local": false,
+    "distinguish_pre_existing_baseline": true,
+    "no_test_suite": true,
+    "_no_test_suite_doc": "This repo has ZERO test source sets (confirmed in root CLAUDE.md and .serena/memories/task_completion.md). /spec-implement and /spec-plan must never invent a 'run tests' step; verification is build-green only (plus a manual run in the simulator/emulator for UI-visible changes).",
+    "secret_log_keywords": ["apiKey", "api_key", "API_KEY", "token", "Token", "TOKEN", "secret", "Secret", "password", "Password"],
+    "_secret_log_keywords_doc": "This repo's real sensitive-data surface is the WeatherAPI key (configured in composeResources/values/api.xml per README) — no DB connection strings or certificates like the source lineage's C# repo. Keep the list short and specific to what this repo actually holds."
+  },
+
+  "architecture": {
+    "_comment": "Read by /spec-plan (gauntlet automation) and /spec-implement (pre-handoff gate). Replaces the lineage's Controller/Command/Manager + Execute/Undo gauntlet — this repo is a Clean-Architecture-over-Koin KMP app, not a reflection-driven install engine. See .serena/memories/architecture.md for the full pattern and root CLAUDE.md for the SOLID mapping.",
+    "modules": ["domain", "data", "features", "core", "di", "components", "device", "validator"],
+    "shape": "features/<feature>/XxxViewModel (extends core/viewmodel/ParentViewModel) -> domain/repository/*Interface (DIP boundary) -> data/repository/<feature>/*Impl -> data/remote (Ktor) | data/local (Room); di/ wires interface->impl via Koin",
+    "expect_actual_parity_required": true,
+    "_expect_actual_parity_doc": "This repo's own architectural gate, replacing Execute/Undo symmetry: every `expect` declaration added or changed in commonMain must have a matching `actual` in every active source set that needs it (androidMain, iosMain, and jvmMain when the desktop target is affected). A missing actual is a compile error for that target, not a silent runtime bug — but it's easy to add/edit an actual for iOS while forgetting jvmMain (or vice versa) since the three source sets are never open in the same editor view. /spec-implement's pre-handoff gate checks this explicitly for any touched expect/actual pair.",
+    "dual_localization_required": true,
+    "_dual_localization_doc": "Any user-facing string touched by both the Compose UI and native iOS code (notifications, widgets) must be updated in BOTH composeApp/src/commonMain/composeResources/values[-es]/*.xml AND iosApp/en.strings + iosApp/es.strings — see .serena/memories/conventions.md. /spec-plan's gauntlet flags this explicitly when a spec's scope includes user-facing strings."
+  }
+}
