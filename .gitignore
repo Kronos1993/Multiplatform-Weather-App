@@ -17,3 +17,6 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+
+# spec-driven workflow — per-run findings, not source of truth
+specs/*/.review-findings.md

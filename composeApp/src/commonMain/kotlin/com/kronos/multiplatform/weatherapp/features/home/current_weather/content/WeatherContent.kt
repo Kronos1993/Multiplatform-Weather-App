@@ -105,9 +105,15 @@ import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
 import com.kronos.multiplatform.weatherapp.data.mapper.mapCurrentSuggestions
 import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
+import com.kronos.multiplatform.weatherapp.domain.model.AirQuality
+import com.kronos.multiplatform.weatherapp.domain.model.Astro
+import com.kronos.multiplatform.weatherapp.domain.model.Condition
+import com.kronos.multiplatform.weatherapp.domain.model.CurrentWeather
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
+import com.kronos.multiplatform.weatherapp.domain.model.Day
 import com.kronos.multiplatform.weatherapp.domain.model.DayMoment
 import com.kronos.multiplatform.weatherapp.domain.model.Hour
+import com.kronos.multiplatform.weatherapp.domain.model.Location
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.MoonPhase
 import com.kronos.multiplatform.weatherapp.domain.model.SuggestionArg
@@ -1258,6 +1264,315 @@ fun WeatherSuggestionModel.resolveMessage(): String {
     return resolvedArgs.foldIndexed(template) { index, acc, arg ->
         acc.replace("%${index + 1}\$s", arg)
     }
+}
+
+// ---------------------------------------------------------------------------
+// MOCK DATA PARA PREVIEWS
+// Solo incluye los campos que aparecen usados en WeatherContent*.kt.
+// Si tus data classes reales (Forecast, Current, Location, Condition,
+// AirQuality, Astro, Day, DailyForecast, Hour) tienen más campos obligatorios
+// sin default, el compilador te lo va a marcar aquí mismo: agrégalos con un
+// valor dummy.
+// ---------------------------------------------------------------------------
+
+private val mockCondition = Condition(
+    description = "Partly cloudy",
+    icon = "https://cdn.weatherapi.com/weather/64x64/day/116.png"
+)
+
+private val mockAirQuality = AirQuality(usEpaIndex = 2)
+
+private val mockCurrent = CurrentWeather(
+    tempC = 29.0,
+    tempF = 84.2,
+    isDay = true,
+    uv = 7.0,
+    windSpeedKph = 18.0,
+    windSpeedMph = 11.2,
+    windDegree = 210.0,
+    humidity = 68.0,
+    precipitationMm = 0.0,
+    visionKM = 10.0,
+    visionMiles = 6.0,
+    cloud = 40.0,
+    pressureMb = 1012.0,
+    pressureIn = 29.88,
+    feelslikeC = 31.0,
+    feelslikeF = 87.8,
+    condition = mockCondition,
+    airQuality = mockAirQuality
+)
+
+private val mockLocation = Location(
+    name = "Panama City",
+    region = "Panamá",
+    country = "Panama",
+    lat = 8.9824,
+    lon = -79.5199,
+    tzId = "America/Panama",
+    localtime = "2026-07-27 14:30"
+)
+
+private val mockAstro = Astro(
+    sunrise = "06:12 AM",
+    sunset = "06:48 PM",
+    moonrise = "09:15 PM",
+    moonset = "08:40 AM",
+    moonPhase = MoonPhase.WAXING_GIBBOUS,
+    moonIllumination = "",
+    isMoonUp = false,
+    isSunUp = true
+)
+
+private val mockDay = Day(
+    dailyWillItSnow = false,
+    totalsnowCm = 0.0,
+    maxtempC = 31.0,
+    maxtempF = 87.8,
+    mintempC = 24.0,
+    mintempF = 75.2,
+    avgtempC = 27.5,
+    avgtempF = 81.5,
+    maxwindMph = 14.0,
+    maxwindKph = 22.5,
+    totalprecipMm = 2.4,
+    totalprecipIn = 0.09,
+    avgvisKm = 10.0,
+    avgvisMiles = 6.0,
+    avghumidity = 72.0,
+    dailyWillItRain = true,
+    dailyChanceOfRain = 65.0,
+    dailyChanceOfSnow = 0.0,
+    condition = mockCondition,
+    uv = 7.0
+)
+
+private fun mockHour(hour: Int, tempC: Double) = Hour(
+    time = "2026-07-27 ${hour.toString().padStart(2, '0')}:00",
+    condition = mockCondition,
+    tempC = tempC,
+    tempF = tempC * 9 / 5 + 32,
+    timeEpoch = 1785110400,
+    isDay = hour in 6..18,
+    windMph = 11.2,
+    windKph = 18.0,
+    windDegree = 210.0,
+    windDir = "SW",
+    pressureMb = 1012.0,
+    pressureIn = 29.88,
+    precipMm = 0.0,
+    precipIn = 0.0,
+    humidity = 68,
+    cloud = 40,
+    feelslikeC = tempC + 2,
+    feelslikeF = (tempC + 2) * 9 / 5 + 32,
+    windchillC = tempC,
+    windchillF = tempC * 9 / 5 + 32,
+    heatindexC = tempC + 1,
+    heatindexF = (tempC + 1) * 9 / 5 + 32,
+    dewpoC = tempC - 5,
+    dewpoF = (tempC - 5) * 9 / 5 + 32,
+    willItRain = hour in 14..18,
+    chanceOfRain = if (hour in 14..18) 65.0 else 10.0,
+    willItSnow = false,
+    chanceOfSnow = 30.0,
+    visKm = 10.0,
+    visMiles = 6.0,
+    gustMph = 14.0,
+    gustKph = 22.5,
+    uv = if (hour in 9..16) 7.0 else 0.0
+)
+
+private val mockHours = listOf(
+    mockHour(0, 22.0),
+    mockHour(3, 21.0),
+    mockHour(6, 23.0),
+    mockHour(9, 27.0),
+    mockHour(12, 30.0),
+    mockHour(15, 31.0),
+    mockHour(18, 28.0),
+    mockHour(21, 24.0)
+)
+
+private val mockDailyForecast = DailyForecast(
+    astro = mockAstro,
+    day = mockDay,
+    date = "2026-07-27",
+    dateEpoch = 1785110400L,
+    hours = mockHours
+)
+
+private val mockAlerts = listOf(
+    WeatherAlert(
+        headline = "Aviso de tormenta eléctrica",
+        event = "Tormenta eléctrica",
+        severity = "Moderate",
+        urgency = "Expected",
+        certainty = "Likely",
+        areas = "Panamá; Colón; Veraguas",
+        description = "Se esperan tormentas eléctricas con vientos fuertes durante la tarde.",
+        instruction = "Evite actividades al aire libre entre las 2pm y 6pm.",
+        effective = "2026-07-27T14:00:00Z",
+        expires = "2026-07-27T20:00:00Z"
+    )
+)
+
+private val mockForecast = Forecast(
+    current = mockCurrent,
+    location = mockLocation,
+    alerts = mockAlerts
+)
+
+private val mockMapLayers = listOf(
+    MapLayerState(type = MapLayerType.RAIN_RADAR, enabled = true),
+    MapLayerState(type = MapLayerType.NOWCAST, enabled = false),
+    MapLayerState(type = MapLayerType.SATELLITE, enabled = false)
+)
+
+private val mockUrlProvider = object : UrlProvider {
+    override fun getPublicApiUrl(): String = ""
+    override fun getPrivateApiUrl(): String = ""
+    override fun getServerUrl(): String = ""
+    override fun getImageUrl(icon: String, quality: String): String = icon
+    override fun extractIdFromUrl(url: String): Int = 1
+}
+
+// ---------------------------------------------------------------------------
+// PREVIEWS
+// ---------------------------------------------------------------------------
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 200)
+@Composable
+private fun WeatherHeaderSectionExpandedPreview() {
+    WeatherHeaderSection(
+        currentWeather = mockForecast,
+        isDarkTheme = true,
+        urlProvider = mockUrlProvider,
+        imageQuality = "low",
+        currentLang = "es",
+        measureUnit = MeasureUnit.INTERNATIONAL,
+        isCompactMode = true
+    )
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 100)
+@Composable
+private fun WeatherHeaderSectionCompactPreview() {
+    WeatherHeaderSection(
+        currentWeather = mockForecast,
+        isDarkTheme = false,
+        urlProvider = mockUrlProvider,
+        imageQuality = "low",
+        currentLang = "es",
+        measureUnit = MeasureUnit.INTERNATIONAL,
+        isCompactMode = true
+    )
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 900)
+@Composable
+private fun WeatherContentSectionPreview() {
+    WeatherContentSection(
+        currentWeather = mockForecast,
+        mapLayers = mockMapLayers,
+        onLayerToggled = {},
+        isDarkTheme = false,
+        urlProvider = mockUrlProvider,
+        imageQuality = "1x",
+        currentLang = "es",
+        measureUnit = MeasureUnit.INTERNATIONAL,
+        scrollState = rememberLazyListState(),
+        onHourItemClicked = {},
+        onAlertItemClicked = {},
+        onDailyItemClicked = {}
+    )
+}
+
+@Preview(name = "Portrait - Light", showBackground = true, widthDp = 400, heightDp = 900)
+@Composable
+private fun WeatherContentPortraitPreview() {
+    WeatherContentPortrait(
+        weather = mockForecast,
+        mapLayers = mockMapLayers,
+        onLayerToggled = {},
+        deviceScreenConfiguration = DeviceScreenConfiguration.MOBILE_PORTRAIT,
+        isDarkTheme = false,
+        urlProvider = mockUrlProvider,
+        imageQuality = "1x",
+        currentLang = "es",
+        measureUnit = MeasureUnit.INTERNATIONAL,
+        onHourItemClicked = {},
+        onAlertItemClicked = {},
+        onDailyItemClicked = {}
+    )
+}
+
+@Preview(name = "Portrait - Dark", showBackground = true, widthDp = 400, heightDp = 900)
+@Composable
+private fun WeatherContentPortraitDarkPreview() {
+    WeatherContentPortrait(
+        weather = mockForecast,
+        mapLayers = mockMapLayers,
+        onLayerToggled = {},
+        deviceScreenConfiguration = DeviceScreenConfiguration.MOBILE_PORTRAIT,
+        isDarkTheme = true,
+        urlProvider = mockUrlProvider,
+        imageQuality = "1x",
+        currentLang = "es",
+        measureUnit = MeasureUnit.INTERNATIONAL,
+        onHourItemClicked = {},
+        onAlertItemClicked = {},
+        onDailyItemClicked = {}
+    )
+}
+
+@Preview(name = "Landscape - Mobile", showBackground = true, widthDp = 800, heightDp = 400)
+@Composable
+private fun WeatherContentLandscapeMobilePreview() {
+    WeatherContentLandscape(
+        weather = mockForecast,
+        mapLayers = mockMapLayers,
+        onLayerToggled = {},
+        isDarkTheme = false,
+        urlProvider = mockUrlProvider,
+        imageQuality = "1x",
+        currentLang = "es",
+        measureUnit = MeasureUnit.INTERNATIONAL,
+        deviceScreenConfiguration = DeviceScreenConfiguration.MOBILE_LANDSCAPE,
+        onHourItemClicked = {},
+        onAlertItemClicked = {},
+        onDailyItemClicked = {}
+    )
+}
+
+@Preview(name = "Landscape - Desktop", showBackground = true, widthDp = 1024, heightDp = 700)
+@Composable
+private fun WeatherContentLandscapeDesktopPreview() {
+    WeatherContentLandscape(
+        weather = mockForecast,
+        mapLayers = mockMapLayers,
+        onLayerToggled = {},
+        isDarkTheme = false,
+        urlProvider = mockUrlProvider,
+        imageQuality = "1x",
+        currentLang = "es",
+        measureUnit = MeasureUnit.INTERNATIONAL,
+        deviceScreenConfiguration = DeviceScreenConfiguration.DESKTOP,
+        onHourItemClicked = {},
+        onAlertItemClicked = {},
+        onDailyItemClicked = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ShowAlertInfoDialogPreview() {
+    ShowAlertInfoDialog(
+        alert = mockAlerts.first(),
+        showDialog = true,
+        onClose = {},
+        isDarkTheme = false
+    )
 }
 
 @Preview(showBackground = true, heightDp = 600, widthDp = 800)

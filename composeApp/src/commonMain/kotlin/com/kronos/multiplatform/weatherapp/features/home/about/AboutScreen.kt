@@ -4,11 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -38,8 +40,6 @@ fun AboutScreen(
     val viewModel = koinViewModel<AboutViewModel>()
     val scrollState = rememberScrollState()
 
-    val appVersion = viewModel.appVersion
-
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -54,7 +54,7 @@ fun AboutScreen(
             val rootModifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(color = Color.Transparent)
+                .background(Color.Transparent)
                 .consumeWindowInsets(WindowInsets.navigationBars)
 
             when (deviceScreenConfiguration) {
@@ -64,19 +64,19 @@ fun AboutScreen(
                             .padding(8.dp)
                             .verticalScroll(scrollState),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
                     ) {
                         AboutHeaderSection(
-                            isDarkTheme = isDarkTheme,
+                            appVersion = viewModel.appVersion,
                             alignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            darkTheme = isDarkTheme
                         )
+                        Spacer(modifier = Modifier.height(12.dp))
                         AboutInfoSection(
-                            appVersion,
-                            viewModel.intents,
-                            isDarkTheme = isDarkTheme,
-                            modifier = Modifier
-                                .fillMaxWidth()
+                            expectedIntents = viewModel.intents,
+                            modifier = Modifier.fillMaxWidth(),
+                            darkTheme = isDarkTheme
                         )
                     }
                 }
@@ -88,23 +88,20 @@ fun AboutScreen(
                     Row(
                         modifier = rootModifier
                             .windowInsetsPadding(WindowInsets.displayCutout)
-                            .padding(
-                                horizontal = 32.dp, vertical = 32.dp
-                            ),
-                        horizontalArrangement = Arrangement.spacedBy(32.dp)
+                            .padding(horizontal = 32.dp, vertical = 32.dp),
+                        horizontalArrangement = Arrangement.spacedBy(32.dp),
                     ) {
                         AboutHeaderSection(
-                            isDarkTheme = isDarkTheme,
-                            modifier = Modifier
-                                .weight(.5f)
+                            appVersion = viewModel.appVersion,
+                            modifier = Modifier.weight(.5f),
+                            darkTheme = isDarkTheme
                         )
                         AboutInfoSection(
-                            appVersion,
-                            viewModel.intents,
-                            isDarkTheme = isDarkTheme,
+                            expectedIntents = viewModel.intents,
+                            darkTheme = isDarkTheme,
                             modifier = Modifier
-                                .verticalScroll(scrollState)
                                 .weight(1f)
+                                .verticalScroll(scrollState),
                         )
                     }
                 }

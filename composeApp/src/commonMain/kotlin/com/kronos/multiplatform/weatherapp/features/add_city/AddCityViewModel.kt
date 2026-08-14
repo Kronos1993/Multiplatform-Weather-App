@@ -291,9 +291,12 @@ class AddCityViewModel(
                     _mapLayers.update { layers ->
                         layers.map { layer ->
                             when (layer.type) {
-                                MapLayerType.RAIN_RADAR -> layer.copy(tileUrl = tiles.radarUrl, enabled = tiles.radarUrl.isNotBlank())
-                                MapLayerType.NOWCAST -> layer.copy(tileUrl = tiles.nowcastUrl, enabled = tiles.nowcastUrl.isNotBlank())
-                                MapLayerType.SATELLITE -> layer.copy(tileUrl = tiles.satelliteUrl, enabled = tiles.satelliteUrl.isNotBlank())
+                                MapLayerType.RAIN_RADAR -> layer.copy(tileUrl = tiles.radarUrl, enabled = layer.enabled && tiles.radarUrl.isNotBlank())
+                                MapLayerType.NOWCAST -> layer.copy(tileUrl = tiles.nowcastUrl, enabled = layer.enabled && tiles.nowcastUrl.isNotBlank())
+                                MapLayerType.SATELLITE -> layer.copy(tileUrl = tiles.satelliteUrl, enabled = layer.enabled && tiles.satelliteUrl.isNotBlank())
+                                MapLayerType.TEMPERATURE -> layer.copy(tileUrl = tiles.temperatureUrl, enabled = layer.enabled && tiles.temperatureUrl.isNotBlank())
+                                MapLayerType.WIND -> layer.copy(tileUrl = tiles.windUrl, enabled = layer.enabled && tiles.windUrl.isNotBlank())
+                                MapLayerType.PRESSURE -> layer.copy(tileUrl = tiles.pressureUrl, enabled = layer.enabled && tiles.pressureUrl.isNotBlank())
                             }
                         }
                     }
