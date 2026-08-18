@@ -42,11 +42,12 @@ import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
 
 @Composable
 fun WeatherWidgetBackground(content: @Composable () -> Unit) {
+    val s = rememberWidgetSpacing()
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(ImageProvider(R.drawable.bg_widget_glass))
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = s.contentPadding, vertical = s.contentPadding),
         contentAlignment = Alignment.Center
     ) {
         content()
@@ -56,6 +57,7 @@ fun WeatherWidgetBackground(content: @Composable () -> Unit) {
 @Composable
 fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData) {
     val t = rememberWidgetTypography()
+    val s = rememberWidgetSpacing()
 
     Column(
         modifier = GlanceModifier
@@ -70,7 +72,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             WeatherIcon(bitmap = weatherData.currentIconBitmap, size = t.weatherIconSize)
-            Spacer(modifier = GlanceModifier.width(6.dp))
+            Spacer(modifier = GlanceModifier.width(s.iconTextGap))
             Text(
                 text = weatherData.currentTemp,
                 style = TextStyle(
@@ -81,7 +83,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData) {
             )
         }
 
-        Spacer(modifier = GlanceModifier.height(4.dp))
+        Spacer(modifier = GlanceModifier.height(s.sectionGap))
 
         Text(
             text = weatherData.currentCondition,
@@ -92,7 +94,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData) {
             maxLines = 1
         )
 
-        Spacer(modifier = GlanceModifier.height(4.dp))
+        Spacer(modifier = GlanceModifier.height(s.sectionGap))
 
         LocationRow(location = weatherData.location, typography = t)
     }
@@ -101,6 +103,7 @@ fun SmallWeatherWidgetContent(weatherData: WeatherWidgetData) {
 @Composable
 fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData) {
     val t = rememberWidgetTypography()
+    val s = rememberWidgetSpacing()
 
     Column(
         modifier = GlanceModifier
@@ -111,7 +114,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData) {
     ) {
         LocationRow(location = weatherData.location, typography = t)
 
-        Spacer(modifier = GlanceModifier.height(8.dp))
+        Spacer(modifier = GlanceModifier.height(s.sectionGap))
 
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
@@ -123,7 +126,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 WeatherIcon(bitmap = weatherData.currentIconBitmap, size = t.weatherIconSize)
-                Spacer(modifier = GlanceModifier.width(6.dp))
+                Spacer(modifier = GlanceModifier.width(s.iconTextGap))
                 Text(
                     text = weatherData.currentTemp,
                     style = TextStyle(
@@ -134,7 +137,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData) {
                 )
             }
 
-            Spacer(modifier = GlanceModifier.width(20.dp))
+            Spacer(modifier = GlanceModifier.width(s.itemSpacing))
 
             ForecastDayCompact(
                 dayName = weatherData.day1Name,
@@ -142,7 +145,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData) {
                 typography = t
             )
 
-            Spacer(modifier = GlanceModifier.width(14.dp))
+            Spacer(modifier = GlanceModifier.width(s.itemSpacing))
 
             ForecastDayCompact(
                 dayName = weatherData.day2Name,
@@ -156,6 +159,7 @@ fun MediumWeatherWidgetContent(weatherData: WeatherWidgetData) {
 @Composable
 fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) {
     val t = rememberWidgetTypography()
+    val s = rememberWidgetSpacing()
 
     Column(
         modifier = GlanceModifier
@@ -172,7 +176,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
             LocationRow(location = weatherData.location, typography = t)
         }
 
-        Spacer(modifier = GlanceModifier.height(10.dp))
+        Spacer(modifier = GlanceModifier.height(s.sectionGap))
 
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
@@ -184,7 +188,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 WeatherIcon(bitmap = weatherData.currentIconBitmap, size = t.weatherIconSize)
-                Spacer(modifier = GlanceModifier.height(4.dp))
+                Spacer(modifier = GlanceModifier.height(s.microGap))
                 Text(
                     text = weatherData.currentTemp,
                     style = TextStyle(
@@ -193,7 +197,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
                         color = ColorProvider(Color.White, Color.White)
                     )
                 )
-                Spacer(modifier = GlanceModifier.height(4.dp))
+                Spacer(modifier = GlanceModifier.height(s.microGap))
                 Text(
                     text = weatherData.currentCondition,
                     style = TextStyle(
@@ -205,7 +209,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
                 )
             }
 
-            Spacer(modifier = GlanceModifier.width(16.dp))
+            Spacer(modifier = GlanceModifier.width(s.itemSpacing))
 
             Column(
                 modifier = GlanceModifier.defaultWeight(),
@@ -216,13 +220,13 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
                     value = "${weatherData.humidity}%",
                     typography = t
                 )
-                Spacer(modifier = GlanceModifier.height(6.dp))
+                Spacer(modifier = GlanceModifier.height(s.sectionGap))
                 WeatherDetailRow(
                     label = context.getString(R.string.wind),
                     value = "${weatherData.windSpeed} ${weatherData.windDirection}",
                     typography = t
                 )
-                Spacer(modifier = GlanceModifier.height(6.dp))
+                Spacer(modifier = GlanceModifier.height(s.sectionGap))
                 WeatherDetailRow(
                     label = context.getString(R.string.uv_index),
                     value = when (weatherData.uvIndex) {
@@ -237,7 +241,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
             }
         }
 
-        Spacer(modifier = GlanceModifier.height(16.dp))
+        Spacer(modifier = GlanceModifier.height(s.sectionGap))
 
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
@@ -248,7 +252,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
                 icon = weatherData.day1IconBitmap,
                 typography = t
             )
-            Spacer(modifier = GlanceModifier.width(40.dp))
+            Spacer(modifier = GlanceModifier.width(s.itemSpacing))
             ForecastDayFull(
                 dayName = weatherData.day2Name,
                 icon = weatherData.day2IconBitmap,
@@ -261,6 +265,7 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
 @Composable
 fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
     val t = rememberWidgetTypography()
+    val s = rememberWidgetSpacing()
 
     Row(
         modifier = GlanceModifier
@@ -276,7 +281,7 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     WeatherIcon(bitmap = weatherData.currentIconBitmap, size = t.weatherIconSize)
-                    Spacer(GlanceModifier.width(4.dp))
+                    Spacer(GlanceModifier.width(s.iconTextGap))
                     Text(
                         text = weatherData.currentTemp,
                         style = TextStyle(
@@ -287,10 +292,10 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
                     )
                 }
 
-                Spacer(modifier = GlanceModifier.height(2.dp))
+                Spacer(modifier = GlanceModifier.height(s.microGap))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(modifier = GlanceModifier.width(t.locationIconSize + 4.dp))
+                    Spacer(modifier = GlanceModifier.width(t.locationIconSize + s.iconTextGap))
                     Text(
                         text = weatherData.currentCondition,
                         style = TextStyle(
@@ -301,7 +306,7 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
                     )
                 }
 
-                Spacer(modifier = GlanceModifier.height(2.dp))
+                Spacer(modifier = GlanceModifier.height(s.microGap))
 
                 LocationRow(location = weatherData.location, typography = t)
             }
@@ -328,6 +333,7 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
 @Composable
 fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
     val t = rememberWidgetTypography()
+    val s = rememberWidgetSpacing()
 
     Row(
         modifier = GlanceModifier
@@ -343,7 +349,7 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     WeatherIcon(bitmap = weatherData.currentIconBitmap, size = t.weatherIconSize)
-                    Spacer(GlanceModifier.width(4.dp))
+                    Spacer(GlanceModifier.width(s.iconTextGap))
                     Text(
                         text = weatherData.currentTemp,
                         style = TextStyle(
@@ -354,10 +360,10 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
                     )
                 }
 
-                Spacer(modifier = GlanceModifier.height(2.dp))
+                Spacer(modifier = GlanceModifier.height(s.microGap))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(modifier = GlanceModifier.width(t.locationIconSize + 4.dp))
+                    Spacer(modifier = GlanceModifier.width(t.locationIconSize + s.iconTextGap))
                     Text(
                         text = weatherData.currentCondition,
                         style = TextStyle(
@@ -368,7 +374,7 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
                     )
                 }
 
-                Spacer(modifier = GlanceModifier.height(2.dp))
+                Spacer(modifier = GlanceModifier.height(s.microGap))
 
                 LocationRow(location = weatherData.location, typography = t)
             }
@@ -412,6 +418,8 @@ internal fun WeatherIcon(bitmap: Bitmap?, size: Dp) {
 
 @Composable
 private fun LoadingWidget() {
+    val t = rememberWidgetTypography()
+    val s = rememberWidgetSpacing()
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -420,13 +428,13 @@ private fun LoadingWidget() {
         Image(
             provider = ImageProvider(R.drawable.ic_no_weather_data),
             contentDescription = "Loading",
-            modifier = GlanceModifier.size(44.dp)
+            modifier = GlanceModifier.size(t.weatherIconSize)
         )
-        Spacer(modifier = GlanceModifier.height(12.dp))
+        Spacer(modifier = GlanceModifier.height(s.sectionGap))
         Text(
             text = stringResource(R.string.loading_dialog_text),
             style = TextStyle(
-                fontSize = 13.sp,
+                fontSize = t.conditionSize,
                 color = ColorProvider(Color(0xCCFFFFFF), Color(0xCCFFFFFF))
             )
         )
@@ -435,25 +443,27 @@ private fun LoadingWidget() {
 
 @Composable
 fun WeatherWidgetErrorContent(message: String) {
+    val t = rememberWidgetTypography()
+    val s = rememberWidgetSpacing()
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(ImageProvider(R.drawable.bg_widget_glass))
-            .padding(16.dp),
+            .padding(s.contentPadding),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 provider = ImageProvider(R.drawable.ic_no_weather_data),
                 contentDescription = "Error",
-                modifier = GlanceModifier.size(36.dp)
+                modifier = GlanceModifier.size(t.weatherIconSize)
             )
-            Spacer(modifier = GlanceModifier.height(8.dp))
+            Spacer(modifier = GlanceModifier.height(s.sectionGap))
             Text(
                 text = message,
                 style = TextStyle(
                     color = ColorProvider(Color(0xCCFFFFFF), Color(0xCCFFFFFF)),
-                    fontSize = 13.sp,
+                    fontSize = t.conditionSize,
                     textAlign = TextAlign.Center
                 ),
                 maxLines = 2
@@ -462,12 +472,12 @@ fun WeatherWidgetErrorContent(message: String) {
     }
 }
 
-// ── LocationRow ──────────────────────────────────────────────────
 @Composable
 internal fun LocationRow(
     location: String,
     typography: WidgetTypography
 ) {
+    val s = rememberWidgetSpacing()
     Row(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
@@ -477,7 +487,7 @@ internal fun LocationRow(
             contentDescription = "Location",
             modifier = GlanceModifier.size(typography.locationIconSize)
         )
-        Spacer(modifier = GlanceModifier.width(4.dp))
+        Spacer(modifier = GlanceModifier.width(s.iconTextGap))
         Text(
             text = location,
             style = TextStyle(
@@ -489,13 +499,13 @@ internal fun LocationRow(
     }
 }
 
-// ── WeatherDetailRow ─────────────────────────────────────────────
 @Composable
 internal fun WeatherDetailRow(
     label: String,
     value: String,
     typography: WidgetTypography
 ) {
+    val s = rememberWidgetSpacing()
     Row(
         horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.CenterVertically
@@ -508,7 +518,7 @@ internal fun WeatherDetailRow(
                 color = ColorProvider(Color(0xCCFFFFFF), Color(0xCCFFFFFF))
             )
         )
-        Spacer(modifier = GlanceModifier.width(6.dp))
+        Spacer(modifier = GlanceModifier.width(s.iconTextGap))
         Text(
             text = value,
             style = TextStyle(
@@ -519,13 +529,13 @@ internal fun WeatherDetailRow(
     }
 }
 
-// ── ForecastDayCompact ───────────────────────────────────────────
 @Composable
 internal fun ForecastDayCompact(
     dayName: String,
     icon: Bitmap?,
     typography: WidgetTypography
 ) {
+    val s = rememberWidgetSpacing()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = dayName,
@@ -535,18 +545,18 @@ internal fun ForecastDayCompact(
                 color = ColorProvider(Color(0xCCFFFFFF), Color(0xCCFFFFFF))
             )
         )
-        Spacer(modifier = GlanceModifier.height(3.dp))
+        Spacer(modifier = GlanceModifier.height(s.microGap))
         WeatherIcon(bitmap = icon, size = typography.forecastIconSize)
     }
 }
 
-// ── ForecastDayFull ──────────────────────────────────────────────
 @Composable
 internal fun ForecastDayFull(
     dayName: String,
     icon: Bitmap?,
     typography: WidgetTypography
 ) {
+    val s = rememberWidgetSpacing()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = dayName,
@@ -556,7 +566,7 @@ internal fun ForecastDayFull(
                 color = ColorProvider(Color(0xCCFFFFFF), Color(0xCCFFFFFF))
             )
         )
-        Spacer(modifier = GlanceModifier.height(4.dp))
+        Spacer(modifier = GlanceModifier.height(s.microGap))
         WeatherIcon(bitmap = icon, size = typography.forecastIconSize)
     }
 }
