@@ -1,0 +1,119 @@
+/****************************************************************************/
+/* Localization file */
+// ── RAIN titles ──
+"suggestion_rain_title_morning"   = "Rain this morning 🌂";
+"suggestion_rain_title_afternoon" = "Rain later today 🌧️";
+"suggestion_rain_title_evening"   = "Rain tonight 🌙";
+"suggestion_rain_title_night"     = "Rain overnight 🌧️";
+
+// ── RAIN messages ──
+"suggestion_rain_morning_message"   = "%1$@%% chance of rain. Take an umbrella before you leave";
+"suggestion_rain_afternoon_message" = "%1$@%% chance of rain later. Keep an umbrella nearby";
+"suggestion_rain_evening_message"   = "%1$@%% chance of rain tonight. Bring an umbrella if heading out";
+"suggestion_rain_night_message"     = "%1$@%% chance of rain overnight. You’re fine if staying in";
+
+// ── UV titles ──
+"suggestion_uv_high_title"   = "High UV ☀️";
+"suggestion_uv_medium_title" = "Moderate UV 😎";
+
+// ── UV High messages ──
+"suggestion_uv_high_morning_message"   = "UV is already %1$@. Apply sunscreen before going out";
+"suggestion_uv_high_afternoon_message" = "UV %1$@ — peak hours. Stay in the shade if possible";
+"suggestion_uv_high_evening_message"   = "UV %1$@ — still strong. Use protection outdoors";
+"suggestion_uv_high_night_message"     = "UV %1$@. Low risk at night";
+
+// ── UV Medium messages ──
+"suggestion_uv_medium_morning_message"   = "Moderate UV. Sunglasses recommended";
+"suggestion_uv_medium_afternoon_message" = "Moderate UV. A hat will help";
+"suggestion_uv_medium_evening_message"   = "Moderate UV. Sunscreen is still useful";
+"suggestion_uv_medium_night_message"     = "Low UV now. Safe to be outside";
+
+// ── UV levels ──
+"uv_level_low"       = "Low";
+"uv_level_moderate"  = "Moderate";
+"uv_level_high"      = "High";
+"uv_level_very_high" = "Very High";
+"uv_level_extreme"   = "Extreme";
+
+// ── HEAT titles ──
+"suggestion_heat_high_title"   = "Extreme heat 🥵";
+"suggestion_heat_medium_title" = "Hot weather 🌡️";
+"suggestion_heat_low_title"    = "Warm conditions 😅";
+
+// ── HEAT High messages ──
+"suggestion_heat_high_morning_message"   = "Feels like %1$@°. Stay hydrated from early on";
+"suggestion_heat_high_afternoon_message" = "Feels like %1$@°. Avoid direct sun and take breaks";
+"suggestion_heat_high_evening_message"   = "Still %1$@°. Wait a bit before going out";
+"suggestion_heat_high_night_message"     = "%1$@° overnight. Keep your space cool";
+
+// ── HEAT Medium messages ──
+"suggestion_heat_medium_morning_message"   = "%1$@° early. It’s going to be a hot day";
+"suggestion_heat_medium_afternoon_message" = "%1$@° now. Light clothes and water help";
+"suggestion_heat_medium_evening_message"   = "%1$@° outside. Still warm for the evening";
+"suggestion_heat_medium_night_message"     = "%1$@° overnight. Keep airflow if possible";
+
+// ── HEAT Low messages ──
+"suggestion_heat_low_morning_message"   = "%1$@° and rising. Dress light";
+"suggestion_heat_low_afternoon_message" = "%1$@° this afternoon. Stay comfortable";
+"suggestion_heat_low_evening_message"   = "%1$@° outside. Slightly warm evening";
+"suggestion_heat_low_night_message"     = "%1$@° overnight. Comfortable conditions";
+
+// ── COLD ──
+"suggestion_cold_title"             = "Cold weather 🧥";
+"suggestion_cold_morning_message"   = "%1$@° this morning. Dress warm before heading out";
+"suggestion_cold_afternoon_message" = "%1$@° later. You’ll need a jacket";
+"suggestion_cold_evening_message"   = "%1$@° tonight. Wear something warm";
+"suggestion_cold_night_message"     = "%1$@° overnight. Stay warm indoors";
+
+// ── WIND ──
+"suggestion_wind_title"             = "Strong winds ⚠️";
+"suggestion_wind_morning_message"   = "Winds at %1$@. Secure loose objects";
+"suggestion_wind_afternoon_message" = "%1$@ winds. Be cautious outside";
+"suggestion_wind_evening_message"   = "%1$@ winds tonight. Watch for debris";
+"suggestion_wind_night_message"     = "%1$@ winds overnight. Keep windows closed";
+
+// ── HUMIDITY ──
+"suggestion_humidity_title"             = "High humidity 💧";
+"suggestion_humidity_morning_message"   = "Wear light clothing";
+"suggestion_humidity_afternoon_message" = "Very humid. It may feel hotter than it is";
+"suggestion_humidity_evening_message"   = "Still humid. Stay hydrated";
+"suggestion_humidity_night_message"     = "Humid overnight. Keep airflow if possible";
+
+// ── VISIBILITY ──
+"suggestion_visibility_title"             = "Low visibility 🌫️";
+"suggestion_visibility_morning_message"   = "Visibility: %1$@ km. Drive carefully";
+"suggestion_visibility_afternoon_message" = "Visibility down to %1$@ km. Stay alert";
+"suggestion_visibility_evening_message"   = "%1$@ km visibility. Use fog lights";
+"suggestion_visibility_night_message"     = "%1$@ km visibility. Avoid unnecessary travel";
+
+// ── TOMORROW ──
+"suggestion_tomorrow_rain_title"    = "Rain tomorrow 🌧️";
+"suggestion_tomorrow_heat_title"    = "Hot tomorrow 🥵";
+"suggestion_tomorrow_uv_title"      = "High UV tomorrow ☀️";
+"suggestion_tomorrow_clear_title"   = "Nice weather tomorrow 🌤️";
+
+"suggestion_tomorrow_rain_message"  = "%1$@%% rain · %2$@° / %3$@°. Plan ahead";
+"suggestion_tomorrow_heat_message"  = "Up to %1$@° · Low %2$@°. Stay cool";
+"suggestion_tomorrow_uv_message"    = "%2$@ UV · High %1$@°. Use sunscreen";
+"suggestion_tomorrow_clear_message" = "%1$@° / %2$@°. Great day ahead";
+
+// ── MORNING SUMMARY ──
+"suggestion_morning_rain_title"         = "Rain today 🌧️";
+"suggestion_morning_uv_high_title"      = "Strong sun today ☀️";
+"suggestion_morning_uv_medium_title"    = "Moderate sun today 😎";
+"suggestion_morning_heat_high_title"    = "Very hot today 🥵";
+"suggestion_morning_heat_medium_title"  = "Warm day ahead 🌡️";
+
+"suggestion_morning_rain_message"         = "%1$@%% chance of rain today. Bring an umbrella";
+"suggestion_morning_uv_high_message"      = "UV up to %1$@. Protect your skin";
+"suggestion_morning_uv_medium_message"    = "Moderate UV today. Sunglasses recommended";
+"suggestion_morning_heat_high_message"    = "High of %1$@°. Stay hydrated early";
+"suggestion_morning_heat_medium_message"  = "Up to %1$@°. Expect a warm day";
+
+// ── CURRENT WEATHER notification (manual refresh + hourly background refresh) ──
+"notification_title"                     = "%s°C | %s";
+"notification_short_details"             = "%s. Feels like %s°C";
+"notification_long_details"              = "%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%";
+"notification_title_fahrenheit"          = "%s°F | %s";
+"notification_short_details_fahrenheit"  = "%s. Feels like %s°F";
+"notification_long_details_fahrenheit"   = "%s\nFeels like %s°F\nTemp min %s°F - max %s°F\nRain possibility %s%";

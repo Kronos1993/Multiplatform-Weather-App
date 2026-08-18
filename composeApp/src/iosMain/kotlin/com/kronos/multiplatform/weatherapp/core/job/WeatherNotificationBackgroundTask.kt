@@ -10,6 +10,7 @@ import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
+import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
@@ -25,53 +26,34 @@ class WeatherNotificationBackgroundTask : KoinComponent {
     private val loggerManager: ILogManager by inject()
     private val widgetUpdater: IWidgetUpdater by inject()
 
-    private val taskId = "com.kronos.weatherapp.refresh_weather_notification"
+    private var notificationTitle: String = ""
+    private var notificationShortDetails: String = ""
+    private var notificationLongDetails: String = ""
+    private var notificationTitleFahrenheit: String = ""
+    private var notificationShortDetailsFahrenheit: String = ""
+    private var notificationLongDetailsFahrenheit: String = ""
 
-    private var currentWeatherKey: String = "Current Weather"
-    private var notificationTitle: String = "Weather: %.1f°C in %s"
-    private var notificationShortDetails: String = "%s, feels like %.1f°C"
-    private var notificationLongDetails: String =
-        "%s, feels like %.1f°C. Min %.1f°C / Max %.1f°C, Rain %d%"
-
-    fun initNotificationStrings() {
-        this.currentWeatherKey = "7e068f83abce49b58b2142037230910"
-        this.notificationTitle = "%s° | %s"
-        this.notificationShortDetails = "%s. Feels like %s°C"
-        this.notificationLongDetails = "%s\nFeels like %s°C\nTemp min %s°C - max %s°C\nRain possibility %s%"
+    fun initNotificationStrings(
+        title: String,
+        shortDetails: String,
+        longDetails: String,
+        titleFahrenheit: String,
+        shortDetailsFahrenheit: String,
+        longDetailsFahrenheit: String
+    ) {
+        this.notificationTitle = title
+        this.notificationShortDetails = shortDetails
+        this.notificationLongDetails = longDetails
+        this.notificationTitleFahrenheit = titleFahrenheit
+        this.notificationShortDetailsFahrenheit = shortDetailsFahrenheit
+        this.notificationLongDetailsFahrenheit = longDetailsFahrenheit
     }
 
-/*    @OptIn(ExperimentalForeignApi::class)
-    fun schedule() {
-        val request = BGAppRefreshTaskRequest(identifier = taskId).apply {
-            earliestBeginDate = NSDate().dateByAddingTimeInterval(60.0 * 60) // 1 hora
-        }
-
-        val success = BGTaskScheduler.sharedScheduler.submitTaskRequest(request, null)
-        if (!success) {
-            println("⚠️ No se pudo agendar la tarea en background.")
-        } else {
-            println("✅ Tarea programada exitosamente para dentro de 1h.")
-        }
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun handleAppRefresh(task: BGAppRefreshTask) {
-        val operationQueue = NSOperationQueue()
-        val operation = NSBlockOperation.run{
-            kotlinx.coroutines.GlobalScope.launch {
-                refreshWeather()
-                task.setTaskCompletedWithSuccess(true)
-                schedule()
-            }
-        }
-
-        task.expirationHandler = {
-            println("⏰ Task expiró antes de completarse.")
-            operation.cancel()
-        }
-
-        operationQueue.addOperation(operation as NSOperation)
-    }*/
+    // Set by Swift (WeatherNotificationAppDelegate) to reschedule suggestion
+    // notifications with fresh content whenever the hourly refresh succeeds,
+    // reusing this task's forecast fetch instead of registering separate
+    // BGAppRefreshTasks for each suggestion slot.
+    var onForecastReady: ((Forecast, MeasureUnit) -> Unit)? = null
 
     suspend fun refreshWeather() {
         try {
@@ -106,9 +88,10 @@ class WeatherNotificationBackgroundTask : KoinComponent {
 
             forecast
                 .onSuccess {
-                    createWeatherNotification(it)
+                    createWeatherNotification(it, weatherParams.measureUnit)
                     weatherRemoteRepository.setLastWeatherForecast("current_weather",it)
                     widgetUpdater.updateAllWeatherWidgets()
+                    onForecastReady?.invoke(it, weatherParams.measureUnit)
                     loggerManager.log(
                         LogLevel.INFO,
                         "WeatherNotificationBackgroundTask",
@@ -137,24 +120,46 @@ class WeatherNotificationBackgroundTask : KoinComponent {
         return WeatherParams(
             lang = preferenceRepository.getPreference("default_lang_key", "en"),
             apiKey = preferenceRepository.getPreference("api_key", ""),
-            days = preferenceRepository.getPreference("default_days_key", "1").toInt()
+            days = preferenceRepository.getPreference("default_days_key", "1").toInt(),
+            measureUnit = MeasureUnit.from(
+                preferenceRepository.getPreference("measure_unit_key", "INTERNATIONAL")
+            )
         )
     }
 
-    private fun createWeatherNotification(forecast: Forecast) {
-        val title =
-            notificationTitle.format(forecast.current.tempC, forecast.location.region.toString())
-        val shortDetails = notificationShortDetails.format(
-            forecast.current.condition.description,
-            forecast.current.feelslikeC
-        )
-        val longDetails = notificationLongDetails.format(
-            forecast.current.condition.description,
-            forecast.current.feelslikeC,
-            forecast.forecast.forecastDay[0].day.mintempC,
-            forecast.forecast.forecastDay[0].day.maxtempC,
-            forecast.forecast.forecastDay[0].day.dailyChanceOfRain
-        )
+    private fun createWeatherNotification(forecast: Forecast, measureUnit: MeasureUnit) {
+        val title = if (measureUnit == MeasureUnit.INTERNATIONAL)
+            notificationTitle.format(forecast.current.tempC, forecast.location.region.orEmpty())
+        else
+            notificationTitleFahrenheit.format(forecast.current.tempF, forecast.location.region.orEmpty())
+
+        val shortDetails = if (measureUnit == MeasureUnit.INTERNATIONAL)
+            notificationShortDetails.format(
+                forecast.current.condition.description,
+                forecast.current.feelslikeC
+            )
+        else
+            notificationShortDetailsFahrenheit.format(
+                forecast.current.condition.description,
+                forecast.current.feelslikeF
+            )
+
+        val longDetails = if (measureUnit == MeasureUnit.INTERNATIONAL)
+            notificationLongDetails.format(
+                forecast.current.condition.description,
+                forecast.current.feelslikeC,
+                forecast.forecast.forecastDay[0].day.mintempC,
+                forecast.forecast.forecastDay[0].day.maxtempC,
+                forecast.forecast.forecastDay[0].day.dailyChanceOfRain
+            )
+        else
+            notificationLongDetailsFahrenheit.format(
+                forecast.current.condition.description,
+                forecast.current.feelslikeF,
+                forecast.forecast.forecastDay[0].day.mintempF,
+                forecast.forecast.forecastDay[0].day.maxtempF,
+                forecast.forecast.forecastDay[0].day.dailyChanceOfRain
+            )
 
         notifications.createNotification(
             title = title,
@@ -169,6 +174,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
     private data class WeatherParams(
         val lang: String,
         val apiKey: String,
-        val days: Int
+        val days: Int,
+        val measureUnit: MeasureUnit
     )
 }
