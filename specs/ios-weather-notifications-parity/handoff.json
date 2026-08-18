@@ -1,0 +1,18 @@
+{
+  "spec_id": "ios-weather-notifications-parity",
+  "branch": "feature/ios-weather-notifications-parity",
+  "target_branch": "develop",
+  "pr_number": 9,
+  "pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/9",
+  "opened_at": "2026-08-18T16:25:43Z",
+  "opened_via": "tier-A",
+  "memory_candidates_surfaced": true,
+  "memory_branch": "chore/memories-ios-weather-notifications-parity",
+  "memory_pr_number": 10,
+  "memory_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/10",
+  "archived_at": null,
+  "archive_branch": null,
+  "archive_reason": null,
+  "archive_pr_number": null,
+  "archive_pr_url": null
+}

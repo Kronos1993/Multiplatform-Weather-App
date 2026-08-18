@@ -1,7 +1,3 @@
-//
-// Created by Marcos Guerra Liso on 11/10/25.
-//
-
 import Foundation
 import UIKit
 import UserNotifications
@@ -10,102 +6,119 @@ import ComposeApp
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
+    private let suggestionScheduler = WeatherSuggestionScheduler()
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
 
-        // 🔹 Registrar tarea de background
+        // ── Registrar BGTask de clima ──────────────────────────────────────
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: "com.kronos.weatherapp.refresh_weather_notification",
             using: nil
-        ) { task in
-            self.handleAppRefresh(task: task as! BGAppRefreshTask)
+        ) { [weak self] task in
+            self?.handleWeatherRefresh(task: task as! BGAppRefreshTask)
         }
 
-        // 🔹 Programar tarea periódica
-        scheduleAppRefresh()
+        scheduleWeatherRefresh()
 
-        let center = UNUserNotificationCenter.current()
-        center.delegate = self // 🔹 Esto permite mostrar notificaciones aunque la app esté abierta
-
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                print("✅ Permisos de notificación concedidos")
-            } else {
-                print("🚫 Permisos de notificación denegados: \(error?.localizedDescription ?? "")")
-            }
+        // ── Permisos de notificación ───────────────────────────────────────
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: [.alert, .sound, .badge]
+        ) { granted, _ in
+            print(granted ? "✅ Notificaciones concedidas" : "🚫 Denegadas")
         }
 
-        BGTaskScheduler.shared.getPendingTaskRequests { tasks in
-            print("📌 Pending BGTasks:", tasks.map { $0.identifier })
-        }
+        // ── Re-arma las sugerencias al arrancar ─────────────────────────────
+        // UNCalendarNotificationTrigger(repeats: false) es de un solo disparo:
+        // hace falta volver a llamar scheduleAll antes de cada ocurrencia para
+        // que sigan llegando día a día. El BGAppRefreshTask horario es
+        // oportunista (iOS decide si corre), así que el lanzamiento de la app
+        // es el único momento garantizado — equivalente nativo de iOS al
+        // re-arme que Android hace en cada Application.onCreate.
+        performWeatherRefresh()
 
         return true
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        print("📱 App pasó a background → reprogramando BGTask")
-        scheduleAppRefresh()
+        scheduleWeatherRefresh()
     }
 
-    // 🔹 Muestra notificación también cuando la app está abierta (foreground)
+    // ── BGTask handler ─────────────────────────────────────────────────────
+    private func handleWeatherRefresh(task: BGAppRefreshTask) {
+        task.expirationHandler = {
+            task.setTaskCompleted(success: false)
+        }
+
+        performWeatherRefresh { success in
+            self.scheduleWeatherRefresh()
+            task.setTaskCompleted(success: success)
+        }
+    }
+
+    // ── Fetch + notifica + re-arma sugerencias — usado en el lanzamiento y en el BGTask ──
+    private func performWeatherRefresh(onComplete: ((Bool) -> Void)? = nil) {
+        let worker = WeatherNotificationBackgroundTask()
+        worker.doInitNotificationStrings(
+            title: NSLocalizedString("notification_title", comment: ""),
+            shortDetails: NSLocalizedString("notification_short_details", comment: ""),
+            longDetails: NSLocalizedString("notification_long_details", comment: ""),
+            titleFahrenheit: NSLocalizedString("notification_title_fahrenheit", comment: ""),
+            shortDetailsFahrenheit: NSLocalizedString("notification_short_details_fahrenheit", comment: ""),
+            longDetailsFahrenheit: NSLocalizedString("notification_long_details_fahrenheit", comment: "")
+        )
+        worker.onForecastReady = { [weak self] forecast, measureUnit in
+            self?.suggestionScheduler.scheduleAll(forecast: forecast, measureUnit: measureUnit)
+        }
+
+        Task {
+            do {
+                try await worker.refreshWeather()
+                onComplete?(true)
+            } catch {
+                print("❌ Error: \(error)")
+                onComplete?(false)
+            }
+        }
+    }
+
+    // ── Scheduler BGTask clima — cada 1 hora ───────────────────────────────
+    private func scheduleWeatherRefresh() {
+        let request = BGAppRefreshTaskRequest(
+            identifier: "com.kronos.weatherapp.refresh_weather_notification"
+        )
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
+        try? BGTaskScheduler.shared.submit(request)
+        print("⏰ BGTask clima programada en 60 min")
+    }
+
+    // ── Notification delegates ─────────────────────────────────────────────
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([.banner, .list, .badge])
+        // A routine weather-refresh update (manual or hourly background)
+        // shouldn't pop a banner over whatever the user is already looking
+        // at — Android doesn't show a heads-up alert for this either. Still
+        // update Notification Center and the badge so the latest info is
+        // there when the user checks, just without interrupting the screen.
+        if notification.request.identifier == "WEATHER_UPDATED" {
+            completionHandler([.list, .badge])
+        } else {
+            completionHandler([.banner, .list, .badge])
+        }
     }
 
-    // 🔹 (Opcional) Manejar clic en la notificación
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        let id = response.notification.request.identifier
-        print("🔔 Notificación tocada con ID: \(id)")
+        print("🔔 Notificación tocada: \(response.notification.request.identifier)")
         completionHandler()
-    }
-
-    // 🔹 Lógica al ejecutar la tarea en background
-    private func handleAppRefresh(task: BGAppRefreshTask) {
-        print("🌤 Ejecutando tarea background de clima")
-
-
-        let worker = WeatherNotificationBackgroundTask()
-
-        task.expirationHandler = {
-            print("⏰ Expiró la tarea")
-            task.setTaskCompleted(success: false)
-        }
-
-        Task {
-            worker.doInitNotificationStrings()
-
-            do {
-                try await worker.refreshWeather()
-                scheduleAppRefresh()
-                task.setTaskCompleted(success: true)
-            } catch {
-                print("❌ Error ejecutando refreshWeather(): \(error)")
-                task.setTaskCompleted(success: false)
-            }
-        }
-
-    }
-
-    // 🔹 Reprogramar la tarea para ejecutarse de nuevo en unas horas
-    private func scheduleAppRefresh() {
-        let request = BGAppRefreshTaskRequest(identifier: "com.kronos.weatherapp.refresh_weather_notification")
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60 * 1) // cada 1 horas
-
-        do {
-            try BGTaskScheduler.shared.submit(request)
-            print("⏰ BGTask programada exitosamente")
-        } catch {
-            print("⚠️ Error programando BGTask: \(error)")
-        }
     }
 }

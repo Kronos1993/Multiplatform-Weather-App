@@ -1,15 +1,11 @@
 package com.kronos.multiplatform.weatherapp
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.kronos.multiplatform.weatherapp.core.job.WeatherNotificationBackgroundTask
 import com.kronos.multiplatform.weatherapp.di.initKoin
 
 fun MainViewController() = ComposeUIViewController(
     configure = {
-        initKoin ()
-        val backgroundTask = WeatherNotificationBackgroundTask()
-        backgroundTask.initNotificationStrings()
-        //backgroundTask.schedule()
+        initKoin()
     }
 ) { App() }
 
