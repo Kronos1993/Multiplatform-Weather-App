@@ -13,6 +13,6 @@
   "archived_at": "2026-08-18T16:55:02Z",
   "archive_branch": "chore/archive-ios-weather-notifications-parity",
   "archive_reason": "merged",
-  "archive_pr_number": null,
-  "archive_pr_url": null
+  "archive_pr_number": 13,
+  "archive_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/13"
 }
