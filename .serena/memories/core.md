@@ -35,3 +35,8 @@ entry point. Root package: `com.kronos.multiplatform.weatherapp` (== application
 - `mem:gradle_ksp_multitarget_build_quirk` — why the aggregate `./gradlew build` can be red on a
   clean checkout while `:composeApp:assembleDebug` and the iOS `xcodebuild` are green; read before
   concluding a source change broke the build if only the aggregate task fails.
+- `mem:android_widget_spacing_tokens` — `widget/components/WidgetTheme.kt`'s size-class resolver
+  (`resolveWidgetSizeClass`) and the `WidgetTypography`/`WidgetSpacing` token pattern; read before
+  adding any new size-dependent value to the Android home-screen widgets.
+- `mem:android_widget_error_content_double_padding` — a pre-existing double background/padding
+  trap in `WeatherWidgetErrorContent`; read before touching that composable.
