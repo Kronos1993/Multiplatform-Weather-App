@@ -34,21 +34,17 @@ struct SuggestionStringResolver {
 
         case SuggestionType.tomorrowForecast:
             switch suggestion.priority {
-            case SuggestionPriority.high:   return loc("suggestion_tomorrow_rain_title")
+            case SuggestionPriority.high: return loc("suggestion_tomorrow_rain_title")
             case SuggestionPriority.medium:
-                return suggestion.icon == "🧴"
-                    ? loc("suggestion_tomorrow_uv_title")
-                    : loc("suggestion_tomorrow_heat_title")
+                return String(format: loc("suggestion_tomorrow_alert_title"), locationName)
             default: return loc("suggestion_tomorrow_clear_title")
             }
 
         case SuggestionType.morningSummary:
-            switch suggestion.icon {
-            case "🌂": return loc("suggestion_morning_rain_title")
-            case "🧴": return loc("suggestion_morning_uv_high_title")
-            case "😎": return loc("suggestion_morning_uv_medium_title")
-            case "💧": return loc("suggestion_morning_heat_high_title")
-            default:   return loc("suggestion_morning_heat_medium_title")
+            switch suggestion.priority {
+            case SuggestionPriority.high:   return loc("suggestion_morning_alert_title")
+            case SuggestionPriority.medium: return loc("suggestion_morning_warning_title")
+            default:                        return loc("suggestion_morning_normal_title")
             }
 
         default:
