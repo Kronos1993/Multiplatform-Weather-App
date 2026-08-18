@@ -1,0 +1,119 @@
+/****************************************************************************/
+/* Localization file */
+// ── RAIN titles ──
+"suggestion_rain_title_morning"   = "Lluvia esta mañana 🌂";
+"suggestion_rain_title_afternoon" = "Lluvia más tarde 🌧️";
+"suggestion_rain_title_evening"   = "Lluvia esta noche 🌙";
+"suggestion_rain_title_night"     = "Lluvia durante la madrugada 🌧️";
+
+// ── RAIN messages ──
+"suggestion_rain_morning_message"   = "%1$@%% de probabilidad de lluvia. Lleva paraguas antes de salir";
+"suggestion_rain_afternoon_message" = "%1$@%% de probabilidad de lluvia más tarde. Ten un paraguas a mano";
+"suggestion_rain_evening_message"   = "%1$@%% de probabilidad de lluvia esta noche. Lleva paraguas si sales";
+"suggestion_rain_night_message"     = "%1$@%% de probabilidad de lluvia durante la madrugada. Sin problema si te quedas en casa";
+
+// ── UV titles ──
+"suggestion_uv_high_title"   = "UV alto ☀️";
+"suggestion_uv_medium_title" = "UV moderado 😎";
+
+// ── UV High messages ──
+"suggestion_uv_high_morning_message"   = "El UV ya está en %1$@. Aplica protector solar antes de salir";
+"suggestion_uv_high_afternoon_message" = "UV %1$@ — horas pico. Permanece en la sombra si es posible";
+"suggestion_uv_high_evening_message"   = "UV %1$@ — aún fuerte. Usa protección al aire libre";
+"suggestion_uv_high_night_message"     = "UV %1$@. Riesgo bajo por la noche";
+
+// ── UV Medium messages ──
+"suggestion_uv_medium_morning_message"   = "UV moderado. Se recomiendan gafas de sol";
+"suggestion_uv_medium_afternoon_message" = "UV moderado. Un sombrero ayuda";
+"suggestion_uv_medium_evening_message"   = "UV moderado. El protector solar sigue siendo útil";
+"suggestion_uv_medium_night_message"     = "UV bajo ahora. Seguro estar afuera";
+
+// ── UV levels ──
+"uv_level_low"       = "Bajo";
+"uv_level_moderate"  = "Moderado";
+"uv_level_high"      = "Alto";
+"uv_level_very_high" = "Muy alto";
+"uv_level_extreme"   = "Extremo";
+
+// ── HEAT titles ──
+"suggestion_heat_high_title"   = "Calor extremo 🥵";
+"suggestion_heat_medium_title" = "Clima caluroso 🌡️";
+"suggestion_heat_low_title"    = "Ambiente cálido 😅";
+
+// ── HEAT High messages ──
+"suggestion_heat_high_morning_message"   = "Sensación de %1$@°. Hidrátate desde temprano";
+"suggestion_heat_high_afternoon_message" = "Sensación de %1$@°. Evita el sol directo y toma descansos";
+"suggestion_heat_high_evening_message"   = "Aún %1$@°. Espera un poco antes de salir";
+"suggestion_heat_high_night_message"     = "%1$@° durante la noche. Mantén tu espacio fresco";
+
+// ── HEAT Medium messages ──
+"suggestion_heat_medium_morning_message"   = "%1$@° temprano. Será un día caluroso";
+"suggestion_heat_medium_afternoon_message" = "%1$@° ahora. Ropa ligera y agua ayudan";
+"suggestion_heat_medium_evening_message"   = "%1$@° afuera. Sigue cálido en la tarde";
+"suggestion_heat_medium_night_message"     = "%1$@° durante la noche. Mantén ventilación si es posible";
+
+// ── HEAT Low messages ──
+"suggestion_heat_low_morning_message"   = "%1$@° y subiendo. Usa ropa ligera";
+"suggestion_heat_low_afternoon_message" = "%1$@° esta tarde. Mantente cómodo";
+"suggestion_heat_low_evening_message"   = "%1$@° afuera. Tarde ligeramente cálida";
+"suggestion_heat_low_night_message"     = "%1$@° durante la noche. Condiciones cómodas";
+
+// ── COLD ──
+"suggestion_cold_title"             = "Clima frío 🧥";
+"suggestion_cold_morning_message"   = "%1$@° esta mañana. Abrígate antes de salir";
+"suggestion_cold_afternoon_message" = "%1$@° más tarde. Necesitarás chaqueta";
+"suggestion_cold_evening_message"   = "%1$@° esta noche. Usa ropa abrigada";
+"suggestion_cold_night_message"     = "%1$@° durante la noche. Mantente abrigado en casa";
+
+// ── WIND ──
+"suggestion_wind_title"             = "Vientos fuertes ⚠️";
+"suggestion_wind_morning_message"   = "Vientos de %1$@. Asegura objetos sueltos";
+"suggestion_wind_afternoon_message" = "Vientos de %1$@. Ten precaución al aire libre";
+"suggestion_wind_evening_message"   = "Vientos de %1$@ esta noche. Cuidado con objetos en la calle";
+"suggestion_wind_night_message"     = "Vientos de %1$@ durante la noche. Mantén ventanas cerradas";
+
+// ── HUMIDITY ──
+"suggestion_humidity_title"             = "Alta humedad 💧";
+"suggestion_humidity_morning_message"   = "Usa ropa ligera";
+"suggestion_humidity_afternoon_message" = "Muy húmedo. Puede sentirse más calor del real";
+"suggestion_humidity_evening_message"   = "Sigue húmedo. Mantente hidratado";
+"suggestion_humidity_night_message"     = "Humedad durante la noche. Mantén ventilación si es posible";
+
+// ── VISIBILITY ──
+"suggestion_visibility_title"             = "Baja visibilidad 🌫️";
+"suggestion_visibility_morning_message"   = "Visibilidad: %1$@ km. Conduce con cuidado";
+"suggestion_visibility_afternoon_message" = "Visibilidad reducida a %1$@ km. Mantente alerta";
+"suggestion_visibility_evening_message"   = "%1$@ km de visibilidad. Usa luces antiniebla";
+"suggestion_visibility_night_message"     = "%1$@ km de visibilidad. Evita viajes innecesarios";
+
+// ── TOMORROW ──
+"suggestion_tomorrow_rain_title"    = "Lluvia mañana 🌧️";
+"suggestion_tomorrow_heat_title"    = "Calor mañana 🥵";
+"suggestion_tomorrow_uv_title"      = "UV alto mañana ☀️";
+"suggestion_tomorrow_clear_title"   = "Buen clima mañana 🌤️";
+
+"suggestion_tomorrow_rain_message"  = "%1$@%% de lluvia · %2$@° / %3$@°. Planifica con tiempo";
+"suggestion_tomorrow_heat_message"  = "Hasta %1$@° · Mínima %2$@°. Mantente fresco";
+"suggestion_tomorrow_uv_message"    = "UV %2$@ · Máxima %1$@°. Usa protector solar";
+"suggestion_tomorrow_clear_message" = "%1$@° / %2$@°. Se espera un gran día";
+
+// ── MORNING SUMMARY ──
+"suggestion_morning_rain_title"         = "Lluvia hoy 🌧️";
+"suggestion_morning_uv_high_title"      = "Sol fuerte hoy ☀️";
+"suggestion_morning_uv_medium_title"    = "Sol moderado hoy 😎";
+"suggestion_morning_heat_high_title"    = "Mucho calor hoy 🥵";
+"suggestion_morning_heat_medium_title"  = "Día cálido 🌡️";
+
+"suggestion_morning_rain_message"         = "%1$@%% de probabilidad de lluvia hoy. Lleva paraguas";
+"suggestion_morning_uv_high_message"      = "UV hasta %1$@. Protege tu piel";
+"suggestion_morning_uv_medium_message"    = "UV moderado hoy. Se recomiendan gafas de sol";
+"suggestion_morning_heat_high_message"    = "Máxima de %1$@°. Hidrátate desde temprano";
+"suggestion_morning_heat_medium_message"  = "Hasta %1$@°. Se espera un día cálido";
+
+// ── CURRENT WEATHER notification (manual refresh + hourly background refresh) ──
+"notification_title"                     = "%s°C | %s";
+"notification_short_details"             = "%s. Sensación térmica %s°C";
+"notification_long_details"              = "%s\nSensación térmica %s°C\nTemp min %s°C - max %s°C\nPosibilidad de lluvia %s%";
+"notification_title_fahrenheit"          = "%s°F | %s";
+"notification_short_details_fahrenheit"  = "%s. Sensación térmica %s°F";
+"notification_long_details_fahrenheit"   = "%s\nSensación térmica %s°F\nTemp min %s°F - max %s°F\nPosibilidad de lluvia %s%";

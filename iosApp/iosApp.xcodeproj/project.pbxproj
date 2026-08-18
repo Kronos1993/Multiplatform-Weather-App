@@ -6,12 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BD1128AF7982CE79CFC0073A /* en.strings in Resources */ = {isa = PBXBuildFile; fileRef = BD112FD6DB4E0398DE1AFC6C /* en.strings */; };
+		BD112BC4E742EAF8DE27CCE4 /* es.strings in Resources */ = {isa = PBXBuildFile; fileRef = BD112DE4871494C68C10B5D2 /* es.strings */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		29437EF633704C9274F95191 /* Weather-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Weather-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD112DE4871494C68C10B5D2 /* es.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = es.strings; sourceTree = "<group>"; };
+		BD112FD6DB4E0398DE1AFC6C /* en.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = en.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CD8C183A59EEAA63FFDADE98 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
+		CD8C183A59EEAA63FFDADE98 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +31,7 @@
 		0ECAA2134BF76B8212ABB369 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				CD8C183A59EEAA63FFDADE98 /* Exceptions for "iosApp" folder in "iosApp" target */,
+				CD8C183A59EEAA63FFDADE98 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -61,6 +68,8 @@
 				C2D504564CA30357E9D78F76 /* Configuration */,
 				0ECAA2134BF76B8212ABB369 /* iosApp */,
 				02CDDFE034AA5FCE850D9A6E /* Products */,
+				BD112FD6DB4E0398DE1AFC6C /* en.strings */,
+				BD112DE4871494C68C10B5D2 /* es.strings */,
 			);
 			sourceTree = "<group>";
 		};
@@ -114,6 +123,8 @@
 			);
 			mainGroup = 79E0CCE7E2B065F3322A2EF2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 02CDDFE034AA5FCE850D9A6E /* Products */;
 			projectDirPath = "";
@@ -129,6 +140,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BD1128AF7982CE79CFC0073A /* en.strings in Resources */,
+				BD112BC4E742EAF8DE27CCE4 /* es.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
