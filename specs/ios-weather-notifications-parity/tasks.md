@@ -80,9 +80,9 @@ generated_by: /spec-plan
 
 ## Handoff
 
-- [ ] Branch created (`feature/ios-weather-notifications-parity`)
-- [ ] `/commit` executed
-- [ ] Branch pushed
-- [ ] PR opened against `develop`
-- [ ] Spec folder archived to `specs/_archive/ios-weather-notifications-parity/`
-- [ ] Reusable-knowledge candidates from `decisions.md` proposed
+- [x] Branch created (`feature/ios-weather-notifications-parity`)
+- [x] `/commit` executed — commit `6c92daf` "fix: match iOS weather notification behavior to Android"
+- [ ] Branch pushed *(see /spec-finalize)*
+- [ ] PR opened against `develop` *(see /spec-finalize)*
+- [ ] Spec folder archived to `specs/_archive/ios-weather-notifications-parity/` *(see /spec-finalize)*
+- [ ] Reusable-knowledge candidates from `decisions.md` proposed *(see /spec-finalize)*
