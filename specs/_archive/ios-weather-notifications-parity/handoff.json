@@ -10,9 +10,9 @@
   "memory_branch": "chore/memories-ios-weather-notifications-parity",
   "memory_pr_number": 10,
   "memory_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/10",
-  "archived_at": null,
-  "archive_branch": null,
-  "archive_reason": null,
-  "archive_pr_number": null,
-  "archive_pr_url": null
+  "archived_at": "2026-08-18T16:55:02Z",
+  "archive_branch": "chore/archive-ios-weather-notifications-parity",
+  "archive_reason": "merged",
+  "archive_pr_number": 13,
+  "archive_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/13"
 }
