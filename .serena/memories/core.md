@@ -15,6 +15,7 @@ entry point. Root package: `com.kronos.multiplatform.weatherapp` (== application
 - `iosApp/iosApp/` — native SwiftUI host app: entry point, notification scheduling
   (`WeatherSuggestionScheduler.swift`, `WeatherNotificationAppDelegate.swift`), string resolution
   (`SuggestionStringResolver.swift`). Localized strings at `iosApp/en.strings`, `iosApp/es.strings`.
+  See `mem:ios_notification_mechanics` before editing any of this.
 
 ## Invariants
 - No automated test suite exists in the repo (no test source sets) — see `mem:task_completion`.
@@ -26,3 +27,11 @@ entry point. Root package: `com.kronos.multiplatform.weatherapp` (== application
 - `mem:conventions` — code style, localization duplication, error-handling convention.
 - `mem:suggested_commands` — build/run commands per target, Darwin shell notes.
 - `mem:task_completion` — what "done" means for a change (no test/lint commands to invent).
+- `mem:ios_notification_mechanics` — UNUserNotificationCenter replace semantics, `willPresent`
+  foreground banner control, `UNCalendarNotificationTrigger` one-shot re-arm gotcha, and where/how
+  notification string templates get their args substituted (Kotlin shared vs. Swift-native) — read
+  before touching anything under `core/notification/*.ios.kt`, `core/job/WeatherNotificationBackgroundTask.kt`,
+  or `iosApp/iosApp/Weather*.swift`.
+- `mem:gradle_ksp_multitarget_build_quirk` — why the aggregate `./gradlew build` can be red on a
+  clean checkout while `:composeApp:assembleDebug` and the iOS `xcodebuild` are green; read before
+  concluding a source change broke the build if only the aggregate task fails.
