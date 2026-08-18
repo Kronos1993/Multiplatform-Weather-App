@@ -69,9 +69,9 @@ generated_by: /spec-plan
 
 ## Handoff
 
-- [ ] Branch created (`feature/android-widget-responsive-sizing`)
-- [ ] `/commit` executed
-- [ ] Branch pushed
-- [ ] PR opened against `develop`
-- [ ] Spec folder archived to `specs/_archive/android-widget-responsive-sizing/`
-- [ ] Reusable-knowledge candidates from `decisions.md` proposed
+- [x] Branch created (`feature/android-widget-responsive-sizing`)
+- [x] `/commit` executed — `b80cd99`
+- [x] Branch pushed — `feature/android-widget-responsive-sizing`
+- [x] PR opened against `develop` — PR #17 (https://github.com/Kronos1993/Multiplatform-Weather-App/pull/17), merged 2026-08-18
+- [x] Spec folder archived to `specs/_archive/android-widget-responsive-sizing/`
+- [x] Reusable-knowledge candidates from `decisions.md` proposed — 2 saved (`android_widget_spacing_tokens`, `android_widget_error_content_double_padding`), 1 skipped (tablet finding, tracked by follow-up spec instead); memory PR #18 (https://github.com/Kronos1993/Multiplatform-Weather-App/pull/18), merged 2026-08-18

@@ -1,0 +1,18 @@
+{
+  "spec_id": "android-widget-responsive-sizing",
+  "branch": "feature/android-widget-responsive-sizing",
+  "target_branch": "develop",
+  "pr_number": 17,
+  "pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/17",
+  "opened_at": "2026-08-18T22:32:28Z",
+  "opened_via": "tier-A",
+  "memory_candidates_surfaced": true,
+  "memory_branch": "chore/memories-android-widget-responsive-sizing",
+  "memory_pr_number": 18,
+  "memory_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/18",
+  "archived_at": "2026-08-18T22:46:44Z",
+  "archive_branch": "chore/archive-android-widget-responsive-sizing",
+  "archive_reason": "merged",
+  "archive_pr_number": null,
+  "archive_pr_url": null
+}
