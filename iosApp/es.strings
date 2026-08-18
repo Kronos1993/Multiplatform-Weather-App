@@ -110,6 +110,12 @@
 "suggestion_morning_heat_high_message"    = "Máxima de %1$@°. Hidrátate desde temprano";
 "suggestion_morning_heat_medium_message"  = "Hasta %1$@°. Se espera un día cálido";
 
+// ── GENERIC HEADERS ──
+"suggestion_tomorrow_alert_title" = "Mañana en %1$@";
+"suggestion_morning_alert_title"  = "Importante hoy";
+"suggestion_morning_warning_title" = "Prepárate";
+"suggestion_morning_normal_title" = "Resumen del día";
+
 // ── CURRENT WEATHER notification (manual refresh + hourly background refresh) ──
 "notification_title"                     = "%s°C | %s";
 "notification_short_details"             = "%s. Sensación térmica %s°C";
