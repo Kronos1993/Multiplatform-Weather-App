@@ -102,10 +102,10 @@ wiring in `di`) rather than introducing a new structure.
 
 ## Git Workflow
 
-- Integration branch: **`develop`** (current active branch). `main` and `master` also exist on
-  `origin` with no PR history between them yet — **unconfirmed** which one is the true long-term
-  upstream; confirm with the user at the first real PR and update `.specs/config.json`
-  `pr.default_target` once settled.
+- Integration branch: **`develop`** — confirmed with the user as the target for all PRs opened
+  against this repo (`.specs/config.json` `pr.default_target` is already set to `develop`). `main`
+  also exists on `origin`, but only as the target of separate, periodic "promote develop → main"
+  PRs opened outside this workflow — never a PR base for feature/bugfix/chore work.
 - Never commit directly to `develop`/`main`/`master` when using the spec workflow — branch first
   (see `branch.naming` in `.specs/config.json`).
 - Host: GitHub (`github.com/Kronos1993/Multiplatform-Weather-App`), PRs via `gh` (see `/create-pr`).
