@@ -75,7 +75,7 @@ right away — it just gets `develop` ready so nobody has to remember to bump th
 
 - Does not merge either PR — both are opened for human review/approval.
 - Does not separately resolve `versionCode` for the Play Store upload — the Play Publisher
-  plugin's `resolutionStrategy = ALWAYS` in `composeApp/build.gradle.kts` means whatever
+  plugin's `resolutionStrategy = FAIL` in `composeApp/build.gradle.kts` means whatever
   `versionCode` is set in the repo at merge-to-`main` time is exactly what gets uploaded (`AUTO`
   was tried first but breaks on an app's very first release — see
   [Triple-T/gradle-play-publisher#899](https://github.com/Triple-T/gradle-play-publisher/issues/899)).
