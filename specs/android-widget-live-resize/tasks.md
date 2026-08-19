@@ -74,9 +74,9 @@ generated_by: /spec-plan
 
 ## Handoff
 
-- [ ] Branch created (`feature/android-widget-live-resize`)
-- [ ] `/commit` executed
-- [ ] Branch pushed
-- [ ] PR opened against `develop`
-- [ ] Spec folder archived to `specs/_archive/android-widget-live-resize/`
-- [ ] Reusable-knowledge candidates from `decisions.md` proposed
+- [x] Branch created (`feature/android-widget-live-resize`)
+- [x] `/commit` executed — `b436525`
+- [ ] Branch pushed *(see /spec-finalize)*
+- [ ] PR opened against `develop` *(see /spec-finalize)*
+- [ ] Spec folder archived to `specs/_archive/android-widget-live-resize/` *(see /spec-finalize)*
+- [ ] Reusable-knowledge candidates from `decisions.md` proposed *(see /spec-finalize)*

@@ -1,0 +1,18 @@
+{
+  "spec_id": "android-widget-live-resize",
+  "branch": "feature/android-widget-live-resize",
+  "target_branch": "develop",
+  "pr_number": 21,
+  "pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/21",
+  "opened_at": "2026-08-19T00:18:34Z",
+  "opened_via": "tier-A",
+  "memory_candidates_surfaced": false,
+  "memory_branch": null,
+  "memory_pr_number": null,
+  "memory_pr_url": null,
+  "archived_at": null,
+  "archive_branch": null,
+  "archive_reason": null,
+  "archive_pr_number": null,
+  "archive_pr_url": null
+}
