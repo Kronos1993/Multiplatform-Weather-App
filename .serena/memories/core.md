@@ -40,3 +40,14 @@ entry point. Root package: `com.kronos.multiplatform.weatherapp` (== application
   adding any new size-dependent value to the Android home-screen widgets.
 - `mem:android_widget_error_content_double_padding` — a pre-existing double background/padding
   trap in `WeatherWidgetErrorContent`; read before touching that composable.
+- `mem:android_widget_sizemode_responsive_candidates` — `BaseWeatherGlanceWidget`'s
+  `SizeMode.Responsive` candidate set is exactly the 4 real declared widget minimums, never
+  synthetic in-between values; read before adding any new size-mode candidate or breakpoint.
+- `mem:android_widget_content_dispatch_size_classification` — why the live-resize
+  content-transform dispatcher (`AdaptiveWeatherWidgetContent`) deliberately does NOT reuse
+  `rememberWidgetSizeClass()`; read before changing which composable a widget renders.
+- `mem:android_widget_clock_graphic_scaling` — how the clock widgets' native
+  `AnalogClock`/`TextClock` graphic scales outside the Glance token system, and the
+  `AnalogClock` intrinsic-size gotcha (it never grows past its drawable's declared size); read
+  before touching `widget_rtc_analog_clock*.xml`/`widget_rtc_digital_clock.xml` or their
+  drawables.
