@@ -2,10 +2,9 @@ package com.kronos.multiplatform.weatherapp.widget
 
 import android.content.Context
 import androidx.glance.GlanceId
-import androidx.glance.LocalContext
 import androidx.glance.appwidget.provideContent
 import com.kronos.multiplatform.weatherapp.R
-import com.kronos.multiplatform.weatherapp.widget.components.LargeWeatherWidgetContent
+import com.kronos.multiplatform.weatherapp.widget.components.AdaptiveWeatherWidgetContent
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetBackground
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetErrorContent
 
@@ -23,7 +22,7 @@ class LargeWeatherGlanceWidget : BaseWeatherGlanceWidget() {
         provideContent {
             WeatherWidgetBackground {
                 if (weatherData != null) {
-                    LargeWeatherWidgetContent(weatherData, LocalContext.current)
+                    AdaptiveWeatherWidgetContent(weatherData)
                 } else {
                     WeatherWidgetErrorContent(context.getString(R.string.widget_error_text))
                 }
