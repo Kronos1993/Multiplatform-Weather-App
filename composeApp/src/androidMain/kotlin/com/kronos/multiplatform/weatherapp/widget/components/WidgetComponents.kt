@@ -2,17 +2,18 @@ package com.kronos.multiplatform.weatherapp.widget.components
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.action.actionRunCallback
@@ -51,6 +52,26 @@ fun WeatherWidgetBackground(content: @Composable () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         content()
+    }
+}
+
+// Dispatches to the plain content composable matching the widget's live size, letting an
+// already-placed Small/Medium/Large instance transform layout as the user drag-resizes it —
+// not just rescale tokens within one fixed layout. Thresholds mirror the real declared
+// minWidth/minHeight from widget_provider_info_medium.xml (256x60) and
+// widget_provider_info_large.xml (256x120): BaseWeatherGlanceWidget's SizeMode.Responsive only
+// ever reports one of 4 known DpSize points (see WIDGET_RESPONSIVE_SIZES), so a plain
+// dimension comparison is sufficient — this intentionally does NOT reuse
+// WidgetTheme.kt's resolveWidgetSizeClass (tuned for font/icon/spacing scaling, not layout
+// choice: e.g. Medium's own default of 256x60 resolves SMALL there via its short-height rule,
+// which would wrongly dispatch to SmallWeatherWidgetContent here).
+@Composable
+fun AdaptiveWeatherWidgetContent(weatherData: WeatherWidgetData) {
+    val size = LocalSize.current
+    when {
+        size.width >= 256.dp && size.height >= 120.dp -> LargeWeatherWidgetContent(weatherData, LocalContext.current)
+        size.width >= 256.dp && size.height >= 60.dp -> MediumWeatherWidgetContent(weatherData)
+        else -> SmallWeatherWidgetContent(weatherData)
     }
 }
 
@@ -262,10 +283,22 @@ fun LargeWeatherWidgetContent(weatherData: WeatherWidgetData, context: Context) 
     }
 }
 
+// Maps the live size class to a dedicated analog-clock RemoteViews layout resource — the
+// AnalogClock view's dial/hands are vector drawables driven by fixed layout_width/layout_height
+// dp values (not a Compose-tokenized size), so scaling it live means picking among discrete
+// pre-built layout variants rather than applying a single runtime value. Small keeps the
+// original widget_rtc_analog_clock.xml unchanged (zero risk to the default appearance).
+private fun analogClockLayoutRes(sizeClass: WidgetSizeClass): Int = when (sizeClass) {
+    WidgetSizeClass.SMALL -> R.layout.widget_rtc_analog_clock
+    WidgetSizeClass.MEDIUM -> R.layout.widget_rtc_analog_clock_medium
+    WidgetSizeClass.LARGE -> R.layout.widget_rtc_analog_clock_large
+}
+
 @Composable
 fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
     val t = rememberWidgetTypography()
     val s = rememberWidgetSpacing()
+    val sizeClass = rememberWidgetSizeClass()
 
     Row(
         modifier = GlanceModifier
@@ -323,7 +356,7 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
             AndroidRemoteViews(
                 remoteViews = RemoteViews(
                     LocalContext.current.packageName,
-                    R.layout.widget_rtc_analog_clock
+                    analogClockLayoutRes(sizeClass)
                 )
             )
         }
@@ -392,7 +425,10 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
                 remoteViews = RemoteViews(
                     LocalContext.current.packageName,
                     R.layout.widget_rtc_digital_clock
-                )
+                ).apply {
+                    setTextViewTextSize(R.id.dateClock, TypedValue.COMPLEX_UNIT_SP, t.clockDigitalDateSize.value)
+                    setTextViewTextSize(R.id.textClock, TypedValue.COMPLEX_UNIT_SP, t.clockDigitalTimeSize.value)
+                }
             )
         }
     }

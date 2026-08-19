@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.provideContent
 import com.kronos.multiplatform.weatherapp.R
-import com.kronos.multiplatform.weatherapp.widget.components.MediumWeatherWidgetContent
+import com.kronos.multiplatform.weatherapp.widget.components.AdaptiveWeatherWidgetContent
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetBackground
 import com.kronos.multiplatform.weatherapp.widget.components.WeatherWidgetErrorContent
 
@@ -22,7 +22,7 @@ class MediumWeatherGlanceWidget : BaseWeatherGlanceWidget() {
         provideContent {
             WeatherWidgetBackground {
                 if (weatherData != null) {
-                    MediumWeatherWidgetContent(weatherData)
+                    AdaptiveWeatherWidgetContent(weatherData)
                 } else {
                     WeatherWidgetErrorContent(context.getString(R.string.widget_error_text))
                 }

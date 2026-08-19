@@ -15,7 +15,6 @@ private val SMALL_WIDGET_HEIGHT = 100.dp
 
 enum class WidgetSizeClass { SMALL, MEDIUM, LARGE }
 
-// ── Tokens de tipografía por tamaño ─────────────────────────────
 data class WidgetTypography(
     val tempSize: TextUnit,
     val conditionSize: TextUnit,
@@ -25,6 +24,8 @@ data class WidgetTypography(
     val locationIconSize: Dp,
     val weatherIconSize: Dp,
     val forecastIconSize: Dp,
+    val clockDigitalDateSize: TextUnit,
+    val clockDigitalTimeSize: TextUnit,
 )
 
 private val SmallTypography = WidgetTypography(
@@ -36,6 +37,8 @@ private val SmallTypography = WidgetTypography(
     locationIconSize = 8.dp,
     weatherIconSize  = 28.dp,
     forecastIconSize = 22.dp,
+    clockDigitalDateSize = 14.sp,
+    clockDigitalTimeSize = 24.sp,
 )
 
 private val MediumTypography = WidgetTypography(
@@ -47,6 +50,8 @@ private val MediumTypography = WidgetTypography(
     locationIconSize = 10.dp,
     weatherIconSize  = 36.dp,
     forecastIconSize = 28.dp,
+    clockDigitalDateSize = 16.sp,
+    clockDigitalTimeSize = 30.sp,
 )
 
 private val LargeTypography = WidgetTypography(
@@ -58,6 +63,8 @@ private val LargeTypography = WidgetTypography(
     locationIconSize = 13.dp,
     weatherIconSize  = 52.dp,
     forecastIconSize = 38.dp,
+    clockDigitalDateSize = 18.sp,
+    clockDigitalTimeSize = 36.sp,
 )
 
 // ── Tokens de espaciado por tamaño ───────────────────────────────

@@ -7,11 +7,14 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -48,6 +51,20 @@ import java.util.Locale
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+// SizeMode.Responsive candidate set: the 4 distinct declared minimums across all 5 widget
+// providers (widget_provider_info*.xml) — Small (128x48), the clock variants (196x48), Medium
+// (256x60), and Large (256x120). Using only real, already-designed breakpoints means
+// LocalSize.current can only ever be one of these exact points, never an arbitrary in-between
+// value, so every consumer (WidgetTheme.kt's typography/spacing tokens, and
+// WidgetComponents.kt's AdaptiveWeatherWidgetContent dispatcher) only ever has to reason about
+// 4 known combinations instead of a continuous size range.
+private val WIDGET_RESPONSIVE_SIZES = setOf(
+    DpSize(128.dp, 48.dp),
+    DpSize(196.dp, 48.dp),
+    DpSize(256.dp, 60.dp),
+    DpSize(256.dp, 120.dp),
+)
+
 abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     private val weatherRemoteRepository: WeatherRemoteRepository by inject()
@@ -60,6 +77,8 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     protected abstract fun getClassName(): Class<out GlanceAppWidget>
     protected open val TAG = this::class.simpleName.orEmpty()
+
+    override val sizeMode: SizeMode = SizeMode.Responsive(WIDGET_RESPONSIVE_SIZES)
 
     // ============================================================
     //  CARGA DE DATOS
