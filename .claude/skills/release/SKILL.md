@@ -82,7 +82,12 @@ right away — it just gets `develop` ready so nobody has to remember to bump th
   This makes step 3 load-bearing, not cosmetic: every promote PR must carry a `versionCode` higher
   than whatever Play Console already has, or the upload is rejected.
 - Does not build, sign, or upload anything itself — that's entirely
-  `.github/workflows/publish-android.yml`, which only runs on a push to `main`.
+  `.github/workflows/publish-android.yml`, which only runs on a push to `main`, and always
+  publishes to the **internal** track only. It never touches production.
+- Does not promote a release to production (or beta/alpha) — that's a separate, deliberate manual
+  step, never automatic: `gh workflow run promote-android.yml -f to_track=production` (or run it
+  from the Actions tab). This only moves the already-uploaded internal release to another track;
+  it doesn't rebuild or re-sign anything.
 - iOS/TestFlight and Desktop publishing are out of scope (Android → Play Store only, see
   `.github/workflows/publish-android.yml`).
 
@@ -91,6 +96,9 @@ right away — it just gets `develop` ready so nobody has to remember to bump th
 - Sibling skills: `/commit` (step 3's commit), `/create-pr` (step 3's PR; also the pattern step 2
   is modeled on, base/head reversed).
 - `.github/workflows/publish-android.yml`: the actual build/sign/publish pipeline, triggered by
-  `push: branches: [main]`.
+  `push: branches: [main]`. Always targets the internal track.
+- `.github/workflows/promote-android.yml`: manual (`workflow_dispatch`) promotion of the current
+  internal release to production/beta/alpha, via the Play Publisher plugin's
+  `promoteReleaseArtifact` task. Never runs on its own.
 - `composeApp/build.gradle.kts`: `signingConfigs["release"]` (env-var driven, CI-only) and the
   `play { ... }` block (track, resolution strategy).
