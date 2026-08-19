@@ -69,7 +69,8 @@ private val LargeTypography = WidgetTypography(
 
 // ── Tokens de espaciado por tamaño ───────────────────────────────
 data class WidgetSpacing(
-    val contentPadding: Dp,
+    val contentPaddingHorizontal: Dp,
+    val contentPaddingVertical: Dp,
     val iconTextGap: Dp,
     val microGap: Dp,
     val sectionGap: Dp,
@@ -77,7 +78,8 @@ data class WidgetSpacing(
 )
 
 private val SmallSpacing = WidgetSpacing(
-    contentPadding = 8.dp,
+    contentPaddingHorizontal = 12.dp,
+    contentPaddingVertical   = 8.dp,
     iconTextGap    = 4.dp,
     microGap       = 2.dp,
     sectionGap     = 4.dp,
@@ -85,7 +87,8 @@ private val SmallSpacing = WidgetSpacing(
 )
 
 private val MediumSpacing = WidgetSpacing(
-    contentPadding = 10.dp,
+    contentPaddingHorizontal = 14.dp,
+    contentPaddingVertical   = 12.dp,
     iconTextGap    = 6.dp,
     microGap       = 3.dp,
     sectionGap     = 8.dp,
@@ -93,7 +96,8 @@ private val MediumSpacing = WidgetSpacing(
 )
 
 private val LargeSpacing = WidgetSpacing(
-    contentPadding = 12.dp,
+    contentPaddingHorizontal = 16.dp,
+    contentPaddingVertical   = 14.dp,
     iconTextGap    = 8.dp,
     microGap       = 4.dp,
     sectionGap     = 12.dp,
