@@ -132,6 +132,7 @@ These require explicit written approval before proceeding:
 | `/spec-new`, `/spec-plan`, `/spec-implement`, `/spec-handoff`, `/spec-finalize`, `/spec-status` | Spec-driven workflow — intake is file/manual/URL-based (this repo has no issue tracker). See `.specs/CHOOSING_FINALIZE.md` for the lifecycle overview, `.specs/templates/` for templates, and each skill's own `SKILL.md` for details |
 | `/spec-review` *(optional)* | Read-only review of the uncommitted diff against `proposal.md` intent, `plan.md` scope, this repo's architecture rules, and relevant Serena memories. Sits between `/spec-implement` and `/spec-handoff`. Pure reporter — exits 0 always; never blocks handoff |
 | `/spec-ship` | One-shot alternative to `/spec-handoff` + `/spec-finalize`: commit + impl PR + pre-merge archive in one run |
+| `/release` | Check for changes on `develop` pending publish to `main`, open the `develop`→`main` promote PR that triggers `.github/workflows/publish-android.yml` on merge, and prepare `develop`'s next dev version |
 
 > If a skill file is unavailable, stop and ask — do not infer the pattern manually.
 
