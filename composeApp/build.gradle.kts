@@ -203,7 +203,7 @@ play {
     )
     track.set("internal")
     defaultToAppBundles.set(true)
-    resolutionStrategy.set(com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO)
+    resolutionStrategy.set(com.github.triplet.gradle.androidpublisher.ResolutionStrategy.ALWAYS)
 }
 
 dependencies {

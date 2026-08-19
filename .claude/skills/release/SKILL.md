@@ -74,11 +74,13 @@ right away — it just gets `develop` ready so nobody has to remember to bump th
 ## What this skill does NOT do
 
 - Does not merge either PR — both are opened for human review/approval.
-- Does not touch `versionCode` resolution for the actual Play Store upload — that's handled by
-  the Play Publisher plugin's `resolutionStrategy = AUTO` in `composeApp/build.gradle.kts`, which
-  fetches the real next `versionCode` from Play Console independently at publish time. The
-  version bump in step 3 is for the app itself (local/sideloaded builds, git history), not for
-  what actually gets uploaded to the Store.
+- Does not separately resolve `versionCode` for the Play Store upload — the Play Publisher
+  plugin's `resolutionStrategy = ALWAYS` in `composeApp/build.gradle.kts` means whatever
+  `versionCode` is set in the repo at merge-to-`main` time is exactly what gets uploaded (`AUTO`
+  was tried first but breaks on an app's very first release — see
+  [Triple-T/gradle-play-publisher#899](https://github.com/Triple-T/gradle-play-publisher/issues/899)).
+  This makes step 3 load-bearing, not cosmetic: every promote PR must carry a `versionCode` higher
+  than whatever Play Console already has, or the upload is rejected.
 - Does not build, sign, or upload anything itself — that's entirely
   `.github/workflows/publish-android.yml`, which only runs on a push to `main`.
 - iOS/TestFlight and Desktop publishing are out of scope (Android → Play Store only, see
