@@ -10,9 +10,9 @@
   "memory_branch": "chore/memories-android-widget-content-padding",
   "memory_pr_number": 26,
   "memory_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/26",
-  "archived_at": null,
-  "archive_branch": null,
-  "archive_reason": null,
-  "archive_pr_number": null,
-  "archive_pr_url": null
+  "archived_at": "2026-08-19T21:30:00Z",
+  "archive_branch": "chore/archive-android-widget-content-padding",
+  "archive_reason": "merged",
+  "archive_pr_number": 28,
+  "archive_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/28"
 }
