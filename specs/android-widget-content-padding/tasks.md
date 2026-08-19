@@ -68,9 +68,9 @@ generated_by: /spec-plan
 
 ## Handoff
 
-- [ ] Branch created (`chore/android-widget-content-padding`)
-- [ ] `/commit` executed
-- [ ] Branch pushed
-- [ ] PR opened against `develop`
-- [ ] Spec folder archived to `specs/_archive/android-widget-content-padding/`
-- [ ] Reusable-knowledge candidates from `decisions.md` proposed
+- [x] Branch created (`chore/android-widget-content-padding`)
+- [x] `/commit` executed — commit `3ff4dde`
+- [ ] Branch pushed *(see /spec-finalize)*
+- [ ] PR opened against `develop` *(see /spec-finalize)*
+- [ ] Spec folder archived to `specs/_archive/android-widget-content-padding/` *(see /spec-finalize)*
+- [ ] Reusable-knowledge candidates from `decisions.md` proposed *(see /spec-finalize)*
