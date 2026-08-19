@@ -20,3 +20,8 @@ node_modules/
 
 # spec-driven workflow — per-run findings, not source of truth
 specs/*/.review-findings.md
+
+# Android release signing / Play Store publishing secrets — never commit
+*.jks
+*.keystore
+play-service-account.json

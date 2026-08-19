@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidxRoom)
     alias(libs.plugins.swiftPackageManager)
+    alias(libs.plugins.playPublisher)
 }
 
 kotlin {
@@ -161,9 +162,22 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        create("release") {
+            System.getenv("ANDROID_KEYSTORE_PATH")?.let { path ->
+                storeFile = file(path)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            if (System.getenv("ANDROID_KEYSTORE_PATH") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
@@ -178,6 +192,18 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
     }
+}
+
+play {
+    serviceAccountCredentials.set(
+        file(
+            System.getenv("PLAY_SERVICE_ACCOUNT_JSON_PATH")
+                ?: "${rootProject.projectDir}/play-service-account.json"
+        )
+    )
+    track.set("internal")
+    defaultToAppBundles.set(true)
+    resolutionStrategy.set(com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO)
 }
 
 dependencies {
