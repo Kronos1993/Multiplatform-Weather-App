@@ -1,0 +1,18 @@
+{
+  "spec_id": "android-widget-content-padding",
+  "branch": "chore/android-widget-content-padding",
+  "target_branch": "develop",
+  "pr_number": 25,
+  "pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/25",
+  "opened_at": "2026-08-19T00:00:00Z",
+  "opened_via": "tier-A",
+  "memory_candidates_surfaced": true,
+  "memory_branch": "chore/memories-android-widget-content-padding",
+  "memory_pr_number": 26,
+  "memory_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/26",
+  "archived_at": null,
+  "archive_branch": null,
+  "archive_reason": null,
+  "archive_pr_number": null,
+  "archive_pr_url": null
+}

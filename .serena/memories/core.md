@@ -51,3 +51,17 @@ entry point. Root package: `com.kronos.multiplatform.weatherapp` (== application
   `AnalogClock` intrinsic-size gotcha (it never grows past its drawable's declared size); read
   before touching `widget_rtc_analog_clock*.xml`/`widget_rtc_digital_clock.xml` or their
   drawables.
+- `mem:android_widget_padding_vs_centering` — centering cancels an ancestor's padding
+  algebraically (visible margin becomes `containerSize/2 - contentSize/2`, independent of the
+  padding value); read before assuming a padding/spacing token change will be visible on a
+  centered widget composable, and check the background drawable's corner radius first on compact
+  widgets.
+- `mem:android_widget_clock_condition_maxlines_resize` — the two clock-variant widgets share the
+  same `SizeMode.Responsive` candidate set as Small/Medium/Large, so `LocalSize.current` does
+  change on resize even though they have no `Adaptive*` dispatch; read before assuming their
+  content is resize-inert, and before adding any new size-dependent behavior to them.
+- `mem:android_widget_minresize_missing_blocks_adaptive_content` — a widget provider XML missing
+  `android:minResizeWidth`/`android:minResizeHeight` silently floors shrink-resize at its
+  `minWidth`/`minHeight`, which can look like a broken `Adaptive*` dispatch when it's really a
+  manifest omission; read before adding a new resizable widget provider or debugging why one
+  won't transform content on shrink.

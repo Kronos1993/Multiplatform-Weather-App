@@ -48,7 +48,7 @@ fun WeatherWidgetBackground(content: @Composable () -> Unit) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(ImageProvider(R.drawable.bg_widget_glass))
-            .padding(horizontal = s.contentPadding, vertical = s.contentPadding),
+            .padding(horizontal = s.contentPaddingHorizontal, vertical = s.contentPaddingVertical),
         contentAlignment = Alignment.Center
     ) {
         content()
@@ -299,6 +299,8 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
     val t = rememberWidgetTypography()
     val s = rememberWidgetSpacing()
     val sizeClass = rememberWidgetSizeClass()
+    val size = LocalSize.current
+    val conditionMaxLines = if (size.height >= 100.dp) 2 else 1
 
     Row(
         modifier = GlanceModifier
@@ -335,7 +337,7 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
                             fontSize = t.conditionSize,
                             color = ColorProvider(Color(0xCCFFFFFF), Color(0xCCFFFFFF))
                         ),
-                        maxLines = 1
+                        maxLines = conditionMaxLines
                     )
                 }
 
@@ -367,6 +369,8 @@ fun WeatherWithAnalogClockContent(weatherData: WeatherWidgetData?) {
 fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
     val t = rememberWidgetTypography()
     val s = rememberWidgetSpacing()
+    val size = LocalSize.current
+    val conditionMaxLines = if (size.height >= 100.dp) 2 else 1
 
     Row(
         modifier = GlanceModifier
@@ -403,7 +407,7 @@ fun WeatherWithDigitalClockContent(weatherData: WeatherWidgetData?) {
                             fontSize = t.conditionSize,
                             color = ColorProvider(Color(0xCCFFFFFF), Color(0xCCFFFFFF))
                         ),
-                        maxLines = 1
+                        maxLines = conditionMaxLines
                     )
                 }
 
@@ -485,7 +489,7 @@ fun WeatherWidgetErrorContent(message: String) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(ImageProvider(R.drawable.bg_widget_glass))
-            .padding(s.contentPadding),
+            .padding(horizontal = s.contentPaddingHorizontal, vertical = s.contentPaddingVertical),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
