@@ -25,3 +25,4 @@ specs/*/.review-findings.md
 *.jks
 *.keystore
 play-service-account.json
+carebridge-pro-*.json
