@@ -8,14 +8,24 @@ import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
+import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.util.format
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
 import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
 import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import weather_app.composeapp.generated.resources.Res
+import weather_app.composeapp.generated.resources.api_key
+import weather_app.composeapp.generated.resources.day_preference_default_value
+import weather_app.composeapp.generated.resources.default_days_key
+import weather_app.composeapp.generated.resources.default_lang_key
+import weather_app.composeapp.generated.resources.default_language_value
+import weather_app.composeapp.generated.resources.measure_unit_key
+import weather_app.composeapp.generated.resources.measure_unit_preference_default_value
 
 class WeatherNotificationBackgroundTask : KoinComponent {
 
@@ -25,6 +35,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
     private val notifications: INotifications by inject()
     private val loggerManager: ILogManager by inject()
     private val widgetUpdater: IWidgetUpdater by inject()
+    private val changeLang: IChangeLang by inject()
 
     private var notificationTitle: String = ""
     private var notificationShortDetails: String = ""
@@ -117,12 +128,42 @@ class WeatherNotificationBackgroundTask : KoinComponent {
     }
 
     private suspend fun getWeatherParams(): WeatherParams {
+        // Bug found while chasing "notification text shows unresolved keys":
+        // these three lookups used the literal Kotlin resource NAMES
+        // ("default_lang_key", "default_days_key", "measure_unit_key") as the
+        // DataStore lookup key, but the app actually stores preferences under
+        // the resource's VALUE ("default_lang", "default_days", "measure_unit"
+        // — see composeResources/values/preference_key.xml). The lookup key
+        // never matched what SettingScreen.kt writes, so every background
+        // refresh silently used the hardcoded fallback regardless of the
+        // user's saved settings — worse for measureUnit, whose old fallback
+        // string "INTERNATIONAL" doesn't match MeasureUnit.from() at all
+        // (only "1" parses as INTERNATIONAL; anything else, including that
+        // literal fallback, silently resolved to IMPERIAL). Android's
+        // WeatherNotificationWorker.doWork() already does this correctly via
+        // context.getString(R.string.default_lang_key) — this mirrors that
+        // using the non-composable Compose Resources accessor, and also
+        // reapplies the resolved language via changeLang.onLangChange(lang)
+        // on every refresh (same as the Android worker), instead of relying
+        // solely on the app's AppleLanguages default set once at launch.
+        val lang = preferenceRepository.getPreference(
+            getString(Res.string.default_lang_key),
+            getString(Res.string.default_language_value)
+        )
+        changeLang.onLangChange(lang)
+
         return WeatherParams(
-            lang = preferenceRepository.getPreference("default_lang_key", "en"),
-            apiKey = preferenceRepository.getPreference("api_key", ""),
-            days = preferenceRepository.getPreference("default_days_key", "1").toInt(),
+            lang = lang,
+            apiKey = getString(Res.string.api_key),
+            days = preferenceRepository.getPreference(
+                getString(Res.string.default_days_key),
+                getString(Res.string.day_preference_default_value)
+            ).toInt(),
             measureUnit = MeasureUnit.from(
-                preferenceRepository.getPreference("measure_unit_key", "INTERNATIONAL")
+                preferenceRepository.getPreference(
+                    getString(Res.string.measure_unit_key),
+                    getString(Res.string.measure_unit_preference_default_value)
+                )
             )
         )
     }

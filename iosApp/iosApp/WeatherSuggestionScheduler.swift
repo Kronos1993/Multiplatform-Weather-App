@@ -91,9 +91,19 @@ class WeatherSuggestionScheduler {
         components.minute = minute
         components.second = 0
 
+        // repeats: true — dateMatching only sets hour/minute/second (no
+        // day/month/year), so iOS treats this as "fire daily at this time"
+        // and keeps a pending occurrence armed for tomorrow even if it isn't
+        // re-armed by scheduleAll() again (e.g. the hourly BGAppRefreshTask
+        // doesn't run for a few days). Each fresh scheduleAll() call still
+        // replaces the pending occurrence with today's forecast content —
+        // addNotificationRequest replaces same-identifier PENDING requests —
+        // this only changes what happens when re-arming is missed: the last
+        // known content keeps firing daily instead of the notification
+        // silently stopping.
         let trigger = UNCalendarNotificationTrigger(
             dateMatching: components,
-            repeats: false
+            repeats: true
         )
 
         let request = UNNotificationRequest(

@@ -13,6 +13,26 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
 
+        // ── Default de idioma ANTES de resolver cualquier string ────────────
+        // Si el usuario nunca abrió Settings a elegir idioma, "AppleLanguages"
+        // no existe todavía en NSUserDefaults — currentLanguageTable() caía al
+        // "en" hardcodeado. Con esto queda seteado explícitamente al idioma
+        // del sistema (si es "es", si no "en") apenas se instala/lanza la app
+        // por primera vez, en vez de depender de un fallback silencioso.
+        ensureDefaultLanguagePreference()
+
+        // ── Arranca Koin ANTES de cualquier trabajo en background ───────────
+        // WeatherNotificationBackgroundTask (KoinComponent) se ejecuta desde
+        // performWeatherRefresh() más abajo, en este mismo método — y también
+        // desde el BGAppRefreshTask, que puede lanzar la app sin que SwiftUI
+        // llegue a construir ComposeView/MainViewController (único lugar que
+        // antes arrancaba Koin). Sin este arranque explícito, `by inject()`
+        // fallaba en silencio (excepción atrapada por el catch genérico de
+        // refreshWeather()) y ni la notificación WEATHER_UPDATED ni las
+        // sugerencias se programaban — por eso solo aparecían al refrescar
+        // manualmente desde Home/Locations, donde Koin ya estaba arrancado.
+        MainViewControllerKt.startKoinIOS()
+
         // ── Registrar BGTask de clima ──────────────────────────────────────
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: "com.kronos.weatherapp.refresh_weather_notification",
@@ -59,16 +79,48 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
 
+    // en.strings/es.strings are plain flat files copied to the bundle root
+    // (project.pbxproj has them as separate PBXFileReferences, not a
+    // PBXVariantGroup, and knownRegions only lists "en" — "es" isn't even a
+    // declared project localization). NSLocalizedString(key, comment:) looks
+    // up the default "Localizable" table inside the current locale's
+    // .lproj folder, which doesn't exist here, so it always fell back to
+    // returning the raw key — that's why notification text showed literal
+    // keys instead of resolved strings. Passing tableName: explicitly looks
+    // up "<table>.strings" directly in the bundle root instead, matching
+    // how these files are actually bundled.
+    private func currentLanguageTable() -> String {
+        let langs = UserDefaults.standard.stringArray(forKey: "AppleLanguages") ?? []
+        let code = langs.first?.split(separator: "-").first.map(String.init) ?? "en"
+        return code == "es" ? "es" : "en"
+    }
+
+    // Only the two bundled tables ("en"/"es") are ever valid here — anything
+    // else (a third system language, or none set at all) falls back to "en",
+    // matching the project's developmentRegion.
+    private func ensureDefaultLanguagePreference() {
+        let defaults = UserDefaults.standard
+        guard defaults.stringArray(forKey: "AppleLanguages") == nil else { return }
+
+        let systemCode = Locale.current.language.languageCode?.identifier.lowercased() ?? "en"
+        let table = systemCode == "es" ? "es" : "en"
+        defaults.set([table], forKey: "AppleLanguages")
+    }
+
+    private func localized(_ key: String) -> String {
+        NSLocalizedString(key, tableName: currentLanguageTable(), bundle: .main, value: key, comment: "")
+    }
+
     // ── Fetch + notifica + re-arma sugerencias — usado en el lanzamiento y en el BGTask ──
     private func performWeatherRefresh(onComplete: ((Bool) -> Void)? = nil) {
         let worker = WeatherNotificationBackgroundTask()
         worker.doInitNotificationStrings(
-            title: NSLocalizedString("notification_title", comment: ""),
-            shortDetails: NSLocalizedString("notification_short_details", comment: ""),
-            longDetails: NSLocalizedString("notification_long_details", comment: ""),
-            titleFahrenheit: NSLocalizedString("notification_title_fahrenheit", comment: ""),
-            shortDetailsFahrenheit: NSLocalizedString("notification_short_details_fahrenheit", comment: ""),
-            longDetailsFahrenheit: NSLocalizedString("notification_long_details_fahrenheit", comment: "")
+            title: localized("notification_title"),
+            shortDetails: localized("notification_short_details"),
+            longDetails: localized("notification_long_details"),
+            titleFahrenheit: localized("notification_title_fahrenheit"),
+            shortDetailsFahrenheit: localized("notification_short_details_fahrenheit"),
+            longDetailsFahrenheit: localized("notification_long_details_fahrenheit")
         )
         worker.onForecastReady = { [weak self] forecast, measureUnit in
             self?.suggestionScheduler.scheduleAll(forecast: forecast, measureUnit: measureUnit)
