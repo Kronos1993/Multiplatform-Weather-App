@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -17,9 +16,12 @@ import com.kronos.multiplatform.weatherapp.NOTIFICATION_CHANNEL
 import com.kronos.multiplatform.weatherapp.R
 import com.kronos.multiplatform.weatherapp.SUGGESTION_NOTIFICATION_CHANNEL
 import com.kronos.multiplatform.weatherapp.WEATHER_ALERT_NOTIFICATION_CHANNEL
+import com.kronos.multiplatform.weatherapp.core.util.decodeSampledBitmapFromStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.net.URL
+
+private const val NOTIFICATION_LARGE_ICON_SIZE_PX = 256
 
 actual class AppNotification(
     private val context: Context
@@ -42,9 +44,10 @@ actual class AppNotification(
             val pendingIntent: PendingIntent? =
                 PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
 
-            val imageBitmap = BitmapFactory.decodeStream(
-                URL(notificationImageUrl).openConnection()
-                    .getInputStream()
+            val imageBitmap = decodeSampledBitmapFromStream(
+                URL(notificationImageUrl).openConnection().getInputStream(),
+                reqWidth = NOTIFICATION_LARGE_ICON_SIZE_PX,
+                reqHeight = NOTIFICATION_LARGE_ICON_SIZE_PX
             )
 
             val notification: Notification =
