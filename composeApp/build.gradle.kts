@@ -206,7 +206,7 @@ play {
                 ?: "${rootProject.projectDir}/play-service-account.json"
         )
     )
-    track.set("internal")
+    track.set("production")
     defaultToAppBundles.set(true)
     resolutionStrategy.set(com.github.triplet.gradle.androidpublisher.ResolutionStrategy.FAIL)
 }
