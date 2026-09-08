@@ -43,3 +43,8 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+
+# Move obfuscated classes into the default (unnamed) package for a smaller DEX — becomes the
+# AGP default starting at 9.1, we're still on 9.0.1. Safe for an app (not a library): nothing
+# here looks up resources/classes by this app's own package path at runtime.
+-repackageclasses
