@@ -1,0 +1,45 @@
+root = true
+
+[*.{kt,kts}]
+indent_size = 4
+insert_final_newline = true
+max_line_length = 140
+
+# --- Deliberate project conventions ktlint's default ruleset doesn't know about ---
+
+# @Composable functions stay PascalCase (standard Compose convention) instead of
+# lowerCamelCase. See CLAUDE.md "Code style" and mem:conventions.
+ktlint_standard_function-naming = disabled
+
+# Feature folders use snake_case sub-packages (e.g. features/library/albums_tab,
+# features/permission_gate, core/ui/screen_config) as a deliberate, consistent
+# structural convention — not a naming mistake.
+ktlint_standard_package-name = disabled
+
+# expect/actual files are named after the expect declaration's file, per this
+# repo's .android.kt/.ios.kt/.jvm.kt suffix convention (e.g. Platform.ios.kt,
+# KMPLogguer.jvm.kt) rather than after the actual class name ktlint expects.
+# Desktop's main.kt (lowercase entry point) also trips this rule.
+ktlint_standard_filename = disabled
+
+# --- ktlint's "everything wraps onto its own line" formatting opinions, which
+# conflict with how this code is actually written/reformatted (IntelliJ's
+# default Kotlin formatter does not produce this layout). These are strict
+# multi-line-layout preferences, not correctness issues — disabled as a group
+# rather than fought line by line. Revisit if the project ever adopts
+# `ktlint -F` as the formatting tool of record.
+ktlint_standard_function-signature = disabled
+ktlint_standard_class-signature = disabled
+ktlint_standard_argument-list-wrapping = disabled
+ktlint_standard_parameter-list-wrapping = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_chain-method-continuation = disabled
+ktlint_standard_function-expression-body = disabled
+ktlint_standard_if-else-wrapping = disabled
+ktlint_standard_multiline-if-else = disabled
+ktlint_standard_binary-expression-wrapping = disabled
+ktlint_standard_enum-wrapping = disabled
+ktlint_standard_when-entry-bracing = disabled
+ktlint_standard_statement-wrapping = disabled
+ktlint_standard_function-literal = disabled
+ktlint_standard_property-wrapping = disabled

@@ -4,7 +4,6 @@ package com.kronos.multiplatform.weatherapp.widget
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.compose.ui.unit.DpSize
@@ -24,6 +23,7 @@ import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.result.Result
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
+import com.kronos.multiplatform.weatherapp.core.util.decodeSampledBitmapFromStream
 import com.kronos.multiplatform.weatherapp.core.util.formatDateTime
 import com.kronos.multiplatform.weatherapp.core.util.isToday
 import com.kronos.multiplatform.weatherapp.core.util.isTomorrow
@@ -64,6 +64,10 @@ private val WIDGET_RESPONSIVE_SIZES = setOf(
     DpSize(256.dp, 60.dp),
     DpSize(256.dp, 120.dp),
 )
+
+// Largest declared weatherIconSize (WidgetTheme.kt, 52.dp) at xxxhdpi (4x) — the biggest a
+// condition icon is ever actually rendered at across all widget size classes.
+private const val WIDGET_ICON_SIZE_PX = 208
 
 abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
@@ -339,7 +343,11 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                     setRequestProperty("Accept", "image/*")
                     instanceFollowRedirects = true
                 }
-                val bitmap = BitmapFactory.decodeStream(connection.inputStream)
+                val bitmap = decodeSampledBitmapFromStream(
+                    connection.inputStream,
+                    reqWidth = WIDGET_ICON_SIZE_PX,
+                    reqHeight = WIDGET_ICON_SIZE_PX
+                )
                 if (bitmap != null) return@withContext bitmap
                 // Si bitmap es null pero no hubo excepción, reintentamos
             } catch (e: Exception) {
