@@ -248,7 +248,15 @@ struct SuggestionStringResolver {
     }
 
     // ── Shorthand ─────────────────────────────────────────────────────────
+    // en.strings/es.strings are flat files at the bundle root, not organized
+    // into en.lproj/es.lproj — NSLocalizedString(key, comment:) looks up the
+    // default "Localizable" table inside the current locale's .lproj, which
+    // doesn't exist here, so it always fell back to returning the raw key
+    // (see the matching note in WeatherNotificationAppDelegate.swift).
+    // tableName: looks up "<table>.strings" directly in the bundle root.
     private func loc(_ key: String) -> String {
-        NSLocalizedString(key, comment: "")
+        let langs = UserDefaults.standard.stringArray(forKey: "AppleLanguages") ?? []
+        let table = langs.first?.split(separator: "-").first.map(String.init) == "es" ? "es" : "en"
+        return NSLocalizedString(key, tableName: table, bundle: .main, value: key, comment: "")
     }
 }

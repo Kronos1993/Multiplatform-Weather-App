@@ -38,11 +38,14 @@ Read the current `versionCode`/`versionName` from `composeApp/build.gradle.kts` 
 ```
 gh pr create --base main --head develop \
   --title "release: vX.Y.Z.W (versionCode N)" \
-  --body "Promotes develop -> main. Merging this triggers .github/workflows/publish-android.yml, which builds, signs, and uploads the Android App Bundle to the Play Store internal track."
+  --body "Promotes develop -> main. Merging this triggers .github/workflows/publish-android.yml, which builds, signs, and uploads the Android App Bundle directly to the Play Store production track — live to real users immediately, no staging."
 ```
 
 Report the PR URL. **Do not merge it** — merging is a deliberate human action; this skill only
-opens it. Merging is what actually fires the publish workflow.
+opens it. Merging is what actually fires the publish workflow, and — since the `play {}` block
+in `composeApp/build.gradle.kts` targets `track.set("production")` — publishing means going
+live to production immediately. There is no staging/internal step in between; make sure the
+user understands that before they merge.
 
 ### 3. Prepare `develop` for the next version
 
@@ -82,7 +85,17 @@ right away — it just gets `develop` ready so nobody has to remember to bump th
   This makes step 3 load-bearing, not cosmetic: every promote PR must carry a `versionCode` higher
   than whatever Play Console already has, or the upload is rejected.
 - Does not build, sign, or upload anything itself — that's entirely
-  `.github/workflows/publish-android.yml`, which only runs on a push to `main`.
+  `.github/workflows/publish-android.yml`, which only runs on a push to `main`. As of the
+  `track.set("production")` change (fix/publish-directly-to-production), that upload goes
+  **directly to the production track** — no staging, no internal-testing gate, live to real
+  users as soon as the promote PR is merged. This matches how releases were published manually
+  before this repo had a CI pipeline, at the user's explicit request — do not revert it back to
+  `internal` without checking with the user first.
+- `promote-android.yml` (`workflow_dispatch`, `promoteReleaseArtifact --from-track internal`)
+  still exists for manually pushing an already-uploaded release to another track, but with
+  publish now targeting `production` directly, there is normally no `internal` release for it
+  to promote from — it's a leftover tool from when the default track was `internal`, not part
+  of the normal release flow described here.
 - iOS/TestFlight and Desktop publishing are out of scope (Android → Play Store only, see
   `.github/workflows/publish-android.yml`).
 
@@ -91,6 +104,12 @@ right away — it just gets `develop` ready so nobody has to remember to bump th
 - Sibling skills: `/commit` (step 3's commit), `/create-pr` (step 3's PR; also the pattern step 2
   is modeled on, base/head reversed).
 - `.github/workflows/publish-android.yml`: the actual build/sign/publish pipeline, triggered by
-  `push: branches: [main]`.
+  `push: branches: [main]`. Targets whatever track `composeApp/build.gradle.kts`'s `play {}`
+  block sets — currently `production`, so merging the promote PR ships live immediately. No
+  automated test suite gates this (this repo has none — see root `CLAUDE.md`).
+- `.github/workflows/promote-android.yml`: manual (`workflow_dispatch`) promotion of an existing
+  `internal`-track release to production/beta/alpha, via the Play Publisher plugin's
+  `promoteReleaseArtifact` task. Never runs on its own. Not part of the normal flow while
+  publish targets `production` directly — see above.
 - `composeApp/build.gradle.kts`: `signingConfigs["release"]` (env-var driven, CI-only) and the
   `play { ... }` block (track, resolution strategy).

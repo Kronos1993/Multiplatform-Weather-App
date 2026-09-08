@@ -154,8 +154,8 @@ android {
         applicationId = "com.kronos.multiplatform.weatherapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 7
-        versionName = "1.0.1.3"
+        versionCode = 8
+        versionName = "1.0.1.4"
     }
     packaging {
         resources {
@@ -174,7 +174,12 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             if (System.getenv("ANDROID_KEYSTORE_PATH") != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -201,7 +206,7 @@ play {
                 ?: "${rootProject.projectDir}/play-service-account.json"
         )
     )
-    track.set("internal")
+    track.set("production")
     defaultToAppBundles.set(true)
     resolutionStrategy.set(com.github.triplet.gradle.androidpublisher.ResolutionStrategy.FAIL)
 }
