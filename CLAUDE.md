@@ -27,8 +27,21 @@ commands, and completion criteria.
 
 ## Architecture — Clean Architecture + MVVM, SOLID
 
-- `domain/repository/*`: interfaces only — the abstraction ViewModels depend on (Dependency
-  Inversion). Never let a feature depend on a `data/*Impl` class directly.
+- Data flow: consumer (ViewModel, Worker, Glance widget, iOS background task) →
+  `domain/usecase/<feature>/XxxUseCase` → `domain/repository/*Interface` (Dependency Inversion) →
+  `data/repository/<feature>/*Impl` → datasources. Repositories are never injected or called
+  directly outside of `data/*Impl` and the `domain/usecase/*Impl` classes that wrap them — every
+  consumer injects the abstract `XxxUseCase`, never the repository interface or `Impl`.
+- `core/usecase/UseCase.kt`: shared base `abstract class UseCase<in P, out R> { abstract suspend fun
+  run(params: P): R; suspend operator fun invoke(params: P): R = run(params) }`.
+- `domain/usecase/<feature>/`: one abstract `XxxUseCase` + one concrete `XxxUseCaseImpl` per
+  repository operation, mirroring the `<feature>` subpackage naming already used under
+  `data/repository/<feature>/` — `XxxUseCase` declares a nested `data class Params(...)` (or is
+  `UseCase<Unit, ReturnType>` when the operation takes no parameters); `XxxUseCaseImpl` delegates to
+  the repository with no added logic unless it already existed in a ViewModel and made sense to
+  move down.
+- `domain/repository/*`: interfaces only — the abstraction use cases depend on (Dependency
+  Inversion). Never let a use case or any other consumer depend on a `data/*Impl` class directly.
 - `data/repository/<feature>/*Impl`: implementations of those interfaces, one subpackage per
   feature (`weather`, `location`, `radar/rain`, `user_custom_location`, `alerts`).
 - `data/remote/`: Ktor API clients, DTOs, datasources, DI. `data/local/`: Room entities/DAOs,
@@ -41,7 +54,9 @@ commands, and completion criteria.
   `home/setting`, `home/user_location`, `add_city`), each with `XxxViewModel` + `XxxScreen` and a
   sealed `XxxScreenState` the Screen composable renders.
 - `di/`: Koin composition; `initKoin()` in `di/Koin.kt` wires everything together. New
-  repositories/data sources get registered in the matching Koin module.
+  repositories/data sources get registered in the matching Koin module; new use cases get registered
+  in the flat `useCaseModule` (`di/Modules.kt`, inserted before `viewModelModule`) with
+  `singleOf(::XxxUseCaseImpl).bind<XxxUseCase>()`.
 - Platform-specific (`expect`/`actual`) code lives under `core/*` and `data/local/*` with per-target
   file suffixes: `.ios.kt` (iOS), `.native.kt` (shared native/iOS-only), unsuffixed under
   `androidMain`/`jvmMain`.
@@ -53,16 +68,20 @@ permissions, Glance, WorkManager, etc.) and exact package paths: see `mem:archit
 ### SOLID in this codebase
 
 - **SRP**: one feature/screen per package under `features/`; repository implementations scoped to a
-  single feature under `data/repository/<feature>`.
-- **OCP/DIP**: ViewModels and other consumers depend on `domain/repository` interfaces, not on
-  concrete `data/*Impl` classes — swap implementations without touching callers.
+  single feature under `data/repository/<feature>`; each use case wraps exactly one repository
+  operation.
+- **OCP/DIP**: ViewModels and other consumers depend on `domain/usecase` (the abstract `XxxUseCase`),
+  never on the repository interface or a concrete `data/*Impl` class directly — swap implementations
+  without touching callers.
 - **ISP**: repository interfaces are narrow and feature-specific (`WeatherRemoteRepository`,
-  `LocationRepository`, `MapLayerRepository`, …) rather than one god interface.
+  `LocationRepository`, `MapLayerRepository`, …) rather than one god interface; use cases narrow this
+  further to one operation each.
 - **LSP**: `ParentViewModel` subclasses must remain substitutable — don't override base behavior in
   a way that breaks callers relying on the base contract.
 
-When adding code, follow the existing pattern (interface in `domain`, implementation in `data`,
-wiring in `di`) rather than introducing a new structure.
+When adding code, follow the existing pattern (interface in `domain/repository`, implementation in
+`data`, a use case pair in `domain/usecase`, wiring in `di`) rather than introducing a new
+structure.
 
 ## Conventions
 

@@ -1,6 +1,6 @@
 ---
 name: new-feature
-description: Scaffold a complete new feature end-to-end in this Kotlin Multiplatform app — domain model + repository interface, data repository implementation with a local (Room) and/or remote (Ktor) data source, Koin DI wiring, a ViewModel (extends ParentViewModel with a sealed ScreenState), a Compose Screen (koinViewModel injection), and optionally navigation registration (Destinations + NavHost route). Use when the user wants a brand-new screen/capability added to the app, not a change to an existing feature. Produces a compiling skeleton with TODOs for the actual business logic and UI — it does not invent behavior. Chained from /spec-implement when a spec's proposal.md §6 names this skill.
+description: Scaffold a complete new feature end-to-end in this Kotlin Multiplatform app — domain model + repository interface, data repository implementation with a local (Room) and/or remote (Ktor) data source, a use case pair (domain/usecase) per repository operation, Koin DI wiring, a ViewModel (extends ParentViewModel with a sealed ScreenState) that injects use cases rather than repositories, a Compose Screen (koinViewModel injection), and optionally navigation registration (Destinations + NavHost route). Use when the user wants a brand-new screen/capability added to the app, not a change to an existing feature. Produces a compiling skeleton with TODOs for the actual business logic and UI — it does not invent behavior. Chained from /spec-implement when a spec's proposal.md §6 names this skill.
 metadata:
   claude_md_requires: '[]'
 ---
@@ -137,7 +137,51 @@ match the exact shape rather than guessing.
 Repository methods return `core/result/Result<D, Error>` (`Success`/
 `Error`), never throw — mirror `WeatherRemoteRepositoryImpl`.
 
-### 4. DI wiring
+### 4. Use case pair (skip if `--data none`)
+
+This repo never lets a ViewModel or other consumer inject a repository
+directly (see `mem:architecture`) — every repository operation gets its
+own use case pair under `domain/usecase/{feature_snake}/`, mirroring the
+shape in `core/usecase/UseCase.kt` and e.g. `domain/usecase/weather/`:
+
+```
+domain/usecase/{feature_snake}/{Operation}UseCase.kt      # abstract class {Operation}UseCase : UseCase<Params, ReturnType>()
+domain/usecase/{feature_snake}/{Operation}UseCaseImpl.kt  # class {Operation}UseCaseImpl(private val repository: {Feature}Repository) : {Operation}UseCase()
+```
+
+```kotlin
+package com.kronos.multiplatform.weatherapp.domain.usecase.{feature_snake}
+
+import com.kronos.multiplatform.weatherapp.core.usecase.UseCase
+import com.kronos.multiplatform.weatherapp.domain.model.{Feature}
+
+abstract class {Operation}UseCase : UseCase<Unit, List<{Feature}>>()
+// or, for an operation that takes parameters:
+// abstract class {Operation}UseCase : UseCase<{Operation}UseCase.Params, ReturnType>() {
+//     data class Params(val arg1: ArgType, ...)
+// }
+```
+
+```kotlin
+package com.kronos.multiplatform.weatherapp.domain.usecase.{feature_snake}
+
+import com.kronos.multiplatform.weatherapp.domain.repository.{Feature}Repository
+
+class {Operation}UseCaseImpl(
+    private val repository: {Feature}Repository
+) : {Operation}UseCase() {
+    override suspend fun run(params: Unit) = repository.listAll()
+    // TODO: one pair per repository operation actually needed — mirror this shape, don't invent a generic pass-through
+}
+```
+
+One pair per repository operation — a repository with 3 methods gets 3
+`{Operation}UseCase`/`{Operation}UseCaseImpl` pairs, never one
+catch-all use case. If `--data none`, skip this step entirely: the
+ViewModel injects the existing use case(s) it needs instead (see step 6)
+— every operation on every existing repository already has one.
+
+### 5. DI wiring
 
 - `--data local`: add to `data/local/di/Modules.kt`
   `commonDataLocalModules`:
@@ -148,8 +192,12 @@ Repository methods return `core/result/Result<D, Error>` (`Success`/
 - `--data remote`: add to `data/remote/di/Modules.kt`
   `commonRemoteModules`, following the qualifier pattern already there
   for the Ktor client factory.
-- `--data none`: no new repository binding — the ViewModel will inject
-  existing repositories directly.
+- `--data none`: no new repository binding.
+- Unless `--data none`: register each new use case from step 4 in
+  `di/Modules.kt`'s `useCaseModule`:
+  ```kotlin
+  singleOf(::{Operation}UseCaseImpl).bind<{Operation}UseCase>()
+  ```
 - Always: register the ViewModel in `di/Modules.kt` `viewModelModule`:
   ```kotlin
   viewModelOf(::{Feature}ViewModel)
@@ -158,7 +206,7 @@ Repository methods return `core/result/Result<D, Error>` (`Success`/
 Use Serena's `insert_after_symbol`/`replace_content` on these existing
 files — do not rewrite them wholesale.
 
-### 5. ViewModel
+### 6. ViewModel
 
 ```
 features/{parent?}/{feature_snake}/{Feature}ViewModel.kt
@@ -166,7 +214,7 @@ features/{parent?}/{feature_snake}/{Feature}ViewModel.kt
 
 ```kotlin
 class {Feature}ViewModel(
-    private val {feature}Repository: {Feature}Repository, // omit if --data none; inject whichever existing repositories the feature actually needs instead
+    private val {operation}UseCase: {Operation}UseCase, // one param per use case from step 4 this ViewModel actually calls; if --data none, inject whichever EXISTING use cases the feature needs — never a repository
     private val loggerManager: ILogManager
 ) : ParentViewModel() {
 
@@ -178,7 +226,7 @@ class {Feature}ViewModel(
     fun load() {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = {Feature}ScreenState.Loading
-            // TODO: call the repository, convert Result into a screen state
+            // TODO: call the use case(s) (e.g. {operation}UseCase(Unit) or {operation}UseCase(Params(...))), convert Result into a screen state
         }
     }
 
@@ -199,7 +247,7 @@ sealed class {Feature}ScreenState {
 Ask the user what states the screen actually needs beyond
 `Idle`/`Loading` — don't guess a state machine for them.
 
-### 6. Screen composable
+### 7. Screen composable
 
 ```
 features/{parent?}/{feature_snake}/{Feature}Screen.kt
@@ -225,7 +273,7 @@ fun {Feature}Screen(
 For a larger screen, mirror `user_location/content/` — put sub-composables
 in a `{feature_snake}/content/` sub-package rather than one large file.
 
-### 7. Navigation (only if `--nav-route yes`)
+### 8. Navigation (only if `--nav-route yes`)
 
 1. Add an entry to `Destinations.kt`:
    ```kotlin
@@ -246,7 +294,7 @@ If `--nav-route no`, skip this step and note in the output summary how
 the caller is expected to reach the new Screen (embedded, dialog, etc.)
 — that wiring is the caller's responsibility, not this skill's.
 
-### 8. Localization stub
+### 9. Localization stub
 
 Add placeholder string keys for any screen copy to
 `composeApp/src/commonMain/composeResources/values/strings.xml` **and**
@@ -263,7 +311,7 @@ add those automatically (it doesn't know yet whether iOS needs them).
 - Does not invent business logic, UI layout, or screen states beyond
   `Idle`/`Loading` — every generated body has a `// TODO` where a
   decision belongs to the spec's own implementation steps.
-- Does not write to `iosApp/*.strings` automatically (see step 8).
+- Does not write to `iosApp/*.strings` automatically (see step 9).
 - Does not run the app or the build — the caller (`/spec-implement`,
   or the user directly) verifies per the usual
   `./gradlew :composeApp:assembleDebug` / manual-run process.

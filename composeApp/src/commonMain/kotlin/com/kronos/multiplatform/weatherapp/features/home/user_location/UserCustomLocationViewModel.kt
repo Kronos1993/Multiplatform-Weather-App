@@ -18,8 +18,12 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.UserCustomLocation
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
-import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
-import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.DeleteUserLocationUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.ListUserLocationsUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.SaveUserLocationUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.GetWeatherForecastByCityUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.GetWeatherForecastByCoordinatesUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.SetLastWeatherForecastUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
@@ -30,14 +34,17 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 class UserCustomLocationViewModel(
-    private val weatherRemoteRepository: WeatherRemoteRepository,
-    private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository,
+    private val getWeatherForecastByCityUseCase: GetWeatherForecastByCityUseCase,
+    private val getWeatherForecastByCoordinatesUseCase: GetWeatherForecastByCoordinatesUseCase,
+    private val setLastWeatherForecastUseCase: SetLastWeatherForecastUseCase,
+    private val listUserLocationsUseCase: ListUserLocationsUseCase,
+    private val saveUserLocationUseCase: SaveUserLocationUseCase,
+    private val deleteUserLocationUseCase: DeleteUserLocationUseCase,
     private var notifications: INotifications,
     private val widgetUpdater: IWidgetUpdater,
     val urlProvider: UrlProvider,
-    private val loggerManager: ILogManager
+    private val loggerManager: ILogManager,
 ) : ParentViewModel() {
-
     private val TAG = this::class.simpleName
 
     private val _locations = MutableStateFlow<List<UserCustomLocation>>(listOf())
@@ -66,9 +73,8 @@ class UserCustomLocationViewModel(
         weatherPrefKey: String,
         notificationTitle: String,
         notificationShortDetails: String,
-        notificationLongDetails: String
+        notificationLongDetails: String,
     ) {
-
         this.weatherPrefKey = weatherPrefKey
         this.notificationTitle = notificationTitle
         this.notificationShortDetails = notificationShortDetails
@@ -85,12 +91,12 @@ class UserCustomLocationViewModel(
                 _screenState.value = UserCustomLocationScreenState.Loading
                 _error.value = null
 
-                val locationsFromDb = userCustomLocationLocalRepository.listAll()
+                val locationsFromDb = listUserLocationsUseCase(Unit)
                 log("Custom location: ${locationsFromDb.size}", false)
 
                 _locations.value = locationsFromDb.sortedWith(
                     compareByDescending<UserCustomLocation> { it.isCurrent }
-                        .thenByDescending { it.isSelected }
+                        .thenByDescending { it.isSelected },
                 )
                 _screenState.value = if (locationsFromDb.isNotEmpty()) {
                     UserCustomLocationScreenState.LocationsObtained
@@ -99,7 +105,6 @@ class UserCustomLocationViewModel(
                 }
 
                 launchWeatherUpdates(locationsFromDb, lang, apiKey, days, measureUnit)
-
             } catch (e: Exception) {
                 handleError(e)
             }
@@ -111,7 +116,7 @@ class UserCustomLocationViewModel(
         lang: String,
         apiKey: String,
         days: Int,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
     ) {
         weatherUpdateJob?.cancel()
         weatherUpdateJob = viewModelScope.launch(Dispatchers.IO) {
@@ -135,23 +140,27 @@ class UserCustomLocationViewModel(
         lang: String,
         apiKey: String,
         days: Int,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
     ) {
         try {
             val weatherResult = if (location.lat != null && location.lon != null) {
-                weatherRemoteRepository.getWeatherDataForecast(
-                    location.lat!!,
-                    location.lon!!,
-                    lang,
-                    apiKey,
-                    days
+                getWeatherForecastByCoordinatesUseCase(
+                    GetWeatherForecastByCoordinatesUseCase.Params(
+                        location.lat!!,
+                        location.lon!!,
+                        lang,
+                        apiKey,
+                        days,
+                    ),
                 )
             } else {
-                weatherRemoteRepository.getWeatherDataForecast(
-                    location.cityName,
-                    lang,
-                    apiKey,
-                    days
+                getWeatherForecastByCityUseCase(
+                    GetWeatherForecastByCityUseCase.Params(
+                        location.cityName,
+                        lang,
+                        apiKey,
+                        days,
+                    ),
                 )
             }
 
@@ -163,7 +172,7 @@ class UserCustomLocationViewModel(
                                 icon = forecast.current.condition.icon,
                                 tempC = forecast.current.tempC,
                                 tempF = forecast.current.tempF,
-                                cityName = "${forecast.location.name}/${forecast.location.region}"
+                                cityName = "${forecast.location.name}/${forecast.location.region}",
                             )
                         } else {
                             current
@@ -180,7 +189,6 @@ class UserCustomLocationViewModel(
                 .onError { error ->
                     log("Weather error for ${location.cityName}: $error", isError = true)
                 }
-
         } catch (e: Exception) {
             log("Exception fetching weather for ${location.cityName}: ${e.message}", isError = true)
         }
@@ -191,22 +199,22 @@ class UserCustomLocationViewModel(
         lang: String,
         apiKey: String,
         days: Int,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             _screenState.value = UserCustomLocationScreenState.Loading
             try {
-                val allLocations = userCustomLocationLocalRepository.listAll()
+                val allLocations = listUserLocationsUseCase(Unit)
                 allLocations.forEach { location ->
                     val wasSelected = location.isSelected
                     location.isSelected = false
                     if (wasSelected) {
-                        userCustomLocationLocalRepository.saveLocation(location)
+                        saveUserLocationUseCase(SaveUserLocationUseCase.Params(location))
                     }
                 }
 
                 userLocation.isSelected = true
-                userCustomLocationLocalRepository.saveLocation(userLocation)
+                saveUserLocationUseCase(SaveUserLocationUseCase.Params(userLocation))
 
                 val updatedLocations = _locations.value.map { location ->
                     when {
@@ -217,17 +225,16 @@ class UserCustomLocationViewModel(
                 }
 
                 _locations.value = updatedLocations
-                weatherRemoteRepository.getWeatherDataForecast(
-                    userLocation.lat!!,
-                    userLocation.lon!!,
-                    lang,
-                    apiKey,
-                    days
+                getWeatherForecastByCoordinatesUseCase(
+                    GetWeatherForecastByCoordinatesUseCase.Params(
+                        userLocation.lat!!,
+                        userLocation.lon!!,
+                        lang,
+                        apiKey,
+                        days,
+                    ),
                 ).onSuccess {
-                    weatherRemoteRepository.setLastWeatherForecast(
-                        weatherPrefKey,
-                        it
-                    )
+                    setLastWeatherForecastUseCase(SetLastWeatherForecastUseCase.Params(weatherPrefKey, it))
                     createWeatherNotification(it, measureUnit)
                     widgetUpdater.updateAllWeatherWidgets()
                 }
@@ -245,7 +252,7 @@ class UserCustomLocationViewModel(
     fun removeLocation() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                userCustomLocationLocalRepository.delete(currentLocation)
+                deleteUserLocationUseCase(DeleteUserLocationUseCase.Params(currentLocation))
                 log("Custom location: ${currentLocation.cityName} removed.", false)
 
                 val updatedLocations = _locations.value.filter { it.id != currentLocation.id }
@@ -258,7 +265,6 @@ class UserCustomLocationViewModel(
                 } else {
                     UserCustomLocationScreenState.NoLocations
                 }
-
             } catch (e: Exception) {
                 _error.value = "Error removing location: ${e.message}"
                 log("Location removal error: ${e.message}", isError = true)
@@ -271,7 +277,7 @@ class UserCustomLocationViewModel(
             try {
                 _screenState.value = UserCustomLocationScreenState.Loading
 
-                val locationsFromDb = userCustomLocationLocalRepository.listAll()
+                val locationsFromDb = listUserLocationsUseCase(Unit)
 
                 if (locationsFromDb.isEmpty()) {
                     _locations.value = emptyList()
@@ -283,7 +289,6 @@ class UserCustomLocationViewModel(
                 _screenState.value = UserCustomLocationScreenState.LocationsObtained
 
                 launchWeatherUpdates(locationsFromDb, lang, apiKey, days, measureUnit)
-
             } catch (e: Exception) {
                 handleError(e)
             }
@@ -323,27 +328,27 @@ class UserCustomLocationViewModel(
 
     private fun createWeatherNotification(
         forecast: Forecast,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
     ) {
         notifications.createNotification(
             notificationTitle.format(
                 if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.tempC else forecast.current.tempF,
-                forecast.location.region.orEmpty()
+                forecast.location.region.orEmpty(),
             ),
             notificationShortDetails.format(
                 forecast.current.condition.description,
-                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF
+                if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF,
             ),
             notificationLongDetails.format(
                 forecast.current.condition.description,
                 if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.current.feelslikeC else forecast.current.feelslikeF,
                 if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.mintempC.toString() else forecast.forecast.forecastDay[0].day.mintempF.toString(),
                 if (measureUnit == MeasureUnit.INTERNATIONAL) forecast.forecast.forecastDay[0].day.maxtempC.toString() else forecast.forecast.forecastDay[0].day.maxtempF.toString(),
-                forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString()
+                forecast.forecast.forecastDay[0].day.dailyChanceOfRain.toString(),
             ),
             "https:${forecast.current.condition.icon}",
             NotificationGroup.GENERAL,
-            NotificationType.WEATHER_UPDATED
+            NotificationType.WEATHER_UPDATED,
         )
     }
 
@@ -356,7 +361,10 @@ class UserCustomLocationViewModel(
 
 sealed class UserCustomLocationScreenState {
     object Idle : UserCustomLocationScreenState()
+
     object Loading : UserCustomLocationScreenState()
+
     object NoLocations : UserCustomLocationScreenState()
+
     object LocationsObtained : UserCustomLocationScreenState()
 }

@@ -74,7 +74,7 @@ fun SettingsScreen(
     isDarkTheme: Boolean,
     deviceScreenConfiguration: DeviceScreenConfiguration,
     currentLang: String,
-    onLanguageChange: (String) -> Unit
+    onLanguageChange: (String) -> Unit,
 ) {
     val viewModel = koinViewModel<PreferenceViewModel>()
 
@@ -109,7 +109,7 @@ fun SettingsScreen(
             defaultCityKey = defaultCityPreferenceKey,
             defaultCityDefault = defaultCityPreferenceDefault,
             defaultMeasureUnitKey = measureUnitPreferenceKey,
-            defaultMeasureUnitDefault = MeasureUnit.from(measureUnitPreferenceDefault)
+            defaultMeasureUnitDefault = MeasureUnit.from(measureUnitPreferenceDefault),
         )
     }
 
@@ -120,7 +120,6 @@ fun SettingsScreen(
     val selectedTheme by viewModel.preferenceThemeFlow.collectAsStateWithLifecycle()
     val selectedMeasureUnit by viewModel.preferenceMeasureUnitFlow.collectAsStateWithLifecycle()
 
-
     // Listas de opciones desde recursos
 
     val langOptions = stringResource(Res.string.preference_lang_entries)
@@ -128,7 +127,7 @@ fun SettingsScreen(
         .mapIndexed { index, entry ->
             Pair(
                 entry.trim(),
-                stringResource(Res.string.preference_lang_values).split(",")[index].trim()
+                stringResource(Res.string.preference_lang_values).split(",")[index].trim(),
             )
         }
 
@@ -137,7 +136,7 @@ fun SettingsScreen(
         .mapIndexed { index, entry ->
             Pair(
                 entry.trim(),
-                stringResource(Res.string.preference_days_entries).split(",")[index].trim()
+                stringResource(Res.string.preference_days_entries).split(",")[index].trim(),
             )
         }
 
@@ -146,17 +145,16 @@ fun SettingsScreen(
         .mapIndexed { index, entry ->
             Pair(
                 entry.trim(),
-                stringResource(Res.string.preference_image_quality_values).split(",")[index].trim()
+                stringResource(Res.string.preference_image_quality_values).split(",")[index].trim(),
             )
         }
-
 
     val measureUnitOptions = stringResource(Res.string.preference_measure_unit_entries)
         .split(",")
         .mapIndexed { index, entry ->
             Pair(
                 entry.trim(),
-                stringResource(Res.string.preference_measure_unit_values).split(",")[index].trim()
+                stringResource(Res.string.preference_measure_unit_values).split(",")[index].trim(),
             )
         }
 
@@ -165,7 +163,7 @@ fun SettingsScreen(
         .mapIndexed { index, entry ->
             Pair(
                 entry.trim(),
-                stringResource(Res.string.preference_app_theme_values).split(",")[index].trim()
+                stringResource(Res.string.preference_app_theme_values).split(",")[index].trim(),
             )
         }
 
@@ -174,7 +172,7 @@ fun SettingsScreen(
             scope.launch {
                 snackbarHostState.showSnackbar(
                     message = viewModel.message.orEmpty()["error"].orEmpty(),
-                    duration = SnackbarDuration.Short
+                    duration = SnackbarDuration.Short,
                 )
                 viewModel.message?.clear()
             }
@@ -191,7 +189,7 @@ fun SettingsScreen(
                     Snackbar(
                         snackbarData = data,
                         containerColor = MaterialTheme.colorScheme.error, // Fondo del Snackbar
-                        contentColor = MaterialTheme.colorScheme.onError // Color del texto
+                        contentColor = MaterialTheme.colorScheme.onError, // Color del texto
                     )
                 }
             },
@@ -203,7 +201,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
             ) {
                 key(currentLang) {
                     SettingRadioOptions(
@@ -216,12 +214,10 @@ fun SettingsScreen(
                         options = langOptions,
                         selectedOption = selectedLang,
                         onOptionSelected = {
-                            scope.launch {
-                                viewModel.preferenceRepository.setPreference(langPreferenceKey, it)
-                            }
+                            viewModel.savePreference(langPreferenceKey, it)
                             viewModel.setPreferenceLang(it)
                             onLanguageChange(it)
-                        }
+                        },
                     )
 
                     SettingRadioOptions(
@@ -234,11 +230,9 @@ fun SettingsScreen(
                         options = themeOptions,
                         selectedOption = selectedTheme,
                         onOptionSelected = {
-                            scope.launch {
-                                viewModel.preferenceRepository.setPreference(themePreferenceKey, it)
-                            }
+                            viewModel.savePreference(themePreferenceKey, it)
                             viewModel.setPreferenceTheme(it)
-                        }
+                        },
                     )
 
                     /*SettingRadioOptions(
@@ -266,14 +260,9 @@ fun SettingsScreen(
                         options = imageQualityOptions,
                         selectedOption = selectedImageQuality,
                         onOptionSelected = {
-                            scope.launch {
-                                viewModel.preferenceRepository.setPreference(
-                                    imageQualityPreferenceKey,
-                                    it
-                                )
-                            }
+                            viewModel.savePreference(imageQualityPreferenceKey, it)
                             viewModel.setPreferenceImageQuality(it)
-                        }
+                        },
                     )
 
                     SettingRadioOptions(
@@ -286,16 +275,10 @@ fun SettingsScreen(
                         options = measureUnitOptions,
                         selectedOption = selectedMeasureUnit.value,
                         onOptionSelected = {
-                            scope.launch {
-                                viewModel.preferenceRepository.setPreference(
-                                    measureUnitPreferenceKey,
-                                    it
-                                )
-                            }
+                            viewModel.savePreference(measureUnitPreferenceKey, it)
                             viewModel.setPreferenceMeasureUnit(it)
-                        }
+                        },
                     )
-
                 }
             }
         }
