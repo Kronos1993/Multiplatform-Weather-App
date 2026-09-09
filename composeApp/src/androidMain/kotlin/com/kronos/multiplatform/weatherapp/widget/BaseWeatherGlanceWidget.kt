@@ -1,6 +1,5 @@
 package com.kronos.multiplatform.weatherapp.widget
 
-
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.graphics.Bitmap
@@ -20,7 +19,6 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.kronos.multiplatform.weatherapp.R
 import com.kronos.multiplatform.weatherapp.core.logguer.ILogManager
 import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
-import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.result.Result
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.util.decodeSampledBitmapFromStream
@@ -33,8 +31,13 @@ import com.kronos.multiplatform.weatherapp.data.remote.ktor.UrlProvider
 import com.kronos.multiplatform.weatherapp.domain.model.DailyForecast
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
-import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
-import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.GetStringPreferenceUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.GetCurrentUserLocationUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.GetSelectedUserLocationUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.GetLastWeatherForecastUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.GetWeatherForecastByCityUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.GetWeatherForecastByCoordinatesUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.SetLastWeatherForecastUseCase
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherParams
 import com.kronos.multiplatform.weatherapp.widget.model.WeatherWidgetData
 import kotlinx.coroutines.Dispatchers
@@ -70,16 +73,20 @@ private val WIDGET_RESPONSIVE_SIZES = setOf(
 private const val WIDGET_ICON_SIZE_PX = 208
 
 abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
-
-    private val weatherRemoteRepository: WeatherRemoteRepository by inject()
-    private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository by inject()
-    private val preferenceRepository: PreferenceRepository by inject()
+    private val getWeatherForecastByCoordinatesUseCase: GetWeatherForecastByCoordinatesUseCase by inject()
+    private val getWeatherForecastByCityUseCase: GetWeatherForecastByCityUseCase by inject()
+    private val getLastWeatherForecastUseCase: GetLastWeatherForecastUseCase by inject()
+    private val setLastWeatherForecastUseCase: SetLastWeatherForecastUseCase by inject()
+    private val getSelectedUserLocationUseCase: GetSelectedUserLocationUseCase by inject()
+    private val getCurrentUserLocationUseCase: GetCurrentUserLocationUseCase by inject()
+    private val getStringPreferenceUseCase: GetStringPreferenceUseCase by inject()
     private val urlProvider: UrlProvider by inject()
     private val loggerManager: ILogManager by inject()
     private val changeLang: IChangeLang by inject()
     protected var measureUnit: MeasureUnit = MeasureUnit.INTERNATIONAL
 
     protected abstract fun getClassName(): Class<out GlanceAppWidget>
+
     protected open val TAG = this::class.simpleName.orEmpty()
 
     override val sizeMode: SizeMode = SizeMode.Responsive(WIDGET_RESPONSIVE_SIZES)
@@ -90,17 +97,21 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     protected suspend fun loadWeatherDataFromCache(context: Context): WeatherWidgetData? {
         log("Iniciando carga de datos del clima (GlanceWidget) solo de la cache")
-        val currentLang = preferenceRepository.getPreference(
-            context.getString(R.string.default_lang_key),
-            context.getString(R.string.default_language_value)
+        val currentLang = getStringPreferenceUseCase(
+            GetStringPreferenceUseCase.Params(
+                context.getString(R.string.default_lang_key),
+                context.getString(R.string.default_language_value),
+            ),
         )
         changeLang.onLangChange(currentLang)
 
         measureUnit = MeasureUnit.from(
-            preferenceRepository.getPreference(
-                context.getString(R.string.measure_unit_key),
-                context.getString(R.string.measure_unit_preference_default_value)
-            )
+            getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    context.getString(R.string.measure_unit_key),
+                    context.getString(R.string.measure_unit_preference_default_value),
+                ),
+            ),
         )
 
         return try {
@@ -111,7 +122,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                 val data = createWeatherWidgetData(
                     context,
                     cachedWeatherResult,
-                    weatherParams.imageQuality
+                    weatherParams.imageQuality,
                 )
                 saveWeatherToGlance(context, data)
                 data
@@ -137,7 +148,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                 val data = createWeatherWidgetData(
                     context,
                     cachedWeatherResult,
-                    weatherParams.imageQuality
+                    weatherParams.imageQuality,
                 )
                 saveWeatherToGlance(context, data)
                 data
@@ -153,35 +164,41 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     }
 
     private suspend fun fetchFromApiAndSave(context: Context): WeatherWidgetData? {
-        val currentCity = userCustomLocationLocalRepository.getSelectedLocation()
-            ?: userCustomLocationLocalRepository.getCurrentLocation()
+        val currentCity = getSelectedUserLocationUseCase(Unit)
+            ?: getCurrentUserLocationUseCase(Unit)
         val weatherParams = getWeatherParams(context)
 
         val result = when {
             currentCity != null && currentCity.lat != null && currentCity.lon != null ->
-                weatherRemoteRepository.getWeatherDataForecast(
-                    currentCity.lat!!,
-                    currentCity.lon!!,
-                    weatherParams.lang,
-                    weatherParams.apiKey,
-                    weatherParams.days
+                getWeatherForecastByCoordinatesUseCase(
+                    GetWeatherForecastByCoordinatesUseCase.Params(
+                        currentCity.lat!!,
+                        currentCity.lon!!,
+                        weatherParams.lang,
+                        weatherParams.apiKey,
+                        weatherParams.days,
+                    ),
                 )
 
             currentCity != null ->
-                weatherRemoteRepository.getWeatherDataForecast(
-                    currentCity.cityName,
-                    weatherParams.lang,
-                    weatherParams.apiKey,
-                    weatherParams.days
+                getWeatherForecastByCityUseCase(
+                    GetWeatherForecastByCityUseCase.Params(
+                        currentCity.cityName,
+                        weatherParams.lang,
+                        weatherParams.apiKey,
+                        weatherParams.days,
+                    ),
                 )
 
             else -> {
                 log("No hay ubicación. Usando ciudad por defecto.")
-                weatherRemoteRepository.getWeatherDataForecast(
-                    weatherParams.defaultCity,
-                    weatherParams.lang,
-                    weatherParams.apiKey,
-                    weatherParams.days
+                getWeatherForecastByCityUseCase(
+                    GetWeatherForecastByCityUseCase.Params(
+                        weatherParams.defaultCity,
+                        weatherParams.lang,
+                        weatherParams.apiKey,
+                        weatherParams.days,
+                    ),
                 )
             }
         }
@@ -190,9 +207,11 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             is Result.Success -> {
                 log("Datos obtenidos de API para ${result.data.location.name}.")
                 val data = createWeatherWidgetData(context, result.data, weatherParams.imageQuality)
-                weatherRemoteRepository.setLastWeatherForecast(
-                    context.getString(R.string.current_weather_key),
-                    result.data
+                setLastWeatherForecastUseCase(
+                    SetLastWeatherForecastUseCase.Params(
+                        context.getString(R.string.current_weather_key),
+                        result.data,
+                    ),
                 )
                 saveWeatherToGlance(context, data)
                 data
@@ -207,10 +226,13 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     private suspend fun loadCachedWeather(context: Context): Forecast? {
         return try {
-            when (val r = weatherRemoteRepository.getLastWeatherForecast(
-                context.getString(R.string.current_weather_key)
-            )) {
+            when (
+                val r = getLastWeatherForecastUseCase(
+                    GetLastWeatherForecastUseCase.Params(context.getString(R.string.current_weather_key)),
+                )
+            ) {
                 is Result.Success -> r.data
+
                 is Result.Error -> {
                     log("No se pudo cargar caché: ${r.error.errorMessage}", isError = true)
                     null
@@ -224,23 +246,31 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
 
     private suspend fun getWeatherParams(context: Context): WeatherParams {
         return WeatherParams(
-            defaultCity = preferenceRepository.getPreference(
-                context.getString(R.string.default_city_key),
-                context.getString(R.string.default_city_value)
+            defaultCity = getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    context.getString(R.string.default_city_key),
+                    context.getString(R.string.default_city_value),
+                ),
             ),
-            lang = preferenceRepository.getPreference(
-                context.getString(R.string.default_lang_key),
-                context.getString(R.string.default_language_value)
+            lang = getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    context.getString(R.string.default_lang_key),
+                    context.getString(R.string.default_language_value),
+                ),
             ),
             apiKey = context.getString(R.string.api_key),
-            days = preferenceRepository.getPreference(
-                context.getString(R.string.default_days_key),
-                context.getString(R.string.default_days_values)
+            days = getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    context.getString(R.string.default_days_key),
+                    context.getString(R.string.default_days_values),
+                ),
             ).toInt(),
-            imageQuality = preferenceRepository.getPreference(
-                context.getString(R.string.default_image_quality_key),
-                context.getString(R.string.default_image_quality_value)
-            )
+            imageQuality = getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    context.getString(R.string.default_image_quality_key),
+                    context.getString(R.string.default_image_quality_value),
+                ),
+            ),
         )
     }
 
@@ -251,11 +281,13 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     private suspend fun createWeatherWidgetData(
         context: Context,
         forecast: Forecast,
-        imageQuality: String
+        imageQuality: String,
     ): WeatherWidgetData {
-        val currentLanguage = preferenceRepository.getPreference(
-            context.getString(R.string.default_lang_key),
-            context.getString(R.string.default_language_value)
+        val currentLanguage = getStringPreferenceUseCase(
+            GetStringPreferenceUseCase.Params(
+                context.getString(R.string.default_lang_key),
+                context.getString(R.string.default_language_value),
+            ),
         )
 
         val futureDays = forecast.forecast.forecastDay.filterNot { isToday(it.date) }.take(2)
@@ -302,7 +334,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             day2IconUrl = day2IconUrl,
             currentIconBitmap = bitmaps.first,
             day1IconBitmap = bitmaps.second,
-            day2IconBitmap = bitmaps.third
+            day2IconBitmap = bitmaps.third,
         )
     }
 
@@ -321,7 +353,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     private suspend fun loadBitmapWithRetry(
         url: String?,
         maxRetries: Int = 3,
-        delayMs: Long = 500L
+        delayMs: Long = 500L,
     ): Bitmap? = withContext(Dispatchers.IO) {
         if (url.isNullOrBlank()) return@withContext null
 
@@ -346,14 +378,14 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
                 val bitmap = decodeSampledBitmapFromStream(
                     connection.inputStream,
                     reqWidth = WIDGET_ICON_SIZE_PX,
-                    reqHeight = WIDGET_ICON_SIZE_PX
+                    reqHeight = WIDGET_ICON_SIZE_PX,
                 )
                 if (bitmap != null) return@withContext bitmap
                 // Si bitmap es null pero no hubo excepción, reintentamos
             } catch (e: Exception) {
                 log(
                     "Intento ${attempt + 1}/$maxRetries fallido para $safeUrl: ${e.message}",
-                    isError = true
+                    isError = true,
                 )
                 if (attempt < maxRetries - 1) {
                     delay(delayMs * (attempt + 1)) // backoff lineal: 500ms, 1000ms, 1500ms
@@ -401,7 +433,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         val prefs = getAppWidgetState(
             context,
             PreferencesGlanceStateDefinition,
-            glanceIds.first()
+            glanceIds.first(),
         )
 
         val currentIconUrl = prefs[stringPreferencesKey("currentIconUrl")] ?: ""
@@ -432,7 +464,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
             day2IconUrl = day2IconUrl,
             currentIconBitmap = bitmaps.first,
             day1IconBitmap = bitmaps.second,
-            day2IconBitmap = bitmaps.third
+            day2IconBitmap = bitmaps.third,
         )
     }
 
@@ -441,7 +473,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         currentCondition = context.getString(R.string.widget_error_text),
         tomorrowCondition = "--", humidity = "--", windSpeed = "--",
         windDirection = "--", uvIndex = 0.0, currentIconUrl = "",
-        day1Name = "", day1IconUrl = "", day2Name = "", day2IconUrl = ""
+        day1Name = "", day1IconUrl = "", day2Name = "", day2IconUrl = "",
     )
 
     // ============================================================
@@ -452,7 +484,7 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
         context: Context,
         glanceId: GlanceId,
         appWidgetId: Int,
-        throwable: Throwable
+        throwable: Throwable,
     ) {
         val rv = RemoteViews(context.packageName, R.layout.glance_widget_error)
         AppWidgetManager.getInstance(context).updateAppWidget(appWidgetId, rv)
@@ -482,26 +514,35 @@ abstract class BaseWeatherGlanceWidget : GlanceAppWidget(), KoinComponent {
     private fun getDayName(
         context: Context,
         dailyForecast: DailyForecast,
-        language: String
+        language: String,
     ): String = try {
         val instant = Instant.of(dailyForecast.date, includeHours = false)
         if (instant != null) {
             when {
                 instant.isToday() -> context.getString(R.string.today)
+
                 instant.isTomorrow() -> context.getString(R.string.tomorrow)
+
                 else -> when (instant.toDayOfWeekText()) {
                     DayOfWeek.MONDAY -> context.getString(R.string.monday).capitalize(language)
+
                     DayOfWeek.TUESDAY -> context.getString(R.string.tuesday).capitalize(language)
+
                     DayOfWeek.WEDNESDAY -> context.getString(R.string.wednesday)
                         .capitalize(language)
 
                     DayOfWeek.THURSDAY -> context.getString(R.string.thursday).capitalize(language)
+
                     DayOfWeek.FRIDAY -> context.getString(R.string.friday).capitalize(language)
+
                     DayOfWeek.SATURDAY -> context.getString(R.string.saturday).capitalize(language)
+
                     DayOfWeek.SUNDAY -> context.getString(R.string.sunday).capitalize(language)
                 }
             }
-        } else ""
+        } else {
+            ""
+        }
     } catch (_: Exception) {
         ""
     }
