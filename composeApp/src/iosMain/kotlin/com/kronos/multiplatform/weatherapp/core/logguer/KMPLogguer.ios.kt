@@ -17,12 +17,11 @@ import platform.Foundation.stringWithContentsOfFile
 import platform.Foundation.writeToFile
 
 actual class LogManager : ILogManager {
-
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun log(
         level: LogLevel,
         tag: String,
-        message: String
+        message: String,
     ) {
         val fileManager = NSFileManager.defaultManager
         val logPath = getLogFile()
@@ -44,7 +43,6 @@ actual class LogManager : ILogManager {
             }
             val updated = existing + "$line\n"
             updated.writeTextToFile(logPath)
-
         } catch (e: Exception) {
             println("Error writing log: ${e.message}")
         }
@@ -64,8 +62,6 @@ actual class LogManager : ILogManager {
         "".writeTextToFile(getLogFile())
     }
 
-
-
     @OptIn(ExperimentalForeignApi::class)
     private fun getLogsDir(): String {
         val paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true)
@@ -77,14 +73,13 @@ actual class LogManager : ILogManager {
                 logsPath,
                 withIntermediateDirectories = true,
                 attributes = null,
-                error = null
+                error = null,
             )
         }
         return logsPath
     }
 
     private fun getLogFile(): String = "${getLogsDir()}/$LOG_FILE_NAME"
-
 
     private fun String.writeTextToFile(path: String) {
         val data = this.encodeToByteArray().toNSData()
@@ -97,6 +92,4 @@ actual class LogManager : ILogManager {
             NSData.dataWithBytes(pinned.addressOf(0), this.size.toULong())
         }
     }
-
-
 }

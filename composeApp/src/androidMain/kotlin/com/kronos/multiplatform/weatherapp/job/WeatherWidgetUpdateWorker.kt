@@ -21,7 +21,6 @@ class WeatherWidgetUpdateWorker(
     appContext: Context,
     workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams), KoinComponent {
-
     private val widgetUpdater: IWidgetUpdater by inject()
 
     companion object {
@@ -34,7 +33,7 @@ class WeatherWidgetUpdateWorker(
 
             val request = PeriodicWorkRequestBuilder<WeatherWidgetUpdateWorker>(
                 repeatInterval = 30,
-                repeatIntervalTimeUnit = TimeUnit.MINUTES
+                repeatIntervalTimeUnit = TimeUnit.MINUTES,
             )
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 5, TimeUnit.MINUTES)
@@ -43,7 +42,7 @@ class WeatherWidgetUpdateWorker(
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 WORK_NAME,
                 ExistingPeriodicWorkPolicy.KEEP,
-                request
+                request,
             )
         }
 
@@ -52,7 +51,7 @@ class WeatherWidgetUpdateWorker(
                 .setConstraints(
                     Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
+                        .build(),
                 )
                 .build()
             WorkManager.getInstance(context).enqueue(request)

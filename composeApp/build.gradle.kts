@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.androidxRoom)
     alias(libs.plugins.swiftPackageManager)
     alias(libs.plugins.playPublisher)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
@@ -24,7 +25,7 @@ kotlin {
     listOf(
         iosArm64(),
         iosX64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.compilations {
             val main by getting {
@@ -58,13 +59,13 @@ kotlin {
             implementation(libs.androidx.location.service)
 
             // MapLibre para Android
-            //implementation(libs.maplibre.android)
+            // implementation(libs.maplibre.android)
 
-            //Glace Widget
+            // Glace Widget
             implementation(libs.androidx.glance.appwidget)
             implementation(libs.androidx.glance.material3)
 
-            //worker
+            // worker
             implementation(libs.androidx.work.runtime.ktx)
         }
         commonMain.dependencies {
@@ -107,24 +108,25 @@ kotlin {
 
             implementation(libs.kotlinx.datetime)
 
-            //logger
+            // logger
             implementation(libs.kermit)
 
-            //room
+            // room
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqliteBundled)
 
-            //file kit
+            // file kit
+
             /*implementation(libs.file.kit.core)
             implementation(libs.file.kit.compose)*/
 
-            //api(libs.kmpnotifier)
+            // api(libs.kmpnotifier)
 
             implementation(libs.maplibre.compose)
             implementation(libs.maplibre.composeMaterial3)
 
-            //charts
-            implementation (libs.compose.charts)
+            // charts
+            implementation(libs.compose.charts)
         }
 
         iosMain.dependencies {
@@ -139,10 +141,25 @@ kotlin {
                 remotePackageVersion(
                     url = URI("https://github.com/maplibre/maplibre-gl-native-distribution.git"),
                     products = { add("MapLibre") },
-                    version = "6.17.1"
+                    version = "6.17.1",
                 )
             }
         }
+    }
+}
+
+ktlint {
+    // `ktlintCheck` currently fails on a large pre-existing violation backlog in
+    // commonMain/androidMain (not yet cleaned up — see specs/_archive/adopt-ktlint's
+    // decisions.md / OQ-3 for the follow-up cleanup spec). ignoreFailures keeps
+    // `check`/`build` green while the tool is adopted; flip this to false once that
+    // backlog is cleared so ktlintCheck actually gates the build again.
+    ignoreFailures.set(true)
+
+    filter {
+        // KSP/Room-generated sources (Dao impls, metadata) aren't ours to style —
+        // linting them just adds noise that reappears after every regeneration.
+        exclude { entry -> entry.file.path.contains("${File.separator}generated${File.separator}") }
     }
 }
 
@@ -178,7 +195,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             if (System.getenv("ANDROID_KEYSTORE_PATH") != null) {
                 signingConfig = signingConfigs.getByName("release")
@@ -203,8 +220,8 @@ play {
     serviceAccountCredentials.set(
         file(
             System.getenv("PLAY_SERVICE_ACCOUNT_JSON_PATH")
-                ?: "${rootProject.projectDir}/play-service-account.json"
-        )
+                ?: "${rootProject.projectDir}/play-service-account.json",
+        ),
     )
     track.set("production")
     defaultToAppBundles.set(true)
@@ -223,8 +240,8 @@ dependencies {
     debugImplementation(compose.uiTooling)
     ksp(libs.androidx.room.compiler)
     add("kspCommonMainMetadata", libs.androidx.room.compiler)
-    add("kspAndroid",libs.androidx.room.compiler)
-    add("kspIosSimulatorArm64",libs.androidx.room.compiler)
-    add("kspIosX64",libs.androidx.room.compiler)
-    add("kspIosArm64",libs.androidx.room.compiler)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosX64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
 }

@@ -6,7 +6,6 @@ import platform.UserNotifications.UNTimeIntervalNotificationTrigger
 import platform.UserNotifications.UNUserNotificationCenter
 
 actual class AppNotification : INotifications {
-
     override fun createNotification(
         title: String,
         shortDescription: String,
@@ -28,7 +27,7 @@ actual class AppNotification : INotifications {
         shortDescription: String,
         description: String,
         group: NotificationGroup,
-        notificationsId: NotificationType
+        notificationsId: NotificationType,
     ) {
         postNotification(
             notificationsId = notificationsId,
@@ -43,7 +42,7 @@ actual class AppNotification : INotifications {
         shortDescription: String,
         description: String,
         group: NotificationGroup,
-        notificationsId: NotificationType
+        notificationsId: NotificationType,
     ) {
         postNotification(
             notificationsId = notificationsId,
@@ -67,13 +66,13 @@ actual class AppNotification : INotifications {
 
         val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
             1.0,
-            repeats = false
+            repeats = false,
         )
 
         val request = UNNotificationRequest.requestWithIdentifier(
             identifier = notificationsId.name,
             content = content,
-            trigger = trigger
+            trigger = trigger,
         )
 
         val center = UNUserNotificationCenter.currentNotificationCenter()
@@ -87,7 +86,7 @@ actual class AppNotification : INotifications {
         center.removePendingNotificationRequestsWithIdentifiers(listOf(notificationsId.name))
 
         center.addNotificationRequest(
-            request = request
+            request = request,
         ) { error ->
             if (error != null) {
                 println("🚨 Error al enviar notificación: ${error.localizedDescription}")
@@ -99,7 +98,7 @@ actual class AppNotification : INotifications {
 
     override fun hideNotification(notificationType: NotificationType) {
         UNUserNotificationCenter.currentNotificationCenter().removePendingNotificationRequestsWithIdentifiers(
-            identifiers = listOf(notificationType.name)
+            identifiers = listOf(notificationType.name),
         )
     }
 }
