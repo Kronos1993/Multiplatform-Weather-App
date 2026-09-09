@@ -7,12 +7,11 @@ import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
-
 class ApplicationDatabaseFactory : LocalDatabaseFactory {
     override fun loadLocalDatabase(): RoomDatabase.Builder<ApplicationDatabase> {
         val dbFilePath = documentDirectory() + "/$DATABASE_NAME"
         return Room.databaseBuilder<ApplicationDatabase>(
-            name = dbFilePath
+            name = dbFilePath,
         )
     }
 

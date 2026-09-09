@@ -21,15 +21,12 @@ import org.koin.android.ext.koin.androidContext
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-
 const val NOTIFICATION_CHANNEL = "KMP_WEATHER_NOTIFICATION_CHANNEL"
 const val WEATHER_ALERT_NOTIFICATION_CHANNEL = "KMP_WEATHER_ALERT_NOTIFICATION_CHANNEL"
 const val SUGGESTION_NOTIFICATION_CHANNEL = "KMP_WEATHER_SUGGESTION_CHANNEL"
 const val TAG = "WeatherApp"
 
-
 class WeatherApplication : Application() {
-
     private val exceptionHandler: ExceptionHandler by inject()
 
     override fun onCreate() {
@@ -57,27 +54,26 @@ class WeatherApplication : Application() {
     private fun createNotificationChanel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                NOTIFICATION_CHANNEL, NOTIFICATION_CHANNEL, NotificationManager.IMPORTANCE_LOW
+                NOTIFICATION_CHANNEL, NOTIFICATION_CHANNEL, NotificationManager.IMPORTANCE_LOW,
             )
             notificationChannel.description = NOTIFICATION_CHANNEL
             val notificationManager = getSystemService(
-                NotificationManager::class.java
+                NotificationManager::class.java,
             )
             notificationManager.createNotificationChannel(notificationChannel)
         }
     }
-
 
     private fun createWeatherAlertNotificationChanel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
                 WEATHER_ALERT_NOTIFICATION_CHANNEL,
                 WEATHER_ALERT_NOTIFICATION_CHANNEL,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             )
             notificationChannel.description = WEATHER_ALERT_NOTIFICATION_CHANNEL
             val notificationManager = getSystemService(
-                NotificationManager::class.java
+                NotificationManager::class.java,
             )
             notificationManager.createNotificationChannel(notificationChannel)
         }
@@ -88,7 +84,7 @@ class WeatherApplication : Application() {
             val channel = NotificationChannel(
                 SUGGESTION_NOTIFICATION_CHANNEL,
                 SUGGESTION_NOTIFICATION_CHANNEL,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
                 description = SUGGESTION_NOTIFICATION_CHANNEL
             }
@@ -96,7 +92,6 @@ class WeatherApplication : Application() {
                 .createNotificationChannel(channel)
         }
     }
-
 
     private fun scheduleWeatherWorker(minutes: Long) {
         val constraints = Constraints.Builder()
@@ -107,7 +102,7 @@ class WeatherApplication : Application() {
         val validMinutes = maxOf(minutes, 15L)
 
         val workRequest = PeriodicWorkRequestBuilder<WeatherNotificationWorker>(
-            validMinutes, TimeUnit.MINUTES
+            validMinutes, TimeUnit.MINUTES,
         )
             .setConstraints(constraints)
             .build()
@@ -115,7 +110,7 @@ class WeatherApplication : Application() {
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             WeatherNotificationWorker::class.java.simpleName,
             ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
+            workRequest,
         )
     }
 
@@ -128,7 +123,7 @@ class WeatherApplication : Application() {
         val validMinutes = maxOf(minutes, 15L)
 
         val workRequest = PeriodicWorkRequestBuilder<WeatherAlertNotificationWorker>(
-            validMinutes, TimeUnit.MINUTES
+            validMinutes, TimeUnit.MINUTES,
         )
             .setConstraints(constraints)
             .build()
@@ -136,7 +131,7 @@ class WeatherApplication : Application() {
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             WeatherAlertNotificationWorker::class.java.simpleName,
             ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
+            workRequest,
         )
     }
 

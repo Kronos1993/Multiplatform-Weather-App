@@ -28,7 +28,6 @@ import weather_app.composeapp.generated.resources.measure_unit_key
 import weather_app.composeapp.generated.resources.measure_unit_preference_default_value
 
 class WeatherNotificationBackgroundTask : KoinComponent {
-
     private val weatherRemoteRepository: WeatherRemoteRepository by inject()
     private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository by inject()
     private val preferenceRepository: PreferenceRepository by inject()
@@ -50,7 +49,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
         longDetails: String,
         titleFahrenheit: String,
         shortDetailsFahrenheit: String,
-        longDetailsFahrenheit: String
+        longDetailsFahrenheit: String,
     ) {
         this.notificationTitle = title
         this.notificationShortDetails = shortDetails
@@ -79,49 +78,48 @@ class WeatherNotificationBackgroundTask : KoinComponent {
                     currentCity.lon ?: 0.0,
                     weatherParams.lang,
                     weatherParams.apiKey,
-                    weatherParams.days
+                    weatherParams.days,
                 )
             } else if (!currentCity?.cityName.isNullOrEmpty()) {
                 weatherRemoteRepository.getWeatherDataForecast(
                     currentCity.cityName,
                     weatherParams.lang,
                     weatherParams.apiKey,
-                    weatherParams.days
+                    weatherParams.days,
                 )
             } else {
                 weatherRemoteRepository.getWeatherDataForecast(
                     "Panama",
                     weatherParams.lang,
                     weatherParams.apiKey,
-                    weatherParams.days
+                    weatherParams.days,
                 )
             }
 
             forecast
                 .onSuccess {
                     createWeatherNotification(it, weatherParams.measureUnit)
-                    weatherRemoteRepository.setLastWeatherForecast("current_weather",it)
+                    weatherRemoteRepository.setLastWeatherForecast("current_weather", it)
                     widgetUpdater.updateAllWeatherWidgets()
                     onForecastReady?.invoke(it, weatherParams.measureUnit)
                     loggerManager.log(
                         LogLevel.INFO,
                         "WeatherNotificationBackgroundTask",
-                        "Clima actualizado en background"
+                        "Clima actualizado en background",
                     )
                 }
                 .onError {
                     loggerManager.log(
                         LogLevel.ERROR,
                         "WeatherNotificationBackgroundTask",
-                        "Error getting forecast: ${it.errorMessage}"
+                        "Error getting forecast: ${it.errorMessage}",
                     )
                 }
-
         } catch (e: Exception) {
             loggerManager.log(
                 LogLevel.ERROR,
                 "WeatherNotificationBackgroundTask",
-                "Error: ${e.message}"
+                "Error: ${e.message}",
             )
             println("❌ Error actualizando clima: ${e.message}")
         }
@@ -148,7 +146,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
         // solely on the app's AppleLanguages default set once at launch.
         val lang = preferenceRepository.getPreference(
             getString(Res.string.default_lang_key),
-            getString(Res.string.default_language_value)
+            getString(Res.string.default_language_value),
         )
         changeLang.onLangChange(lang)
 
@@ -157,14 +155,14 @@ class WeatherNotificationBackgroundTask : KoinComponent {
             apiKey = getString(Res.string.api_key),
             days = preferenceRepository.getPreference(
                 getString(Res.string.default_days_key),
-                getString(Res.string.day_preference_default_value)
+                getString(Res.string.day_preference_default_value),
             ).toInt(),
             measureUnit = MeasureUnit.from(
                 preferenceRepository.getPreference(
                     getString(Res.string.measure_unit_key),
-                    getString(Res.string.measure_unit_preference_default_value)
-                )
-            )
+                    getString(Res.string.measure_unit_preference_default_value),
+                ),
+            ),
         )
     }
 
@@ -177,12 +175,12 @@ class WeatherNotificationBackgroundTask : KoinComponent {
         val shortDetails = if (measureUnit == MeasureUnit.INTERNATIONAL)
             notificationShortDetails.format(
                 forecast.current.condition.description,
-                forecast.current.feelslikeC
+                forecast.current.feelslikeC,
             )
         else
             notificationShortDetailsFahrenheit.format(
                 forecast.current.condition.description,
-                forecast.current.feelslikeF
+                forecast.current.feelslikeF,
             )
 
         val longDetails = if (measureUnit == MeasureUnit.INTERNATIONAL)
@@ -191,7 +189,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
                 forecast.current.feelslikeC,
                 forecast.forecast.forecastDay[0].day.mintempC,
                 forecast.forecast.forecastDay[0].day.maxtempC,
-                forecast.forecast.forecastDay[0].day.dailyChanceOfRain
+                forecast.forecast.forecastDay[0].day.dailyChanceOfRain,
             )
         else
             notificationLongDetailsFahrenheit.format(
@@ -199,7 +197,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
                 forecast.current.feelslikeF,
                 forecast.forecast.forecastDay[0].day.mintempF,
                 forecast.forecast.forecastDay[0].day.maxtempF,
-                forecast.forecast.forecastDay[0].day.dailyChanceOfRain
+                forecast.forecast.forecastDay[0].day.dailyChanceOfRain,
             )
 
         notifications.createNotification(
@@ -208,7 +206,7 @@ class WeatherNotificationBackgroundTask : KoinComponent {
             description = longDetails,
             notificationImageUrl = "https:${forecast.current.condition.icon}",
             group = NotificationGroup.GENERAL,
-            notificationsId = NotificationType.WEATHER_UPDATED
+            notificationsId = NotificationType.WEATHER_UPDATED,
         )
     }
 
@@ -216,6 +214,6 @@ class WeatherNotificationBackgroundTask : KoinComponent {
         val lang: String,
         val apiKey: String,
         val days: Int,
-        val measureUnit: MeasureUnit
+        val measureUnit: MeasureUnit,
     )
 }
