@@ -26,7 +26,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-actual val platformModule = module{
+actual val platformModule = module {
     singleOf(::AppPreference).bind<IPreference>()
     singleOf(::AppNotification).bind<INotifications>()
     singleOf(::ExpectedIntents).bind<IExpectedIntents>()

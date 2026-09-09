@@ -59,6 +59,9 @@ workRuntimeKtx = "2.11.2"
 #charts
 composeCharts = "0.2.5"
 
+#style / linting
+ktlint = "14.2.0"
+
 [libraries]
 components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "componentsResources" }
 foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
@@ -152,6 +155,7 @@ androidxRoom = { id = "androidx.room", version.ref = "androidx-room" }
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 swiftPackageManager = { id = "io.github.frankois944.spmForKmp", version.ref = "swift-package-manager" }
 playPublisher = { id = "com.github.triplet.play", version.ref = "playPublisher" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 [bundles]
 ktor = [

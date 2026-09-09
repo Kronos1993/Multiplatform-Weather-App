@@ -8,7 +8,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-actual val  platformDataLocalModules = module {
+actual val platformDataLocalModules = module {
     singleOf(::ApplicationDatabaseFactory).bind<LocalDatabaseFactory>()
     singleOf(::LocationDataSourceImpl).bind<LocationDataSource>()
 }

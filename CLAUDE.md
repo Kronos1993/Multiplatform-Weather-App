@@ -73,7 +73,16 @@ wiring in `di`) rather than introducing a new structure.
   2. `iosApp/en.strings` + `iosApp/es.strings` (native iOS notifications/widgets, resolved via
      `SuggestionStringResolver.swift`).
   A new user-facing string touched from both sides needs edits in both places.
-- No detekt/ktlint/`.editorconfig` — no automated style enforcement; match surrounding style.
+- **ktlint is installed and its rules must be respected.** The root `.editorconfig` is the source of
+  truth for style, including deliberate `ktlint_standard_*` overrides (documented inline there —
+  e.g. `@Composable` PascalCase, snake_case feature packages, `expect`/`actual` filename suffixes,
+  and a block of multiline-wrapping rules disabled as a group). Run `./gradlew :composeApp:ktlintCheck`
+  to check, `./gradlew :composeApp:ktlintFormat` to auto-fix what's mechanical. New/touched code must
+  pass `ktlintCheck` clean. `composeApp/build.gradle.kts`'s `ktlint {}` block currently sets
+  `ignoreFailures = true` — this is a **temporary** bootstrap accommodation for a pre-existing
+  violation backlog in `commonMain`/`androidMain` (tracked for a follow-up cleanup spec, see
+  `specs/_archive/adopt-ktlint/decisions.md`), not a license to ignore new violations; flip it to
+  `false` once that backlog is cleared. No detekt configured.
 - **No test source sets exist** — don't assume a test command exists or claim tests pass.
 
 ## Build & run
@@ -88,7 +97,9 @@ wiring in `di`) rather than introducing a new structure.
 
 - It compiles: `./gradlew :composeApp:assembleDebug` (and `./gradlew build` for multiplatform
   changes; the iOS Xcode project must build for iOS-side changes).
-- There is no lint or test command to run — do not invent one.
+- New/touched Kotlin files pass `./gradlew :composeApp:ktlintCheck` (or are fixed with
+  `./gradlew :composeApp:ktlintFormat`) — see Conventions above. There is no separate test command
+  to run — do not invent one.
 
 ## Working Rules
 

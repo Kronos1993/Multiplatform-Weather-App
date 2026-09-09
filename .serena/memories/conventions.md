@@ -10,6 +10,13 @@
   Adding a user-facing string touched from both sides means editing both locations.
 - Error handling: prefer the sealed `Result` type (`mem:architecture`) over throwing; ViewModels
   catch/convert failures into sealed screen states rather than letting exceptions reach the UI.
-- No detekt/ktlint/`.editorconfig` configured — no automated style enforcement; match surrounding
-  code style by convention.
+- ktlint is installed and enforced by convention: root `.editorconfig` is the style source of
+  truth, including deliberate `ktlint_standard_*` disables (Compose PascalCase, snake_case
+  feature packages, expect/actual filename suffixes, a wrapping-rule block). Run
+  `./gradlew :composeApp:ktlintCheck` / `ktlintFormat`. `composeApp/build.gradle.kts`'s
+  `ktlint { ignoreFailures.set(true) }` is a TEMPORARY bootstrap accommodation for a
+  pre-existing violation backlog (177 files in commonMain, 40 in androidMain) — tracked for a
+  follow-up cleanup spec; flip to `false` once cleared. Generated KSP/Room sources are excluded
+  from ktlint's scope via a `filter` block in the same extension.
+- No detekt configured.
 - No test source sets exist yet — don't assume a test command exists (`mem:task_completion`).

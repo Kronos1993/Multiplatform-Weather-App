@@ -8,11 +8,10 @@ import com.kronos.multiplatform.weatherapp.core.widget.WidgetUpdater
 import com.kronos.multiplatform.weatherapp.job.WeatherWidgetUpdateWorker
 
 abstract class BaseWeatherWidgetReceiver : GlanceAppWidgetReceiver() {
-
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
+        appWidgetIds: IntArray,
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
         WeatherWidgetUpdateWorker.schedule(context)

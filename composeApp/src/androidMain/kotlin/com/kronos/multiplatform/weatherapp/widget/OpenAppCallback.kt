@@ -8,12 +8,11 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
 import com.kronos.multiplatform.weatherapp.MainActivity
 
-class OpenAppCallback : ActionCallback{
-
+class OpenAppCallback : ActionCallback {
     override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
-        parameters: ActionParameters
+        parameters: ActionParameters,
     ) {
         Log.i("OpenAppCallback", "onAction: clicked")
         try {
@@ -24,6 +23,5 @@ class OpenAppCallback : ActionCallback{
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 }
