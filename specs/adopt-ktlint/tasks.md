@@ -62,9 +62,9 @@ generated_by: /spec-plan
 
 ## Handoff
 
-- [ ] Branch created (`chore/adopt-ktlint`)
-- [ ] `/commit` executed
-- [ ] Branch pushed
-- [ ] PR opened against `develop`
-- [ ] Spec folder archived to `specs/_archive/adopt-ktlint/`
-- [ ] Reusable-knowledge candidates from `decisions.md` proposed
+- [x] Branch created (`chore/adopt-ktlint`, off `develop`)
+- [x] `/commit` executed (449ff35)
+- [ ] Branch pushed *(see /spec-finalize)*
+- [ ] PR opened against `develop` *(see /spec-finalize)*
+- [ ] Spec folder archived to `specs/_archive/adopt-ktlint/` *(see /spec-finalize)*
+- [ ] Reusable-knowledge candidates from `decisions.md` proposed *(see /spec-finalize)*
