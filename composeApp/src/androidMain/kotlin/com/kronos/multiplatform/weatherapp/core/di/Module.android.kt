@@ -11,11 +11,13 @@ import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.preferences.AppPreference
 import com.kronos.multiplatform.weatherapp.core.preferences.IPreference
 import com.kronos.multiplatform.weatherapp.core.util.AppInfo
+import com.kronos.multiplatform.weatherapp.core.util.BatteryOptimizationHelper
 import com.kronos.multiplatform.weatherapp.core.util.ChangeLang
 import com.kronos.multiplatform.weatherapp.core.util.CloseAppImpl
 import com.kronos.multiplatform.weatherapp.core.util.ExpectedIntents
 import com.kronos.multiplatform.weatherapp.core.util.HapticFeedback
 import com.kronos.multiplatform.weatherapp.core.util.IAppInfo
+import com.kronos.multiplatform.weatherapp.core.util.IBatteryOptimizationHelper
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.util.ICloseApp
 import com.kronos.multiplatform.weatherapp.core.util.IExpectedIntents
@@ -26,10 +28,11 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-actual val platformModule = module{
+actual val platformModule = module {
     singleOf(::AppPreference).bind<IPreference>()
     singleOf(::AppNotification).bind<INotifications>()
     singleOf(::ExpectedIntents).bind<IExpectedIntents>()
+    singleOf(::BatteryOptimizationHelper).bind<IBatteryOptimizationHelper>()
     singleOf(::HapticFeedback).bind<IHapticFeedback>()
     singleOf(::AppInfo).bind<IAppInfo>()
     singleOf(::DevicePlatform).bind<Platform>()

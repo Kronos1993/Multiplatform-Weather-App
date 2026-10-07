@@ -23,4 +23,8 @@
     <string name="preference_measure_unit_entries">Internacional,Imperial</string>
     <string name="preference_measure_unit_values">1,2</string>
 
+    <string name="preference_background_updates_title">Actualizaciones en segundo plano</string>
+    <string name="preference_background_updates_unrestricted">Sin restricciones</string>
+    <string name="preference_background_updates_restricted">Limitadas por ahorro de batería — toca para corregir</string>
+
 </resources>

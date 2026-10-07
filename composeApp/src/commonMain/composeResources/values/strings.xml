@@ -122,4 +122,11 @@
     <string name="map_layer_temperature">Temperature</string>
     <string name="map_layer_wind">Wind</string>
 
+    <string name="battery_optimization_dialog_title">Keep your weather up to date</string>
+    <string name="battery_optimization_dialog_body">To keep notifications and widgets updating while the app is closed, tap Allow, then open Battery and choose Unrestricted.</string>
+    <string name="battery_optimization_dialog_allow">Allow</string>
+    <string name="battery_optimization_dialog_oem_settings">Manufacturer settings</string>
+    <string name="battery_optimization_dialog_not_now">Not now</string>
+    <string name="battery_optimization_dialog_dont_ask">Don't ask again</string>
+
 </resources>
