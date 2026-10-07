@@ -12,6 +12,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
+import kotlinx.coroutines.CancellationException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.concurrent.TimeUnit
@@ -41,7 +42,7 @@ class WeatherWidgetUpdateWorker(
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 WORK_NAME,
-                ExistingPeriodicWorkPolicy.KEEP,
+                ExistingPeriodicWorkPolicy.UPDATE,
                 request,
             )
         }
@@ -66,6 +67,8 @@ class WeatherWidgetUpdateWorker(
         return try {
             widgetUpdater.updateAllWeatherWidgets()
             Result.success()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("WeatherWidgetUpdateWorker", "Error updating widgets", e)
             Result.retry()
