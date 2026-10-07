@@ -35,6 +35,16 @@ entry point. Root package: `com.kronos.multiplatform.weatherapp` (== application
 - `mem:gradle_ksp_multitarget_build_quirk` — why the aggregate `./gradlew build` can be red on a
   clean checkout while `:composeApp:assembleDebug` and the iOS `xcodebuild` are green; read before
   concluding a source change broke the build if only the aggregate task fails.
+- `mem:android_battery_optimization_settings_ux` — which settings intent to use when asking users to
+  lift battery optimization (One UI list-filter trap, Play policy on the direct request), and the
+  per-OEM auto-launch managers; read before touching `core/util/BatteryOptimizationHelper*` or
+  debugging "widgets/notifications stop updating" on an OEM device.
+- `mem:android_package_visibility_oem_intents` — why `resolveActivity` can't pre-check other apps'
+  components at targetSdk 30+, and the launch-with-fallback pattern; read before adding any
+  intent to another app's explicit component.
+- `mem:compose_tabs_share_viewmodel_owner` — Home's tabs share one `ViewModelStoreOwner`, so
+  `koinViewModel` returns the same instance in `HomeScreen` and a tab screen; read before adding UI
+  state to a ViewModel used by both.
 - `mem:android_widget_spacing_tokens` — `widget/components/WidgetTheme.kt`'s size-class resolver
   (`resolveWidgetSizeClass`) and the `WidgetTypography`/`WidgetSpacing` token pattern; read before
   adding any new size-dependent value to the Android home-screen widgets.

@@ -40,6 +40,15 @@ same defect above, and is fixed by `./gradlew clean` before rebuilding
 (don't assume a clean is unnecessary just because an earlier build in the
 same session succeeded).
 
+**Also observed (2026-10-07)**: the aggregate build can additionally fail
+with `Java heap space` OOMs in `:composeApp:linkReleaseFrameworkIos*` (and
+`kspCommonMainKotlinMetadata` FAILED), after which the Gradle daemon stops
+itself and holds the daemon-registry lock until it exits. A concurrent
+`./gradlew :composeApp:assembleDebug` then fails with "Timeout waiting to lock
+daemon addresses registry". Wait for or kill that build before re-running.
+Raising `org.gradle.jvmargs`/Kotlin daemon heap would be needed for any
+all-target CI build.
+
 Not fixed as part of any single spec — it's a standalone Gradle/KSP task-
 graph wiring issue, out of scope for feature work. Worth a dedicated fix
 if a fully green aggregate `./gradlew build` is ever needed (e.g. for CI).
