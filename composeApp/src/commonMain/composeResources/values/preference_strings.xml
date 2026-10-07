@@ -27,4 +27,8 @@
     <string name="preference_measure_unit_entries">International,Imperial</string>
     <string name="preference_measure_unit_values">1,2</string>
 
+    <string name="preference_background_updates_title">Background updates</string>
+    <string name="preference_background_updates_unrestricted">Unrestricted</string>
+    <string name="preference_background_updates_restricted">Limited by battery saving — tap to fix</string>
+
 </resources>

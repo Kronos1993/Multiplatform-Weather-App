@@ -12,7 +12,6 @@ import com.kronos.multiplatform.weatherapp.core.logguer.LogLevel
 import com.kronos.multiplatform.weatherapp.core.notification.INotifications
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationGroup
 import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
-import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
@@ -27,8 +26,12 @@ import com.kronos.multiplatform.weatherapp.domain.model.SuggestionType
 import com.kronos.multiplatform.weatherapp.domain.model.UvIndexLevel
 import com.kronos.multiplatform.weatherapp.domain.model.WeatherSuggestionModel
 import com.kronos.multiplatform.weatherapp.domain.model.forecast.Forecast
-import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
-import com.kronos.multiplatform.weatherapp.domain.repository.WeatherRemoteRepository
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.GetStringPreferenceUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.GetCurrentUserLocationUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.GetSelectedUserLocationUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.GetWeatherForecastByCityUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.GetWeatherForecastByCoordinatesUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.weather.SetLastWeatherForecastUseCase
 import com.kronos.multiplatform.weatherapp.job.model.NotificationWeatherParams
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -42,13 +45,15 @@ import java.net.UnknownHostException
 
 class WeatherSuggestionNotificationWorker(
     appContext: Context,
-    workerParams: WorkerParameters
+    workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams), KoinComponent {
-
     private val TAG = this::class.simpleName.orEmpty()
-    private val weatherRemoteRepository: WeatherRemoteRepository by inject()
-    private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository by inject()
-    private val preferenceRepository: PreferenceRepository by inject()
+    private val getWeatherForecastByCoordinatesUseCase: GetWeatherForecastByCoordinatesUseCase by inject()
+    private val getWeatherForecastByCityUseCase: GetWeatherForecastByCityUseCase by inject()
+    private val setLastWeatherForecastUseCase: SetLastWeatherForecastUseCase by inject()
+    private val getSelectedUserLocationUseCase: GetSelectedUserLocationUseCase by inject()
+    private val getCurrentUserLocationUseCase: GetCurrentUserLocationUseCase by inject()
+    private val getStringPreferenceUseCase: GetStringPreferenceUseCase by inject()
     private val notifications: INotifications by inject()
     private val loggerManager: ILogManager by inject()
     private val changeLang: IChangeLang by inject()
@@ -61,9 +66,11 @@ class WeatherSuggestionNotificationWorker(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            val currentLang = preferenceRepository.getPreference(
-                applicationContext.getString(R.string.default_lang_key),
-                applicationContext.getString(R.string.default_language_value)
+            val currentLang = getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    applicationContext.getString(R.string.default_lang_key),
+                    applicationContext.getString(R.string.default_language_value),
+                ),
             )
             changeLang.onLangChange(currentLang)
             if (!hasValidatedNetworkConnection()) {
@@ -79,8 +86,8 @@ class WeatherSuggestionNotificationWorker(
     }
 
     private suspend fun refreshWeather() {
-        val currentCity = userCustomLocationLocalRepository.getSelectedLocation()
-            ?: userCustomLocationLocalRepository.getCurrentLocation()
+        val currentCity = getSelectedUserLocationUseCase(Unit)
+            ?: getCurrentUserLocationUseCase(Unit)
 
         val weatherParams = getWeatherParams()
 
@@ -91,7 +98,7 @@ class WeatherSuggestionNotificationWorker(
                         queryLat = currentCity.lat,
                         queryLon = currentCity.lon,
                         weatherParams = weatherParams,
-                        locationType = "coordinates"
+                        locationType = "coordinates",
                     )
                 }
 
@@ -99,7 +106,7 @@ class WeatherSuggestionNotificationWorker(
                     fetchAndNotifyWeather(
                         queryCity = currentCity.cityName,
                         weatherParams = weatherParams,
-                        locationType = "city"
+                        locationType = "city",
                     )
                 }
 
@@ -107,7 +114,7 @@ class WeatherSuggestionNotificationWorker(
                     fetchAndNotifyWeather(
                         queryCity = applicationContext.getString(R.string.default_city_value),
                         weatherParams = weatherParams,
-                        locationType = "default city"
+                        locationType = "default city",
                     )
                 }
             }
@@ -124,42 +131,50 @@ class WeatherSuggestionNotificationWorker(
         queryLon: Double? = null,
         queryCity: String? = null,
         locationType: String,
-        weatherParams: NotificationWeatherParams
+        weatherParams: NotificationWeatherParams,
     ) {
         val result = if (queryLat != null && queryLon != null) {
-            weatherRemoteRepository.getWeatherDataForecast(
-                queryLat,
-                queryLon,
-                weatherParams.lang,
-                weatherParams.apiKey,
-                weatherParams.days
+            getWeatherForecastByCoordinatesUseCase(
+                GetWeatherForecastByCoordinatesUseCase.Params(
+                    queryLat,
+                    queryLon,
+                    weatherParams.lang,
+                    weatherParams.apiKey,
+                    weatherParams.days,
+                ),
             )
         } else {
-            weatherRemoteRepository.getWeatherDataForecast(
-                queryCity ?: "",
-                weatherParams.lang,
-                weatherParams.apiKey,
-                weatherParams.days
+            getWeatherForecastByCityUseCase(
+                GetWeatherForecastByCityUseCase.Params(
+                    queryCity ?: "",
+                    weatherParams.lang,
+                    weatherParams.apiKey,
+                    weatherParams.days,
+                ),
             )
         }
 
         result
             .onSuccess { forecast ->
-                weatherRemoteRepository.setLastWeatherForecast(
-                    applicationContext.getString(R.string.current_weather_key),
-                    forecast
+                setLastWeatherForecastUseCase(
+                    SetLastWeatherForecastUseCase.Params(
+                        applicationContext.getString(R.string.current_weather_key),
+                        forecast,
+                    ),
                 )
                 val notificationType = NotificationType.from(inputData.getString(KEY_NOTIFICATION_TYPE).orEmpty()) ?: NotificationType.WEATHER_SUGGESTION_MORNING
                 val timeZone = forecast.location.tzId
                 val measureUnit = MeasureUnit.from(
-                    preferenceRepository.getPreference(
-                        applicationContext.getString(R.string.measure_unit_key),
-                        applicationContext.getString(R.string.measure_unit_preference_default_value)
-                    )
+                    getStringPreferenceUseCase(
+                        GetStringPreferenceUseCase.Params(
+                            applicationContext.getString(R.string.measure_unit_key),
+                            applicationContext.getString(R.string.measure_unit_preference_default_value),
+                        ),
+                    ),
                 )
                 when (notificationType) {
                     NotificationType.WEATHER_SUGGESTION_EVENING -> handleEveningSuggestion(forecast, measureUnit)
-                    NotificationType.WEATHER_SUGGESTION_MIDDAY  -> handleMiddaySuggestions(forecast, timeZone, measureUnit)
+                    NotificationType.WEATHER_SUGGESTION_MIDDAY -> handleMiddaySuggestions(forecast, timeZone, measureUnit)
                     else -> handleMorningSuggestions(forecast, timeZone, measureUnit)
                 }
                 log("Weather from $locationType acquired: ${forecast.location.name}", false)
@@ -172,7 +187,7 @@ class WeatherSuggestionNotificationWorker(
     private suspend fun <T> withRetry(
         maxRetries: Int = 3,
         initialDelay: Long = 2000,
-        block: suspend () -> T
+        block: suspend () -> T,
     ): T {
         var currentDelay = initialDelay
         repeat(maxRetries) { attempt ->
@@ -185,7 +200,7 @@ class WeatherSuggestionNotificationWorker(
 
                 log(
                     "Intento ${attempt + 1} falló: ${e.message}. Reintentando en ${currentDelay}ms...",
-                    true
+                    true,
                 )
 
                 if (isNetworkRelatedError(e)) {
@@ -201,33 +216,39 @@ class WeatherSuggestionNotificationWorker(
 
     private suspend fun getWeatherParams(): NotificationWeatherParams {
         return NotificationWeatherParams(
-            lang = preferenceRepository.getPreference(
-                applicationContext.getString(R.string.default_lang_key),
-                applicationContext.getString(R.string.default_language_value)
+            lang = getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    applicationContext.getString(R.string.default_lang_key),
+                    applicationContext.getString(R.string.default_language_value),
+                ),
             ),
             apiKey = applicationContext.getString(R.string.api_key),
-            days = preferenceRepository.getPreference(
-                applicationContext.getString(R.string.default_days_key),
-                applicationContext.getString(R.string.default_days_values)
+            days = getStringPreferenceUseCase(
+                GetStringPreferenceUseCase.Params(
+                    applicationContext.getString(R.string.default_days_key),
+                    applicationContext.getString(R.string.default_days_values),
+                ),
             ).toInt(),
             measureUnit = MeasureUnit.from(
-                preferenceRepository.getPreference(
-                    applicationContext.getString(R.string.measure_unit_key),
-                    applicationContext.getString(R.string.measure_unit_preference_default_value)
-                )
-            )
+                getStringPreferenceUseCase(
+                    GetStringPreferenceUseCase.Params(
+                        applicationContext.getString(R.string.measure_unit_key),
+                        applicationContext.getString(R.string.measure_unit_preference_default_value),
+                    ),
+                ),
+            ),
         )
     }
 
     private fun hasValidatedNetworkConnection(): Boolean {
         val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
+            as ConnectivityManager
 
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
     private suspend fun handleWorkerError(e: Exception): Result {
@@ -251,16 +272,16 @@ class WeatherSuggestionNotificationWorker(
 
     private fun isNetworkRelatedError(e: Exception): Boolean {
         return e is UnknownHostException ||
-                e is SocketTimeoutException ||
-                e is ConnectException ||
-                e.message?.contains("Unable to resolve host") == true ||
-                e.message?.contains("No address associated with hostname") == true
+            e is SocketTimeoutException ||
+            e is ConnectException ||
+            e.message?.contains("Unable to resolve host") == true ||
+            e.message?.contains("No address associated with hostname") == true
     }
 
     private fun handleMorningSuggestions(
         forecast: Forecast,
         timeZone: String,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
     ) {
         val suggestions = forecast.mapMorningSuggestions(timeZone, measureUnit)
         if (suggestions.isEmpty()) return
@@ -269,21 +290,18 @@ class WeatherSuggestionNotificationWorker(
 
         notifications.createNotificationSuggestion(
             title = "${top.icon} ${resolveTitle(top, forecast.location.name)}",
-
             shortDescription = resolveMessage(top),
-
             description = suggestions
                 .joinToString(" • ") { resolveMessage(it) },
-
             group = NotificationGroup.SUGGESTION,
-            notificationsId = NotificationType.WEATHER_SUGGESTION_MORNING
+            notificationsId = NotificationType.WEATHER_SUGGESTION_MORNING,
         )
     }
 
     private fun handleMiddaySuggestions(
         forecast: Forecast,
         timeZone: String,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
     ) {
         val suggestions = forecast.mapCurrentSuggestions(timeZone, measureUnit)
         if (suggestions.isEmpty()) return
@@ -292,55 +310,45 @@ class WeatherSuggestionNotificationWorker(
 
         notifications.createNotificationSuggestion(
             title = "${top.icon} ${resolveTitle(top, forecast.location.name)}",
-
             shortDescription = resolveMessage(top),
-
             description = suggestions
                 .joinToString(" • ") { resolveMessage(it) },
-
             group = NotificationGroup.SUGGESTION,
-            notificationsId = NotificationType.WEATHER_SUGGESTION_MIDDAY
+            notificationsId = NotificationType.WEATHER_SUGGESTION_MIDDAY,
         )
     }
 
     private fun handleEveningSuggestion(
         forecast: Forecast,
-        measureUnit: MeasureUnit
+        measureUnit: MeasureUnit,
     ) {
         val suggestion = forecast.mapTomorrowNotification(
             forecast.location.tzId,
-            measureUnit
+            measureUnit,
         ) ?: return
 
         notifications.createNotificationSuggestion(
             title = resolveTitle(suggestion, forecast.location.name),
-
             shortDescription = resolveMessage(suggestion),
-
             description = "",
-
             group = NotificationGroup.SUGGESTION,
-            notificationsId = NotificationType.WEATHER_SUGGESTION_EVENING
+            notificationsId = NotificationType.WEATHER_SUGGESTION_EVENING,
         )
     }
 
-
-
     private fun resolveTitle(
         suggestion: WeatherSuggestionModel,
-        locationName: String
+        locationName: String,
     ): String {
-
         val res = applicationContext.resources
 
         return when (suggestion.type) {
-
             // 🌧️ RAIN
             SuggestionType.RAIN -> when (suggestion.moment) {
-                DayMoment.MORNING   -> res.getString(R.string.suggestion_rain_title_morning)
+                DayMoment.MORNING -> res.getString(R.string.suggestion_rain_title_morning)
                 DayMoment.AFTERNOON -> res.getString(R.string.suggestion_rain_title_afternoon)
-                DayMoment.EVENING   -> res.getString(R.string.suggestion_rain_title_evening)
-                DayMoment.NIGHT     -> res.getString(R.string.suggestion_rain_title_night)
+                DayMoment.EVENING -> res.getString(R.string.suggestion_rain_title_evening)
+                DayMoment.NIGHT -> res.getString(R.string.suggestion_rain_title_night)
             }
 
             // ☀️ UV
@@ -379,7 +387,6 @@ class WeatherSuggestionNotificationWorker(
 
             // 🌤️ TOMORROW
             SuggestionType.TOMORROW_FORECAST -> when (suggestion.priority) {
-
                 SuggestionPriority.HIGH ->
                     res.getString(R.string.suggestion_tomorrow_rain_title)
 
@@ -393,7 +400,6 @@ class WeatherSuggestionNotificationWorker(
 
             // 🌅 MORNING SUMMARY
             SuggestionType.MORNING_SUMMARY -> when (suggestion.priority) {
-
                 SuggestionPriority.HIGH ->
                     res.getString(R.string.suggestion_morning_alert_title)
 
@@ -409,84 +415,88 @@ class WeatherSuggestionNotificationWorker(
     fun resolveMessage(suggestion: WeatherSuggestionModel): String {
         val res = applicationContext.resources
         val template = when (suggestion.type) {
-
             SuggestionType.RAIN -> when (suggestion.moment) {
-                DayMoment.MORNING   -> res.getString(R.string.suggestion_rain_morning_message)
+                DayMoment.MORNING -> res.getString(R.string.suggestion_rain_morning_message)
                 DayMoment.AFTERNOON -> res.getString(R.string.suggestion_rain_afternoon_message)
-                DayMoment.EVENING   -> res.getString(R.string.suggestion_rain_evening_message)
-                DayMoment.NIGHT     -> res.getString(R.string.suggestion_rain_night_message)
+                DayMoment.EVENING -> res.getString(R.string.suggestion_rain_evening_message)
+                DayMoment.NIGHT -> res.getString(R.string.suggestion_rain_night_message)
             }
 
             SuggestionType.UV -> when (suggestion.priority) {
                 SuggestionPriority.HIGH -> when (suggestion.moment) {
-                    DayMoment.MORNING   -> res.getString(R.string.suggestion_uv_high_morning_message)
+                    DayMoment.MORNING -> res.getString(R.string.suggestion_uv_high_morning_message)
                     DayMoment.AFTERNOON -> res.getString(R.string.suggestion_uv_high_afternoon_message)
-                    DayMoment.EVENING   -> res.getString(R.string.suggestion_uv_high_evening_message)
-                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_uv_high_night_message)
+                    DayMoment.EVENING -> res.getString(R.string.suggestion_uv_high_evening_message)
+                    DayMoment.NIGHT -> res.getString(R.string.suggestion_uv_high_night_message)
                 }
+
                 else -> when (suggestion.moment) {
-                    DayMoment.MORNING   -> res.getString(R.string.suggestion_uv_medium_morning_message)
+                    DayMoment.MORNING -> res.getString(R.string.suggestion_uv_medium_morning_message)
                     DayMoment.AFTERNOON -> res.getString(R.string.suggestion_uv_medium_afternoon_message)
-                    DayMoment.EVENING   -> res.getString(R.string.suggestion_uv_medium_evening_message)
-                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_uv_medium_night_message)
+                    DayMoment.EVENING -> res.getString(R.string.suggestion_uv_medium_evening_message)
+                    DayMoment.NIGHT -> res.getString(R.string.suggestion_uv_medium_night_message)
                 }
             }
 
             SuggestionType.HEAT -> when (suggestion.priority) {
                 SuggestionPriority.HIGH -> when (suggestion.moment) {
-                    DayMoment.MORNING   -> res.getString(R.string.suggestion_heat_high_morning_message)
+                    DayMoment.MORNING -> res.getString(R.string.suggestion_heat_high_morning_message)
                     DayMoment.AFTERNOON -> res.getString(R.string.suggestion_heat_high_afternoon_message)
-                    DayMoment.EVENING   -> res.getString(R.string.suggestion_heat_high_evening_message)
-                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_heat_high_night_message)
+                    DayMoment.EVENING -> res.getString(R.string.suggestion_heat_high_evening_message)
+                    DayMoment.NIGHT -> res.getString(R.string.suggestion_heat_high_night_message)
                 }
+
                 SuggestionPriority.MEDIUM -> when (suggestion.moment) {
-                    DayMoment.MORNING   -> res.getString(R.string.suggestion_heat_medium_morning_message)
+                    DayMoment.MORNING -> res.getString(R.string.suggestion_heat_medium_morning_message)
                     DayMoment.AFTERNOON -> res.getString(R.string.suggestion_heat_medium_afternoon_message)
-                    DayMoment.EVENING   -> res.getString(R.string.suggestion_heat_medium_evening_message)
-                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_heat_medium_night_message)
+                    DayMoment.EVENING -> res.getString(R.string.suggestion_heat_medium_evening_message)
+                    DayMoment.NIGHT -> res.getString(R.string.suggestion_heat_medium_night_message)
                 }
+
                 else -> when (suggestion.moment) {
-                    DayMoment.MORNING   -> res.getString(R.string.suggestion_heat_low_morning_message)
+                    DayMoment.MORNING -> res.getString(R.string.suggestion_heat_low_morning_message)
                     DayMoment.AFTERNOON -> res.getString(R.string.suggestion_heat_low_afternoon_message)
-                    DayMoment.EVENING   -> res.getString(R.string.suggestion_heat_low_evening_message)
-                    DayMoment.NIGHT     -> res.getString(R.string.suggestion_heat_low_night_message)
+                    DayMoment.EVENING -> res.getString(R.string.suggestion_heat_low_evening_message)
+                    DayMoment.NIGHT -> res.getString(R.string.suggestion_heat_low_night_message)
                 }
             }
 
             SuggestionType.COLD -> when (suggestion.moment) {
-                DayMoment.MORNING   -> res.getString(R.string.suggestion_cold_morning_message)
+                DayMoment.MORNING -> res.getString(R.string.suggestion_cold_morning_message)
                 DayMoment.AFTERNOON -> res.getString(R.string.suggestion_cold_afternoon_message)
-                DayMoment.EVENING   -> res.getString(R.string.suggestion_cold_evening_message)
-                DayMoment.NIGHT     -> res.getString(R.string.suggestion_cold_night_message)
+                DayMoment.EVENING -> res.getString(R.string.suggestion_cold_evening_message)
+                DayMoment.NIGHT -> res.getString(R.string.suggestion_cold_night_message)
             }
 
             SuggestionType.WIND -> when (suggestion.moment) {
-                DayMoment.MORNING   -> res.getString(R.string.suggestion_wind_morning_message)
+                DayMoment.MORNING -> res.getString(R.string.suggestion_wind_morning_message)
                 DayMoment.AFTERNOON -> res.getString(R.string.suggestion_wind_afternoon_message)
-                DayMoment.EVENING   -> res.getString(R.string.suggestion_wind_evening_message)
-                DayMoment.NIGHT     -> res.getString(R.string.suggestion_wind_night_message)
+                DayMoment.EVENING -> res.getString(R.string.suggestion_wind_evening_message)
+                DayMoment.NIGHT -> res.getString(R.string.suggestion_wind_night_message)
             }
 
             SuggestionType.HUMIDITY -> when (suggestion.moment) {
-                DayMoment.MORNING   -> res.getString(R.string.suggestion_humidity_morning_message)
+                DayMoment.MORNING -> res.getString(R.string.suggestion_humidity_morning_message)
                 DayMoment.AFTERNOON -> res.getString(R.string.suggestion_humidity_afternoon_message)
-                DayMoment.EVENING   -> res.getString(R.string.suggestion_humidity_evening_message)
-                DayMoment.NIGHT     -> res.getString(R.string.suggestion_humidity_night_message)
+                DayMoment.EVENING -> res.getString(R.string.suggestion_humidity_evening_message)
+                DayMoment.NIGHT -> res.getString(R.string.suggestion_humidity_night_message)
             }
 
             SuggestionType.VISIBILITY -> when (suggestion.moment) {
-                DayMoment.MORNING   -> res.getString(R.string.suggestion_visibility_morning_message)
+                DayMoment.MORNING -> res.getString(R.string.suggestion_visibility_morning_message)
                 DayMoment.AFTERNOON -> res.getString(R.string.suggestion_visibility_afternoon_message)
-                DayMoment.EVENING   -> res.getString(R.string.suggestion_visibility_evening_message)
-                DayMoment.NIGHT     -> res.getString(R.string.suggestion_visibility_night_message)
+                DayMoment.EVENING -> res.getString(R.string.suggestion_visibility_evening_message)
+                DayMoment.NIGHT -> res.getString(R.string.suggestion_visibility_night_message)
             }
 
             SuggestionType.TOMORROW_FORECAST -> when (suggestion.priority) {
-                SuggestionPriority.HIGH   -> res.getString(R.string.suggestion_tomorrow_rain_message)
+                SuggestionPriority.HIGH -> res.getString(R.string.suggestion_tomorrow_rain_message)
+
                 SuggestionPriority.MEDIUM -> when (suggestion.icon) {
                     "🧴" -> res.getString(R.string.suggestion_tomorrow_uv_message)
                     else -> res.getString(R.string.suggestion_tomorrow_heat_message)
                 }
+
                 else -> res.getString(R.string.suggestion_tomorrow_clear_message)
             }
 
@@ -502,11 +512,11 @@ class WeatherSuggestionNotificationWorker(
         val resolvedArgs = suggestion.args.map { arg ->
             when (arg) {
                 is SuggestionArg.Temperature -> "${arg.value}"
-                is SuggestionArg.Percentage  -> "${arg.value}"
-                is SuggestionArg.WindSpeed   -> "${arg.value}"
-                is SuggestionArg.Distance    -> "${arg.value}"
-                is SuggestionArg.Text        -> arg.value
-                is SuggestionArg.Uv         -> uvIndexDescription(arg.level,res)
+                is SuggestionArg.Percentage -> "${arg.value}"
+                is SuggestionArg.WindSpeed -> "${arg.value}"
+                is SuggestionArg.Distance -> "${arg.value}"
+                is SuggestionArg.Text -> arg.value
+                is SuggestionArg.Uv -> uvIndexDescription(arg.level, res)
             }
         }
 
@@ -525,7 +535,7 @@ class WeatherSuggestionNotificationWorker(
         }
     }
 
-    fun uvIndexDescription(index: UvIndexLevel,res: Resources): String {
+    fun uvIndexDescription(index: UvIndexLevel, res: Resources): String {
         return when (index) {
             UvIndexLevel.LOW -> res.getString(R.string.uv_index_low)
             UvIndexLevel.MEDIUM -> res.getString(R.string.uv_index_medium)

@@ -4,7 +4,7 @@ import platform.Foundation.NSLog
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 
-actual class ExpectedIntents : IExpectedIntents{
+actual class ExpectedIntents : IExpectedIntents {
     override fun openBrowser(url: String) {
         val nsUrl = NSURL(string = url)
         val application = UIApplication.sharedApplication
@@ -12,7 +12,7 @@ actual class ExpectedIntents : IExpectedIntents{
             application.openURL(
                 url = nsUrl,
                 options = mapOf<Any?, Any>(),
-                completionHandler = null
+                completionHandler = null,
             )
         }
     }
@@ -28,7 +28,7 @@ actual class ExpectedIntents : IExpectedIntents{
                     if (!success) {
                         NSLog("Failed to initiate call to: $phone")
                     }
-                }
+                },
             )
         } else {
             NSLog("Cannot make call. Invalid phone number or no supported application: $phone")
@@ -46,7 +46,7 @@ actual class ExpectedIntents : IExpectedIntents{
                     if (!success) {
                         NSLog("Failed to open email client for: $email")
                     }
-                }
+                },
             )
         } else {
             NSLog("Cannot send email. Invalid email address or no supported application: $email")

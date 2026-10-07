@@ -5,7 +5,6 @@ import com.kronos.multiplatform.weatherapp.di.initKoin
 
 fun MainViewController() = ComposeUIViewController { App() }
 
-
 // Called once from AppDelegate.didFinishLaunchingWithOptions, before any
 // background weather refresh or notification scheduling runs — Koin must be
 // started before didFinishLaunchingWithOptions returns, since BGAppRefreshTask
@@ -19,7 +18,6 @@ fun MainViewController() = ComposeUIViewController { App() }
 fun startKoinIOS() {
     initKoin()
 }
-
 
 /*
 fun initNotificationManager(){

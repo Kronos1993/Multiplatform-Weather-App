@@ -12,6 +12,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.kronos.multiplatform.weatherapp.core.widget.IWidgetUpdater
+import kotlinx.coroutines.CancellationException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.concurrent.TimeUnit
@@ -21,7 +22,6 @@ class WeatherWidgetUpdateWorker(
     appContext: Context,
     workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams), KoinComponent {
-
     private val widgetUpdater: IWidgetUpdater by inject()
 
     companion object {
@@ -34,7 +34,7 @@ class WeatherWidgetUpdateWorker(
 
             val request = PeriodicWorkRequestBuilder<WeatherWidgetUpdateWorker>(
                 repeatInterval = 30,
-                repeatIntervalTimeUnit = TimeUnit.MINUTES
+                repeatIntervalTimeUnit = TimeUnit.MINUTES,
             )
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 5, TimeUnit.MINUTES)
@@ -42,8 +42,8 @@ class WeatherWidgetUpdateWorker(
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 WORK_NAME,
-                ExistingPeriodicWorkPolicy.KEEP,
-                request
+                ExistingPeriodicWorkPolicy.UPDATE,
+                request,
             )
         }
 
@@ -52,7 +52,7 @@ class WeatherWidgetUpdateWorker(
                 .setConstraints(
                     Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
+                        .build(),
                 )
                 .build()
             WorkManager.getInstance(context).enqueue(request)
@@ -67,6 +67,8 @@ class WeatherWidgetUpdateWorker(
         return try {
             widgetUpdater.updateAllWeatherWidgets()
             Result.success()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("WeatherWidgetUpdateWorker", "Error updating widgets", e)
             Result.retry()

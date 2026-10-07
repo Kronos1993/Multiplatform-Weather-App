@@ -122,4 +122,11 @@
     <string name="map_layer_temperature">Temperatura</string>
     <string name="map_layer_wind">Vientos</string>
 
+    <string name="battery_optimization_dialog_title">Mantén el clima actualizado</string>
+    <string name="battery_optimization_dialog_body">Para que las notificaciones y los widgets se actualicen con la app cerrada, toca Permitir, entra en Batería y elige Sin restricciones.</string>
+    <string name="battery_optimization_dialog_allow">Permitir</string>
+    <string name="battery_optimization_dialog_oem_settings">Ajustes del fabricante</string>
+    <string name="battery_optimization_dialog_not_now">Ahora no</string>
+    <string name="battery_optimization_dialog_dont_ask">No volver a preguntar</string>
+
 </resources>

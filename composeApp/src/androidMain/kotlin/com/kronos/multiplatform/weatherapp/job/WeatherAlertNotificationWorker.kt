@@ -14,8 +14,9 @@ import com.kronos.multiplatform.weatherapp.core.notification.NotificationType
 import com.kronos.multiplatform.weatherapp.core.result.onError
 import com.kronos.multiplatform.weatherapp.core.result.onSuccess
 import com.kronos.multiplatform.weatherapp.domain.model.alerts.WeatherAlert
-import com.kronos.multiplatform.weatherapp.domain.repository.UserCustomLocationLocalRepository
-import com.kronos.multiplatform.weatherapp.domain.repository.WeatherAlertsRemoteRepository
+import com.kronos.multiplatform.weatherapp.domain.usecase.alerts.GetWeatherAlertsUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.GetCurrentUserLocationUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.user_custom_location.GetSelectedUserLocationUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -27,13 +28,13 @@ import java.net.UnknownHostException
 
 class WeatherAlertNotificationWorker(
     appContext: Context,
-    workerParams: WorkerParameters
+    workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams), KoinComponent {
-
     private val TAG = this::class.simpleName.orEmpty()
 
-    private val weatherAlertsRemoteRepository: WeatherAlertsRemoteRepository by inject()
-    private val userCustomLocationLocalRepository: UserCustomLocationLocalRepository by inject()
+    private val getWeatherAlertsUseCase: GetWeatherAlertsUseCase by inject()
+    private val getSelectedUserLocationUseCase: GetSelectedUserLocationUseCase by inject()
+    private val getCurrentUserLocationUseCase: GetCurrentUserLocationUseCase by inject()
     private val notifications: INotifications by inject()
     private val loggerManager: ILogManager by inject()
 
@@ -51,8 +52,8 @@ class WeatherAlertNotificationWorker(
     }
 
     private suspend fun refreshWeatherAlerts() {
-        val currentCity = userCustomLocationLocalRepository.getSelectedLocation()
-            ?: userCustomLocationLocalRepository.getCurrentLocation()
+        val currentCity = getSelectedUserLocationUseCase(Unit)
+            ?: getCurrentUserLocationUseCase(Unit)
 
         val weatherParams = getWeatherAlertsParams()
 
@@ -60,7 +61,7 @@ class WeatherAlertNotificationWorker(
             lat = currentCity?.lat ?: 0.0,
             lon = currentCity?.lon ?: 0.0,
             weatherParams = weatherParams,
-            locationType = "city"
+            locationType = "city",
         )
     }
 
@@ -68,12 +69,10 @@ class WeatherAlertNotificationWorker(
         lat: Double,
         lon: Double,
         weatherParams: WeatherAlertParams,
-        locationType: String
+        locationType: String,
     ) {
-        weatherAlertsRemoteRepository.getWeatherAlertsData(
-            lat,
-            lon,
-            weatherParams.apiKey,
+        getWeatherAlertsUseCase(
+            GetWeatherAlertsUseCase.Params(lat, lon, weatherParams.apiKey),
         )
             .onSuccess { alerts ->
                 createWeatherAlertNotification(alerts.alerts)
@@ -86,21 +85,21 @@ class WeatherAlertNotificationWorker(
 
     private fun isNetworkRelatedError(e: Exception): Boolean {
         return e is UnknownHostException ||
-                e is SocketTimeoutException ||
-                e is ConnectException ||
-                e.message?.contains("Unable to resolve host") == true ||
-                e.message?.contains("No address associated with hostname") == true
+            e is SocketTimeoutException ||
+            e is ConnectException ||
+            e.message?.contains("Unable to resolve host") == true ||
+            e.message?.contains("No address associated with hostname") == true
     }
 
     private fun hasValidatedNetworkConnection(): Boolean {
         val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
+            as ConnectivityManager
 
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
     private suspend fun handleWorkerError(e: Exception): Result {
@@ -144,7 +143,7 @@ class WeatherAlertNotificationWorker(
                 shortDescription = notificationShortDetails,
                 description = notificationLongDetails,
                 NotificationGroup.WEATHER_ALERT,
-                NotificationType.WEATHER_ALERT
+                NotificationType.WEATHER_ALERT,
             )
         }
     }

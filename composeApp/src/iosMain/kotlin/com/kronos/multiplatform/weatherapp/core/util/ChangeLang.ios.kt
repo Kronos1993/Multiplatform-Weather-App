@@ -8,7 +8,6 @@ import platform.Foundation.languageCode
 import platform.Foundation.localeIdentifier
 
 actual class ChangeLang : IChangeLang {
-
     override fun onLangChange(lang: String) {
         if (isCurrentLanguage(lang)) {
             return // No hacer nada si ya está en el idioma deseado

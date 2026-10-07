@@ -25,11 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.core.ui.components.ConfirmDialog
 import com.kronos.multiplatform.weatherapp.core.ui.components.ScrollableTabView
 import com.kronos.multiplatform.weatherapp.core.ui.components.TabItem
+import com.kronos.multiplatform.weatherapp.core.viewmodel.BatteryOptimizationViewModel
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
@@ -68,6 +71,13 @@ fun HomeScreen(
     deviceScreenConfiguration: DeviceScreenConfiguration,
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
+    val batteryOptimizationViewModel = koinViewModel<BatteryOptimizationViewModel>()
+    val showBatteryPrompt by batteryOptimizationViewModel.showHomePrompt.collectAsStateWithLifecycle()
+
+    LifecycleResumeEffect(Unit) {
+        batteryOptimizationViewModel.refreshStatus()
+        onPauseOrDispose { }
+    }
 
     val factory = rememberPermissionsControllerFactory()
     val controller = remember(factory) {
@@ -186,6 +196,10 @@ fun HomeScreen(
                 currentPermissionFlow = PermissionFlow.RequestingLocation
             }
 
+            PermissionFlow.Completed -> {
+                batteryOptimizationViewModel.evaluateHomePrompt()
+            }
+
             else -> {
                 // Otros estados
             }
@@ -205,7 +219,7 @@ fun HomeScreen(
             stringResource(Res.string.title_weather),
             Icons.Filled.Cloud,
             Icons.Outlined.Cloud,
-            1
+            1,
         ) {
             WeatherScreen(
                 deviceScreenConfiguration,
@@ -218,12 +232,11 @@ fun HomeScreen(
                 measureUnit,
             )
         },
-
         TabItem(
             stringResource(Res.string.title_location),
             Icons.Filled.LocationOn,
             Icons.Outlined.LocationOn,
-            2
+            2,
         ) {
             UserCustomLocationScreen(
                 navHost,
@@ -233,15 +246,14 @@ fun HomeScreen(
                 imageQuality,
                 amountOfDays,
                 measureUnit,
-                isDarkTheme
+                isDarkTheme,
             )
         },
-
         TabItem(
             stringResource(Res.string.title_settings),
             Icons.Filled.Settings,
             Icons.Outlined.Settings,
-            3
+            3,
         ) {
             SettingsScreen(
                 navHost,
@@ -250,15 +262,14 @@ fun HomeScreen(
                 currentLang,
                 {
                     viewModel.updateAppLanguage(it)
-                }
+                },
             )
         },
-
         TabItem(
             stringResource(Res.string.title_about),
             Icons.Filled.Info,
             Icons.Outlined.Info,
-            4
+            4,
         ) {
             AboutScreen(navHost, isDarkTheme, deviceScreenConfiguration)
         },
@@ -275,14 +286,14 @@ fun HomeScreen(
                     Snackbar(
                         snackbarData = data,
                         containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                        contentColor = MaterialTheme.colorScheme.onError,
                     )
                 }
-            }
+            },
         ) { paddingValues ->
             ScrollableTabView(
                 tabs = tabs,
-                paddingValues = paddingValues
+                paddingValues = paddingValues,
             )
         }
 
@@ -291,22 +302,36 @@ fun HomeScreen(
             body = stringResource(Res.string.exit_dialog_body),
             confirmText = stringResource(Res.string.exit_dialog_yes),
             onConfirm = {
-
                 viewModel.closeApp()
                 showExitDialog = false
             },
             cancelText = stringResource(Res.string.exit_dialog_no),
             onCancel = { showExitDialog = false },
-            showDialog = showExitDialog
+            showDialog = showExitDialog,
+        )
+
+        BatteryOptimizationDialog(
+            showDialog = showBatteryPrompt,
+            showOemSettings = batteryOptimizationViewModel.hasOemAutoStartSettings,
+            showDontAskAgain = true,
+            onAllow = batteryOptimizationViewModel::onAllow,
+            onOemSettings = batteryOptimizationViewModel::onOemSettings,
+            onNotNow = batteryOptimizationViewModel::onNotNow,
+            onDontAskAgain = batteryOptimizationViewModel::onDontAskAgain,
         )
     }
 }
 
 sealed class PermissionFlow {
     object Idle : PermissionFlow()
+
     object RequestedNotification : PermissionFlow()
+
     object RequestingNotification : PermissionFlow()
+
     object RequestedLocation : PermissionFlow()
+
     object RequestingLocation : PermissionFlow()
+
     object Completed : PermissionFlow()
 }

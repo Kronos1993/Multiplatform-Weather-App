@@ -56,7 +56,7 @@ fun WeatherScreen(
     amountOfDays: Int,
     defaultCity: String,
     isDarkTheme: Boolean,
-    measureUnit: MeasureUnit
+    measureUnit: MeasureUnit,
 ) {
     val viewModel = koinViewModel<WeatherViewModel>()
     val weather by viewModel.weather.collectAsStateWithLifecycle()
@@ -70,7 +70,6 @@ fun WeatherScreen(
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-
 
     viewModel.initNotificationsString(
         stringResource(Res.string.current_weather_key),
@@ -92,7 +91,7 @@ fun WeatherScreen(
 
     LaunchedEffect(currentLang) {
         if (currentLang.isNotBlank()) {
-            viewModel.initLocations(currentLang, apiKey, amountOfDays, imageQuality, defaultCity,measureUnit)
+            viewModel.initLocations(currentLang, apiKey, amountOfDays, imageQuality, defaultCity, measureUnit)
         }
     }
 
@@ -102,7 +101,7 @@ fun WeatherScreen(
             if (errorMessage.isNotBlank()) {
                 snackbarHostState.showSnackbar(
                     message = errorMessage,
-                    duration = SnackbarDuration.Short
+                    duration = SnackbarDuration.Short,
                 )
                 viewModel.clean()
             }
@@ -115,7 +114,7 @@ fun WeatherScreen(
             if (warningMessage.isNotBlank()) {
                 snackbarHostState.showSnackbar(
                     message = warningMessage,
-                    duration = SnackbarDuration.Short
+                    duration = SnackbarDuration.Short,
                 )
                 viewModel.clean()
             }
@@ -146,7 +145,7 @@ fun WeatherScreen(
                                 MaterialTheme.colorScheme.onError
 
                             else -> Color.White
-                        }
+                        },
                     )
                 }
             },
@@ -161,9 +160,9 @@ fun WeatherScreen(
                         amountOfDays,
                         imageQuality,
                         defaultCity,
-                        measureUnit
+                        measureUnit,
                     )
-                }
+                },
             ) {
                 val rootModifier = Modifier
                     .fillMaxSize()
@@ -173,7 +172,7 @@ fun WeatherScreen(
                     DeviceScreenConfiguration.MOBILE_PORTRAIT -> {
                         Column(
                             modifier = rootModifier,
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             when (screenState) {
                                 WeatherScreenState.Idle -> {
@@ -184,7 +183,7 @@ fun WeatherScreen(
 
                                 WeatherScreenState.Loading -> {
                                     WeatherLoadingState(
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier.fillMaxSize(),
                                     )
                                 }
 
@@ -198,9 +197,9 @@ fun WeatherScreen(
                                                 amountOfDays,
                                                 imageQuality,
                                                 defaultCity,
-                                                measureUnit
+                                                measureUnit,
                                             )
-                                        }
+                                        },
                                     )
                                 }
 
@@ -222,7 +221,7 @@ fun WeatherScreen(
                                             onDailyItemClicked = {},
                                             onAlertItemClicked = {
                                                 viewModel.showAlertInfo(it)
-                                            }
+                                            },
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -234,9 +233,9 @@ fun WeatherScreen(
                                                     amountOfDays,
                                                     imageQuality,
                                                     defaultCity,
-                                                    measureUnit
+                                                    measureUnit,
                                                 )
-                                            }
+                                            },
                                         )
                                     }
                                 }
@@ -254,7 +253,7 @@ fun WeatherScreen(
 
                             WeatherScreenState.Loading -> {
                                 WeatherLoadingState(
-                                    modifier = rootModifier
+                                    modifier = rootModifier,
                                 )
                             }
 
@@ -268,9 +267,9 @@ fun WeatherScreen(
                                             amountOfDays,
                                             imageQuality,
                                             defaultCity,
-                                            measureUnit
+                                            measureUnit,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -293,7 +292,7 @@ fun WeatherScreen(
                                         onDailyItemClicked = {},
                                         onAlertItemClicked = {
                                             viewModel.showAlertInfo(it)
-                                        }
+                                        },
                                     )
                                 } else {
                                     NoWeatherItem(
@@ -305,9 +304,9 @@ fun WeatherScreen(
                                                 amountOfDays,
                                                 imageQuality,
                                                 defaultCity,
-                                                measureUnit
+                                                measureUnit,
                                             )
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -317,7 +316,7 @@ fun WeatherScreen(
                     DeviceScreenConfiguration.TABLET_PORTRAIT -> {
                         Column(
                             modifier = rootModifier,
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             when (screenState) {
                                 WeatherScreenState.Idle -> {
@@ -328,7 +327,7 @@ fun WeatherScreen(
 
                                 WeatherScreenState.Loading -> {
                                     WeatherLoadingState(
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier.fillMaxSize(),
                                     )
                                 }
 
@@ -342,9 +341,9 @@ fun WeatherScreen(
                                                 amountOfDays,
                                                 imageQuality,
                                                 defaultCity,
-                                                measureUnit
+                                                measureUnit,
                                             )
-                                        }
+                                        },
                                     )
                                 }
 
@@ -366,7 +365,7 @@ fun WeatherScreen(
                                             onDailyItemClicked = {},
                                             onAlertItemClicked = {
                                                 viewModel.showAlertInfo(it)
-                                            }
+                                            },
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -378,9 +377,9 @@ fun WeatherScreen(
                                                     amountOfDays,
                                                     imageQuality,
                                                     defaultCity,
-                                                    measureUnit
+                                                    measureUnit,
                                                 )
-                                            }
+                                            },
                                         )
                                     }
                                 }
@@ -389,12 +388,13 @@ fun WeatherScreen(
                     }
 
                     DeviceScreenConfiguration.TABLET_LANDSCAPE,
-                    DeviceScreenConfiguration.DESKTOP -> {
+                    DeviceScreenConfiguration.DESKTOP,
+                    -> {
                         Column(
                             modifier = rootModifier
                                 .padding(top = 48.dp),
                             verticalArrangement = Arrangement.spacedBy(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             when (screenState) {
                                 WeatherScreenState.Idle -> {
@@ -405,7 +405,7 @@ fun WeatherScreen(
 
                                 WeatherScreenState.Loading -> {
                                     WeatherLoadingState(
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier.fillMaxSize(),
                                     )
                                 }
 
@@ -419,9 +419,9 @@ fun WeatherScreen(
                                                 amountOfDays,
                                                 imageQuality,
                                                 defaultCity,
-                                                measureUnit
+                                                measureUnit,
                                             )
-                                        }
+                                        },
                                     )
                                 }
 
@@ -443,7 +443,7 @@ fun WeatherScreen(
                                             onDailyItemClicked = {},
                                             onAlertItemClicked = {
                                                 viewModel.showAlertInfo(it)
-                                            }
+                                            },
                                         )
                                     } else {
                                         NoWeatherItem(
@@ -455,9 +455,9 @@ fun WeatherScreen(
                                                     amountOfDays,
                                                     imageQuality,
                                                     defaultCity,
-                                                    measureUnit
+                                                    measureUnit,
                                                 )
-                                            }
+                                            },
                                         )
                                     }
                                 }
@@ -471,7 +471,7 @@ fun WeatherScreen(
                 alert = selectedAlert,
                 showDialog = showAlertInfo,
                 isDarkTheme = isDarkTheme,
-                onClose = { viewModel.showAlertInfo(null) }
+                onClose = { viewModel.showAlertInfo(null) },
             )
         }
     }

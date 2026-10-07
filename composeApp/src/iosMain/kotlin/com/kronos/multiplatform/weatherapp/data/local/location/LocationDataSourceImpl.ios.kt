@@ -12,12 +12,10 @@ import platform.darwin.NSObject
 import kotlin.coroutines.resume
 
 actual class LocationDataSourceImpl : LocationDataSource {
-
     private val manager = CLLocationManager()
     private var continuation: CancellableContinuation<LocationModel?>? = null
 
     private val delegate = object : NSObject(), CLLocationManagerDelegateProtocol {
-
         @OptIn(ExperimentalForeignApi::class)
         override fun locationManager(manager: CLLocationManager, didUpdateLocations: List<*>) {
             val location = (didUpdateLocations.lastOrNull() as? CLLocation) ?: return

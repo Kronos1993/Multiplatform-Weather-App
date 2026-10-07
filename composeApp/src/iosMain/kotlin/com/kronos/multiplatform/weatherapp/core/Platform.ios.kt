@@ -1,8 +1,8 @@
 package com.kronos.multiplatform.weatherapp.core
 
-import platform.UIKit.UIDevice
 import platform.Foundation.NSUUID
 import platform.Foundation.NSUserDefaults
+import platform.UIKit.UIDevice
 import kotlin.run
 import kotlin.text.isNullOrEmpty
 

@@ -1,10 +1,15 @@
 package com.kronos.multiplatform.weatherapp.core.preferences
 
 import androidx.lifecycle.viewModelScope
-import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.util.IChangeLang
 import com.kronos.multiplatform.weatherapp.core.viewmodel.ParentViewModel
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.GetIntPreferenceUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.GetStringPreferenceUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.SetBooleanPreferenceUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.SetDoublePreferenceUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.SetIntPreferenceUseCase
+import com.kronos.multiplatform.weatherapp.domain.usecase.preferences.SetStringPreferenceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,10 +18,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PreferenceViewModel(
-    val preferenceRepository: PreferenceRepository,
-    private val changeLang: IChangeLang
+    private val getStringPreferenceUseCase: GetStringPreferenceUseCase,
+    private val getIntPreferenceUseCase: GetIntPreferenceUseCase,
+    private val setStringPreferenceUseCase: SetStringPreferenceUseCase,
+    private val setIntPreferenceUseCase: SetIntPreferenceUseCase,
+    private val setBooleanPreferenceUseCase: SetBooleanPreferenceUseCase,
+    private val setDoublePreferenceUseCase: SetDoublePreferenceUseCase,
+    private val changeLang: IChangeLang,
 ) : ParentViewModel() {
-
     private var _preferenceLangFlow = MutableStateFlow("en")
     val preferenceLangFlow: StateFlow<String> = _preferenceLangFlow.asStateFlow()
 
@@ -43,7 +52,7 @@ class PreferenceViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = false
+            initialValue = false,
         )
 
     fun loadPreferences(
@@ -58,38 +67,40 @@ class PreferenceViewModel(
         defaultCityKey: String,
         defaultCityDefault: String,
         defaultMeasureUnitKey: String,
-        defaultMeasureUnitDefault: MeasureUnit
+        defaultMeasureUnitDefault: MeasureUnit,
     ) {
         viewModelScope.launch {
             try {
-                val lang = preferenceRepository.getPreference(
-                    langKey,
-                    changeLang.getSystemLang().ifBlank { langDefault }
+                val lang = getStringPreferenceUseCase(
+                    GetStringPreferenceUseCase.Params(
+                        langKey,
+                        changeLang.getSystemLang().ifBlank { langDefault },
+                    ),
                 )
                 _preferenceLangFlow.value = lang
                 changeLang.onLangChange(lang)
 
                 _preferenceThemeFlow.value =
-                    preferenceRepository.getPreference(themeKey, themeDefault)
+                    getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(themeKey, themeDefault))
 
                 _preferenceDays.value =
-                    preferenceRepository.getPreference(daysKey, daysDefault)
+                    getIntPreferenceUseCase(GetIntPreferenceUseCase.Params(daysKey, daysDefault))
 
                 _preferenceImageQuality.value =
-                    preferenceRepository.getPreference(imageQualityKey, imageQualityDefault)
+                    getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(imageQualityKey, imageQualityDefault))
 
                 _preferenceDefaultCity.value =
-                    preferenceRepository.getPreference(defaultCityKey, defaultCityDefault)
+                    getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(defaultCityKey, defaultCityDefault))
 
-                val measureUnit = preferenceRepository.getPreference(
-                    defaultMeasureUnitKey,
-                    defaultMeasureUnitDefault.value
+                val measureUnit = getStringPreferenceUseCase(
+                    GetStringPreferenceUseCase.Params(
+                        defaultMeasureUnitKey,
+                        defaultMeasureUnitDefault.value,
+                    ),
                 )
                 _preferenceMeasureUnitFlow.value = MeasureUnit.fromInt(measureUnit.toInt())
 
-
                 _prefsLoaded.value = true
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 message = hashMapOf("error" to e.message.orEmpty())
@@ -101,10 +112,10 @@ class PreferenceViewModel(
         viewModelScope.launch {
             try {
                 when (value) {
-                    is String -> preferenceRepository.setPreference(key, value)
-                    is Int -> preferenceRepository.setPreference(key, value)
-                    is Boolean -> preferenceRepository.setPreference(key, value)
-                    is Double -> preferenceRepository.setPreference(key, value)
+                    is String -> setStringPreferenceUseCase(SetStringPreferenceUseCase.Params(key, value))
+                    is Int -> setIntPreferenceUseCase(SetIntPreferenceUseCase.Params(key, value))
+                    is Boolean -> setBooleanPreferenceUseCase(SetBooleanPreferenceUseCase.Params(key, value))
+                    is Double -> setDoublePreferenceUseCase(SetDoublePreferenceUseCase.Params(key, value))
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -117,38 +128,38 @@ class PreferenceViewModel(
 
     fun getPreferenceLang(key: String, defaultValue: String) {
         viewModelScope.launch {
-            _preferenceLangFlow.value = preferenceRepository.getPreference(key, defaultValue)
+            _preferenceLangFlow.value = getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(key, defaultValue))
             changeLang.onLangChange(_preferenceLangFlow.value)
         }
     }
 
     fun getPreferenceCurrentCity(key: String, defaultValue: String) {
         viewModelScope.launch {
-            _preferenceCurrentCityFlow.value = preferenceRepository.getPreference(key, defaultValue)
+            _preferenceCurrentCityFlow.value = getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(key, defaultValue))
         }
     }
 
     fun getPreferenceTheme(key: String, defaultValue: String) {
         viewModelScope.launch {
-            _preferenceThemeFlow.value = preferenceRepository.getPreference(key, defaultValue)
+            _preferenceThemeFlow.value = getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(key, defaultValue))
         }
     }
 
     fun getPreferenceDays(key: String, defaultValue: Int) {
         viewModelScope.launch {
-            _preferenceDays.value = preferenceRepository.getPreference(key, defaultValue)
+            _preferenceDays.value = getIntPreferenceUseCase(GetIntPreferenceUseCase.Params(key, defaultValue))
         }
     }
 
     fun getPreferenceImageQuality(key: String, defaultValue: String) {
         viewModelScope.launch {
-            _preferenceImageQuality.value = preferenceRepository.getPreference(key, defaultValue)
+            _preferenceImageQuality.value = getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(key, defaultValue))
         }
     }
 
     fun getPreferenceDefaultCity(key: String, defaultValue: String) {
         viewModelScope.launch {
-            _preferenceDefaultCity.value = preferenceRepository.getPreference(key, defaultValue)
+            _preferenceDefaultCity.value = getStringPreferenceUseCase(GetStringPreferenceUseCase.Params(key, defaultValue))
         }
     }
 
@@ -186,5 +197,4 @@ class PreferenceViewModel(
 
     fun getSystemLanguage() =
         changeLang.getSystemLang()
-
 }
