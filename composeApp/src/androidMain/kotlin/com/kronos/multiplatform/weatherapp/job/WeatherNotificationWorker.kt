@@ -1,8 +1,6 @@
 package com.kronos.multiplatform.weatherapp.job
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.kronos.multiplatform.weatherapp.R
@@ -39,7 +37,7 @@ class WeatherNotificationWorker(
     appContext: Context,
     workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams), KoinComponent {
-    private val TAG = this::class.simpleName.orEmpty()
+    private val tag = this::class.simpleName.orEmpty()
 
     private val getWeatherForecastByCoordinatesUseCase: GetWeatherForecastByCoordinatesUseCase by inject()
     private val getWeatherForecastByCityUseCase: GetWeatherForecastByCityUseCase by inject()
@@ -61,13 +59,11 @@ class WeatherNotificationWorker(
                 ),
             )
             changeLang.onLangChange(currentLang)
-            if (!hasValidatedNetworkConnection()) {
-                log("No hay conexión validada, reintentando...", true)
-                return@withContext Result.retry()
-            }
 
             refreshWeather()
             Result.success()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             handleWorkerError(e)
         }
@@ -169,6 +165,8 @@ class WeatherNotificationWorker(
         repeat(maxRetries) { attempt ->
             try {
                 return block()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 if (attempt == maxRetries - 1) {
                     throw e
@@ -198,33 +196,13 @@ class WeatherNotificationWorker(
             e.message?.contains("No address associated with hostname") == true
     }
 
-    private fun hasValidatedNetworkConnection(): Boolean {
-        val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE)
-            as ConnectivityManager
-
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-    }
-
     private suspend fun handleWorkerError(e: Exception): Result {
-        return when {
-            isNetworkRelatedError(e) -> {
-                log("Error de red/DNS en background: ${e.message}", true)
-                Result.retry()
-            }
-
-            e is CancellationException -> {
-                log("Worker cancelado", true)
-                Result.success()
-            }
-
-            else -> {
-                log("Error no manejado: ${e.message}", true)
-                Result.failure()
-            }
+        return if (isNetworkRelatedError(e)) {
+            log("Error de red/DNS en background: ${e.message}", true)
+            Result.retry()
+        } else {
+            log("Error no manejado: ${e.message}", true)
+            Result.failure()
         }
     }
 
@@ -305,10 +283,10 @@ class WeatherNotificationWorker(
     private suspend fun log(item: String, isError: Boolean = false) {
         if (isError) {
             println("ERROR: $item")
-            loggerManager.log(LogLevel.ERROR, TAG, item)
+            loggerManager.log(LogLevel.ERROR, tag, item)
         } else {
             println("INFO: $item")
-            loggerManager.log(LogLevel.INFO, TAG, item)
+            loggerManager.log(LogLevel.INFO, tag, item)
         }
     }
 }
