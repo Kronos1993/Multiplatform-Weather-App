@@ -1,0 +1,18 @@
+{
+  "spec_id": "battery-optimization-exemption-prompt",
+  "branch": "feature/battery-optimization-exemption-prompt",
+  "target_branch": "develop",
+  "pr_number": 50,
+  "pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/50",
+  "opened_at": "2026-10-07T00:00:00Z",
+  "opened_via": "tier-A",
+  "memory_candidates_surfaced": true,
+  "memory_branch": "chore/memories-battery-optimization-exemption-prompt",
+  "memory_pr_number": 51,
+  "memory_pr_url": "https://github.com/Kronos1993/Multiplatform-Weather-App/pull/51",
+  "archived_at": "2026-10-07T19:23:00Z",
+  "archive_branch": "chore/archive-battery-optimization-exemption-prompt",
+  "archive_reason": "merged",
+  "archive_pr_number": null,
+  "archive_pr_url": null
+}
