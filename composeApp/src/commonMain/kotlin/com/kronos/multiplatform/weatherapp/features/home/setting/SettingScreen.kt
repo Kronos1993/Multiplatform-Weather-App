@@ -1,17 +1,26 @@
 package com.kronos.multiplatform.weatherapp.features.home.setting
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -25,14 +34,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.kronos.multiplatform.weatherapp.core.preferences.PreferenceViewModel
+import com.kronos.multiplatform.weatherapp.core.ui.components.BodyText
+import com.kronos.multiplatform.weatherapp.core.ui.components.ComponentSize
 import com.kronos.multiplatform.weatherapp.core.ui.components.SettingRadioOptions
+import com.kronos.multiplatform.weatherapp.core.ui.components.TitleText
+import com.kronos.multiplatform.weatherapp.core.viewmodel.BatteryOptimizationViewModel
 import com.kronos.multiplatform.weatherapp.device.screen_config.DeviceScreenConfiguration
 import com.kronos.multiplatform.weatherapp.domain.model.MeasureUnit
+import com.kronos.multiplatform.weatherapp.features.home.BatteryOptimizationDialog
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -49,6 +66,9 @@ import weather_app.composeapp.generated.resources.measure_unit_key
 import weather_app.composeapp.generated.resources.measure_unit_preference_default_value
 import weather_app.composeapp.generated.resources.preference_app_theme_entries
 import weather_app.composeapp.generated.resources.preference_app_theme_values
+import weather_app.composeapp.generated.resources.preference_background_updates_restricted
+import weather_app.composeapp.generated.resources.preference_background_updates_title
+import weather_app.composeapp.generated.resources.preference_background_updates_unrestricted
 import weather_app.composeapp.generated.resources.preference_days_entries
 import weather_app.composeapp.generated.resources.preference_image_quality_entries
 import weather_app.composeapp.generated.resources.preference_image_quality_subtitle
@@ -77,6 +97,14 @@ fun SettingsScreen(
     onLanguageChange: (String) -> Unit,
 ) {
     val viewModel = koinViewModel<PreferenceViewModel>()
+    val batteryOptimizationViewModel = koinViewModel<BatteryOptimizationViewModel>()
+    val isBackgroundRestricted by batteryOptimizationViewModel.isRestricted.collectAsStateWithLifecycle()
+    val showBatteryDialog by batteryOptimizationViewModel.showSettingsDialog.collectAsStateWithLifecycle()
+
+    LifecycleResumeEffect(Unit) {
+        batteryOptimizationViewModel.refreshStatus()
+        onPauseOrDispose { }
+    }
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -279,8 +307,73 @@ fun SettingsScreen(
                             viewModel.setPreferenceMeasureUnit(it)
                         },
                     )
+
+                    if (batteryOptimizationViewModel.isSupported) {
+                        BackgroundUpdatesSettingRow(
+                            isRestricted = isBackgroundRestricted,
+                            onClick = batteryOptimizationViewModel::openFromSettings,
+                        )
+                    }
                 }
             }
+        }
+    }
+
+    BatteryOptimizationDialog(
+        showDialog = showBatteryDialog,
+        showOemSettings = batteryOptimizationViewModel.hasOemAutoStartSettings,
+        showDontAskAgain = false,
+        onAllow = batteryOptimizationViewModel::onAllow,
+        onOemSettings = batteryOptimizationViewModel::onOemSettings,
+        onNotNow = batteryOptimizationViewModel::onNotNow,
+        onDontAskAgain = batteryOptimizationViewModel::onDontAskAgain,
+    )
+}
+
+@Composable
+private fun BackgroundUpdatesSettingRow(
+    isRestricted: Boolean,
+    onClick: () -> Unit,
+) {
+    val title = stringResource(Res.string.preference_background_updates_title)
+    Surface(
+        color = Color.Transparent,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .clickable(onClick = onClick),
+    ) {
+        Column(Modifier.padding(4.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.BatterySaver,
+                    tint = Color.White,
+                    contentDescription = title,
+                    modifier = Modifier.size(24.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TitleText(
+                    text = title,
+                    textColor = Color.White,
+                )
+            }
+            BodyText(
+                text = stringResource(
+                    if (isRestricted) {
+                        Res.string.preference_background_updates_restricted
+                    } else {
+                        Res.string.preference_background_updates_unrestricted
+                    },
+                ),
+                size = ComponentSize.LARGE,
+                textColor = Color.White,
+            )
+            HorizontalDivider()
         }
     }
 }

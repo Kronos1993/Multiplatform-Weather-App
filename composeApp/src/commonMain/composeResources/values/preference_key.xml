@@ -21,4 +21,7 @@
     <string name="measure_unit_key" translatable="false">measure_unit</string>
     <string name="measure_unit_preference_default_value">1</string>
 
+    <string name="battery_optimization_dont_ask_key" translatable="false">battery_optimization_dont_ask</string>
+    <string name="battery_optimization_snooze_until_key" translatable="false">battery_optimization_snooze_until</string>
+
 </resources>

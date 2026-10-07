@@ -5,6 +5,7 @@ import com.kronos.multiplatform.weatherapp.core.preferences.datasource.Preferenc
 import com.kronos.multiplatform.weatherapp.core.preferences.datasource.PreferenceDatasourceImpl
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepository
 import com.kronos.multiplatform.weatherapp.core.preferences.repository.PreferenceRepositoryImpl
+import com.kronos.multiplatform.weatherapp.core.viewmodel.BatteryOptimizationViewModel
 import com.kronos.multiplatform.weatherapp.core.viewmodel.PermissionViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -14,13 +15,12 @@ import org.koin.dsl.module
 
 expect val platformModule: Module
 
-
-val coreViewModel = module{
-    //core viewmodels
+val coreViewModel = module {
+    // core viewmodels
     viewModelOf(::PermissionViewModel)
+    viewModelOf(::BatteryOptimizationViewModel)
     singleOf(::PreferenceViewModel)
 }
-
 
 val preferenceModule = module {
     singleOf(::PreferenceDatasourceImpl).bind<PreferenceDataSource>()
