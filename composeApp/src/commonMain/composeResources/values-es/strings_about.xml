@@ -2,7 +2,8 @@
     <!-- About Screen -->
     <string name="about_app_description">Weather App es una aplicación multiplataforma desarrollada con Kotlin Multiplatform que te permite consultar el clima actual y pronósticos de manera precisa y elegante. Con una interfaz moderna y datos en tiempo real, mantente informado sobre las condiciones climáticas donde sea que estés.</string>
     <string name="about_developer">Kronos Tech</string>
-    <string name="about_github">GitHub</string>
+    <string name="about_website">Kronos Tech — sitio web</string>
+    <string name="about_privacy_policy">Política de privacidad</string>
     <string name="about_version">Versión: %s</string>
     <string name="about_copyright">2024 Kronos Tech. Todos los derechos reservados.</string>
     <string name="about_features_title">Características</string>

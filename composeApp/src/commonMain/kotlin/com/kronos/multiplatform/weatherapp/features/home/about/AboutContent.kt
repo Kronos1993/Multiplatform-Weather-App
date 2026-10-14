@@ -20,8 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Bolt
-import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,13 +57,14 @@ import weather_app.composeapp.generated.resources.about_feature_2
 import weather_app.composeapp.generated.resources.about_feature_3
 import weather_app.composeapp.generated.resources.about_feature_4
 import weather_app.composeapp.generated.resources.about_features_title
-import weather_app.composeapp.generated.resources.about_github
 import weather_app.composeapp.generated.resources.about_links_title
+import weather_app.composeapp.generated.resources.about_privacy_policy
 import weather_app.composeapp.generated.resources.about_tech_1
 import weather_app.composeapp.generated.resources.about_tech_2
 import weather_app.composeapp.generated.resources.about_tech_3
 import weather_app.composeapp.generated.resources.about_technologies
 import weather_app.composeapp.generated.resources.about_version
+import weather_app.composeapp.generated.resources.about_website
 import weather_app.composeapp.generated.resources.ic_copyright
 import weather_app.composeapp.generated.resources.ic_weather_app_icon
 import weather_app.composeapp.generated.resources.title_about
@@ -125,7 +127,8 @@ fun AboutInfoSection(
     modifier: Modifier = Modifier,
     darkTheme: Boolean = false,
 ) {
-    val githubUrl = "https://github.com/Kronos1993/Multiplatform-Weather-App"
+    val websiteUrl = "https://kronos1993.github.io/#weather-app"
+    val privacyPolicyUrl = "https://kronos1993.github.io/weather-app/privacy/"
 
     Column(
         modifier = modifier,
@@ -186,9 +189,14 @@ fun AboutInfoSection(
         AboutSectionCard(title = stringResource(Res.string.about_links_title), darkTheme) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 AboutLinkRow(
-                    icon = Icons.Outlined.Code,
-                    text = stringResource(Res.string.about_github),
-                    onClick = { expectedIntents.openBrowser(githubUrl) },
+                    icon = Icons.Outlined.Public,
+                    text = stringResource(Res.string.about_website),
+                    onClick = { expectedIntents.openBrowser(websiteUrl) },
+                )
+                AboutLinkRow(
+                    icon = Icons.Outlined.PrivacyTip,
+                    text = stringResource(Res.string.about_privacy_policy),
+                    onClick = { expectedIntents.openBrowser(privacyPolicyUrl) },
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 Row(
